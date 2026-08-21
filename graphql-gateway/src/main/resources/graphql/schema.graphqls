@@ -1,0 +1,6 @@
+# Placeholder — replaced with the real schema (Product, RecommenderStrategy,
+# SearchResult, Query.search) in M3. Kept minimal here so the Spring GraphQL
+# auto-configuration has a valid schema to load during M0/M1/M2 scaffolding.
+type Query {
+    ping: String!
+}

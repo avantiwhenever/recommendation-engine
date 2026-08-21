@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.avanti.recengine</groupId>
+    <artifactId>recengine-parent</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <artifactId>rec-support</artifactId>
+  <name>rec-support</name>
+  <description>Shared infrastructure building blocks (WANDS CSV parsing, ONNX embedding pipeline, Pinecone client wrapper) — deliberately holds no domain model or business logic; each service owns its own domain types under hexagonal architecture.</description>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-csv</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.microsoft.onnxruntime</groupId>
+      <artifactId>onnxruntime</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ai.djl.huggingface</groupId>
+      <artifactId>tokenizers</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.pinecone</groupId>
+      <artifactId>pinecone-client</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+  </dependencies>
+</project>

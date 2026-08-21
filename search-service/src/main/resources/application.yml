@@ -1,0 +1,18 @@
+# search-service is a gRPC server only — no REST/HTTP inbound adapter, so
+# there's no `server.port` to configure (spring-boot-starter-web isn't even
+# a dependency).
+grpc:
+  server:
+    port: ${GRPC_PORT:9090}
+
+search-service:
+  pinecone:
+    # Defaults point at the Pinecone Local container from docker-compose.yml
+    # (no account/API key needed). Point at a real hosted Pinecone free-tier
+    # index by overriding these three env vars — no code change required.
+    control-plane-host: ${PINECONE_HOST:http://pinecone-local:5080}
+    api-key: ${PINECONE_API_KEY:pclocal}
+    tls-enabled: ${PINECONE_TLS_ENABLED:false}
+    index: ${PINECONE_INDEX:wands-products}
+  models:
+    embedding-dir: ${SEARCH_MODELS_EMBEDDING_DIR:models/bge-small-en-v1.5}

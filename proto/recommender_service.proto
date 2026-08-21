@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package recengine.recommender.v1;
+
+import "search_service.proto";
+
+option java_package = "com.avanti.recengine.grpc.recommender";
+option java_multiple_files = true;
+
+// The only contract recommender-service exposes.
+service RecommenderService {
+  rpc Recommend (RecommendRequest) returns (RecommendResponse);
+}
+
+enum Strategy {
+  NONE = 0;
+  POPULARITY = 1;
+  COLLABORATIVE = 2;
+  BANDIT = 3;
+  NEURAL = 4;
+}
+
+message RecommendRequest {
+  string query = 1;
+  string user_id = 2;
+  Strategy strategy = 3;
+  // Baseline candidates from search-service, reusing its message type
+  // directly rather than re-declaring an equivalent one.
+  repeated recengine.search.v1.ScoredProduct candidates = 4;
+}
+
+message RecommendResponse {
+  repeated recengine.search.v1.ScoredProduct results = 1;
+  // Which strategy produced (or boosted/injected) each result — surfaced to
+  // the frontend as the result's "why was this shown" badge.
+  string source = 2;
+}

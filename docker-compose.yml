@@ -1,0 +1,82 @@
+services:
+  pinecone-local:
+    # In-memory Pinecone emulator — no account, no API key, no persistence.
+    # x86_64-only image (verified: no multi-arch manifest), so `platform` is
+    # pinned explicitly rather than left to auto-detection, which would fail
+    # outright on Apple Silicon instead of falling back.
+    image: ghcr.io/pinecone-io/pinecone-local:latest
+    platform: linux/amd64
+    environment:
+      PORT: 5080
+      PINECONE_HOST: pinecone-local
+    ports:
+      - "5080-5090:5080-5090"
+    # No healthcheck: the image is a scratch/distroless-style single binary
+    # with no shell, so a CMD-based healthcheck can't run inside it. Plain
+    # `depends_on` below only waits for container start, not readiness —
+    # search-service's and recommender-service's Pinecone clients retry their
+    # first connection with backoff to cover the few-second startup gap.
+
+  search-service:
+    build:
+      context: .
+      dockerfile: search-service/Dockerfile
+    environment:
+      PINECONE_HOST: http://pinecone-local:5080
+      PINECONE_API_KEY: pclocal
+      PINECONE_TLS_ENABLED: "false"
+      PINECONE_INDEX: wands-products
+      SEARCH_MODELS_EMBEDDING_DIR: /models/bge-small-en-v1.5
+      GRPC_PORT: 9090
+    volumes:
+      - ./models:/models:ro
+    ports:
+      - "9090:9090"
+    depends_on:
+      - pinecone-local
+
+  recommender-service:
+    build:
+      context: .
+      dockerfile: recommender-service/Dockerfile
+    environment:
+      PINECONE_HOST: http://pinecone-local:5080
+      PINECONE_API_KEY: pclocal
+      PINECONE_TLS_ENABLED: "false"
+      PINECONE_INDEX: wands-products
+      CLICKSTREAM_DATA_PATH: /data/clickstream.csv
+      NEURAL_RANKER_MODEL_PATH: /models/neural-ranker/model.onnx
+      GRPC_PORT: 9091
+    volumes:
+      - ./data:/data:ro
+      - ./models:/models:ro
+    ports:
+      - "9091:9091"
+    depends_on:
+      - pinecone-local
+
+  graphql-gateway:
+    build:
+      context: .
+      dockerfile: graphql-gateway/Dockerfile
+    environment:
+      SEARCH_SERVICE_HOST: search-service
+      SEARCH_SERVICE_GRPC_PORT: 9090
+      RECOMMENDER_SERVICE_HOST: recommender-service
+      RECOMMENDER_SERVICE_GRPC_PORT: 9091
+      SERVER_PORT: 8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      - search-service
+      - recommender-service
+
+  web:
+    build:
+      context: ./web
+    environment:
+      VITE_GRAPHQL_URL: http://localhost:8080/graphql
+    ports:
+      - "5173:80"
+    depends_on:
+      - graphql-gateway
