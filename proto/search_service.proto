@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package recengine.search.v1;
+
+option java_package = "com.avanti.recengine.grpc.search";
+option java_multiple_files = true;
+
+// The only contract search-service exposes. graphql-gateway and
+// recommender-service are both gRPC clients of this service — no REST
+// exists between Java services anywhere in this system.
+service SearchService {
+  rpc Search (SearchRequest) returns (SearchResponse);
+}
+
+message SearchRequest {
+  string query = 1;
+  int32 top_k = 2;
+}
+
+message SearchResponse {
+  repeated ScoredProduct results = 1;
+}
+
+// Shared across both proto contracts: a single candidate product with its
+// retrieval score and enough denormalized catalog metadata to render a
+// result without a second round trip.
+message ScoredProduct {
+  string product_id = 1;
+  double score = 2;
+  string product_name = 3;
+  string product_class = 4;
+  string category_hierarchy = 5;
+  double average_rating = 6;
+  int32 rating_count = 7;
+}

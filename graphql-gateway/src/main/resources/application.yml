@@ -1,0 +1,20 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  graphql:
+    graphiql:
+      enabled: true
+    path: /graphql
+
+# grpc-client-spring-boot-starter: one static gRPC channel per backend
+# service. PLAINTEXT since neither is TLS-terminated — this is all
+# intra-docker-network traffic, not exposed outside the compose network.
+grpc:
+  client:
+    search-service:
+      address: static://${SEARCH_SERVICE_HOST:search-service}:${SEARCH_SERVICE_GRPC_PORT:9090}
+      negotiation-type: PLAINTEXT
+    recommender-service:
+      address: static://${RECOMMENDER_SERVICE_HOST:recommender-service}:${RECOMMENDER_SERVICE_GRPC_PORT:9091}
+      negotiation-type: PLAINTEXT
