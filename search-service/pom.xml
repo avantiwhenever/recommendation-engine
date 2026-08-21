@@ -67,22 +67,12 @@
         <groupId>org.xolstice.maven.plugins</groupId>
         <artifactId>protobuf-maven-plugin</artifactId>
       </plugin>
-      <plugin>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-maven-plugin</artifactId>
-        <version>${spring-boot.version}</version>
-        <configuration>
-          <finalName>search-service</finalName>
-          <mainClass>com.avanti.recengine.search.SearchServiceApplication</mainClass>
-        </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>repackage</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
+      <!-- Must run BEFORE spring-boot-maven-plugin's repackage below: both
+           bind to the `package` phase, and Maven runs same-phase executions
+           in POM declaration order. Shading after repackage would shade the
+           already-nested Spring Boot fat jar (BOOT-INF/...) instead of the
+           plain compiled classes, producing a jar whose Main-Class can't
+           actually be loaded by a plain `java -jar`. -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
@@ -100,8 +90,29 @@
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                   <mainClass>com.avanti.recengine.search.ingestion.IngestionCli</mainClass>
                 </transformer>
+                <!-- Without this, only one jar's META-INF/services/io.grpc.*
+                     SPI file survives shading (last one wins), silently
+                     dropping the DNS NameResolverProvider registration that
+                     grpc-netty-shaded and the Pinecone client both need. -->
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
               </transformers>
             </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <version>${spring-boot.version}</version>
+        <configuration>
+          <finalName>search-service</finalName>
+          <mainClass>com.avanti.recengine.search.SearchServiceApplication</mainClass>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>repackage</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>
