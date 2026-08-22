@@ -96,6 +96,25 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <!-- Transitive-only pins: pinecone-client's own control-plane API
+           client (org.openapitools:jackson-databind-nullable and its own
+           deps) pulls jackson-databind and log4j-api versions with real
+           MEDIUM-severity CVEs (CVE-2026-54515/-59889/GHSA-mhm7-754m-9p8w;
+           CVE-2026-49844 respectively) — found via `./scripts/scan-cves.sh`,
+           the same local-reproduction workflow that caught the netty CVEs
+           above. Pinned to the newest fixed release in the same line
+           already resolved (jackson) or the sibling `search` project's own
+           already-vetted pin (log4j, same version it uses). -->
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>2.21.5</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-api</artifactId>
+        <version>2.26.1</version>
+      </dependency>
       <dependency>
         <groupId>com.google.protobuf</groupId>
         <artifactId>protobuf-java</artifactId>

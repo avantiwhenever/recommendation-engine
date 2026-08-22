@@ -49,28 +49,31 @@ Downloads ONNX weights + tokenizer for `bge-small-en-v1.5` into
 ### 3. Start Pinecone Local + all four services
 
 ```bash
-docker compose up -d --build
+./scripts/start-services.sh
 ```
+
+(Set `GATEWAY_HOST_PORT`/`WEB_HOST_PORT` env vars first if 8080/5173 are
+already taken by another project on your machine.) Builds and starts all
+five containers, then polls until graphql-gateway responds.
 
 **Verify:** `docker compose ps` — all five containers (`pinecone-local`,
 `search-service`, `recommender-service`, `graphql-gateway`, `web`) should
-show as running (not restarting/exited). `curl -sf http://localhost:5080/indexes`
-should return `{"indexes":[]}` before ingestion, confirming Pinecone Local
-itself is reachable.
+show as running (not restarting/exited).
 
 ### 4. Ingest the WANDS catalog into Pinecone
 
 ```bash
-docker compose run --rm search-service \
-  java -cp app.jar:BOOT-INF/lib/* com.avanti.recengine.search.ingestion.IngestionCli
+./scripts/ingest-catalog.sh
 ```
 
-(Or build and run the shaded ingestion CLI jar locally instead of through
-Docker — see `search-service/pom.xml`'s `maven-shade-plugin` execution,
-classifier `ingestion-cli`.) This embeds all ~43K products via
-`bge-small-en-v1.5` and upserts them into the `wands-products` Pinecone
-Local index. Expect this to take a while (CPU-bound batch embedding) — the
-CLI prints progress periodically.
+Rebuilds `search-service` (to pick up any local changes) and runs the
+ingestion CLI **inside** the compose network — it can't run on the host,
+since Pinecone Local's data-plane host discovery returns the
+container-internal hostname regardless of caller; see
+[docs/PROJECT_STATE.md](docs/PROJECT_STATE.md) for why. This embeds all
+~43K products via `bge-small-en-v1.5` and upserts them into the
+`wands-products` Pinecone Local index — expect this to take a while
+(CPU-bound batch embedding); the CLI prints progress periodically.
 
 **Verify:** `curl -s http://localhost:5080/indexes/wands-products` should
 report a non-zero vector count once ingestion completes.
@@ -117,6 +120,51 @@ http://localhost:5173
 
 **Verify:** the search box returns results, the strategy dropdown changes
 them, and each result shows a "why was this shown" source badge.
+
+### 8. Run the offline evaluation
+
+```bash
+./scripts/run-recommender-eval.sh
+```
+
+Scores all 5 strategies against held-out clickstream sessions and writes
+`RESULTS.md` at the repo root — see `EvalCli`'s class Javadoc for the full
+methodology and honest caveats.
+
+**Verify:** `RESULTS.md` has a fresh timestamp and a 5-row table.
+
+### 9. Regenerate the GitHub Pages demo snapshots
+
+```bash
+python3 scripts/capture_demo_snapshots.py
+```
+
+Captures live results for a curated set of queries × all 5 strategies into
+`docs/data/*.json` — this is what `docs/index.html`'s static demo fetches.
+
+**Verify:** `docs/data/manifest.json` lists the captured files; open
+`docs/index.html` locally (e.g. `python3 -m http.server` from `docs/`) to
+confirm the page renders with the new data.
+
+### Stopping everything
+
+```bash
+./scripts/stop-services.sh
+```
+
+## Convenience scripts
+
+| Script | What it does |
+|---|---|
+| `scripts/download-data.sh` | Fetches WANDS + clickstream CSVs into `data/` |
+| `scripts/download-models.sh` | Fetches the embedding model into `models/` |
+| `scripts/start-services.sh` | `docker compose up --build` + waits for the gateway |
+| `scripts/wait-for-gateway.sh` | Polls a host until it responds (used by the above) |
+| `scripts/stop-services.sh` | `docker compose down` |
+| `scripts/ingest-catalog.sh` | Runs the ingestion CLI inside the compose network |
+| `scripts/run-recommender-eval.sh` | Runs the offline evaluation, writes `RESULTS.md` |
+| `scripts/capture_demo_snapshots.py` | Captures live queries into `docs/data/` for the GitHub Pages demo |
+| `scripts/scan-cves.sh` | Reproduces CI's `cve-scan` job locally via Trivy |
 
 ## Running things individually outside Docker (for development)
 
