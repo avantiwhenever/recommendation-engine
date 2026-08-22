@@ -13,6 +13,7 @@ Usage: python3 scripts/capture_demo_snapshots.py [gateway_url] [user_id]
 """
 import json
 import sys
+import urllib.parse
 import urllib.request
 from pathlib import Path
 
@@ -41,6 +42,15 @@ query Search($q: String!, $s: RecommenderStrategy!, $u: String, $k: Int!) {
 
 
 def run_query(gateway_url, query, strategy, user_id):
+    # gateway_url is a CLI arg (see main()) rather than a hardcoded literal,
+    # so Semgrep's dynamic-urllib-use rule flags it — urllib also honors
+    # file:// and other non-HTTP schemes, which would let a malicious value
+    # read local files instead of hitting a server. Enforcing http(s) here
+    # closes that off rather than just suppressing the finding.
+    parsed_scheme = urllib.parse.urlparse(gateway_url).scheme
+    if parsed_scheme not in ("http", "https"):
+        raise ValueError(f"gateway_url must be http(s), got scheme {parsed_scheme!r}: {gateway_url!r}")
+
     payload = json.dumps({
         "query": GQL,
         "variables": {"q": query, "s": strategy, "u": user_id, "k": TOP_K},
@@ -48,7 +58,10 @@ def run_query(gateway_url, query, strategy, user_id):
     request = urllib.request.Request(
         gateway_url, data=payload, headers={"Content-Type": "application/json"}, method="POST"
     )
-    with urllib.request.urlopen(request, timeout=30) as response:
+    # The rule is purely syntactic (any non-literal reaching urlopen trips
+    # it) and can't see the scheme check above, which is the actual
+    # mitigation the rule's own remediation text recommends.
+    with urllib.request.urlopen(request, timeout=30) as response:  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
         body = json.loads(response.read())
     if "errors" in body:
         raise RuntimeError(f"GraphQL error for query={query!r} strategy={strategy}: {body['errors']}")
