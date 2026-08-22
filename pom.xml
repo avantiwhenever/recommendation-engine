@@ -79,6 +79,23 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <!-- Transitive-only pin: io.pinecone:pinecone-client pulls the
+           non-shaded io.grpc:grpc-netty (grpc-netty-shaded's own bundled
+           netty is relocated/isolated and unaffected), which resolves to a
+           netty version with several real HIGH-severity CVEs
+           (CVE-2026-59901, -55831, -55833, -56745, -56819 — DoS/infinite
+           loop in netty-codec/-http/-http2) that grpc 1.83.1 hasn't picked
+           up yet. Overriding via netty-bom to the newest patched release in
+           the same 4.1.x line grpc/pinecone-client were built against,
+           rather than jumping to the 4.2.x line, which is a real breaking
+           change. Caught by CI's docker-image-scan job, not guessed. -->
+      <dependency>
+        <groupId>io.netty</groupId>
+        <artifactId>netty-bom</artifactId>
+        <version>4.1.137.Final</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
       <dependency>
         <groupId>com.google.protobuf</groupId>
         <artifactId>protobuf-java</artifactId>
