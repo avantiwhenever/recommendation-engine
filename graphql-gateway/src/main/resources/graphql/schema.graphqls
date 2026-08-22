@@ -1,6 +1,28 @@
-# Placeholder — replaced with the real schema (Product, RecommenderStrategy,
-# SearchResult, Query.search) in M3. Kept minimal here so the Spring GraphQL
-# auto-configuration has a valid schema to load during M0/M1/M2 scaffolding.
+type Product {
+    productId: ID!
+    name: String!
+    productClass: String
+    categoryHierarchy: String
+    averageRating: Float
+    ratingCount: Int
+    score: Float!
+    source: String!
+}
+
+enum RecommenderStrategy {
+    NONE
+    POPULARITY
+    COLLABORATIVE
+    BANDIT
+    NEURAL
+}
+
+type SearchResult {
+    query: String!
+    strategy: RecommenderStrategy!
+    products: [Product!]!
+}
+
 type Query {
-    ping: String!
+    search(query: String!, topK: Int = 10, strategy: RecommenderStrategy = COLLABORATIVE, userId: String): SearchResult!
 }

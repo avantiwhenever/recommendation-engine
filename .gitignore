@@ -1,6 +1,7 @@
 # Java / Maven
 target/
 *.class
+dependency-reduced-pom.xml
 
 # Data & models — fetched via scripts/download-data.sh and
 # scripts/download-models.sh, not committed (same convention as the sibling

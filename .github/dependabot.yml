@@ -1,0 +1,51 @@
+version: 2
+updates:
+  # Root reactor pom.xml manages versions for every Java module
+  # (rec-support, search-service, recommender-service, graphql-gateway) via
+  # dependencyManagement, so one entry at "/" covers all four.
+  - package-ecosystem: maven
+    directory: "/"
+    schedule:
+      interval: weekly
+    groups:
+      maven-patch-minor:
+        update-types:
+          - minor
+          - patch
+    open-pull-requests-limit: 10
+
+  - package-ecosystem: npm
+    directory: "/web"
+    schedule:
+      interval: weekly
+    groups:
+      npm-patch-minor:
+        update-types:
+          - minor
+          - patch
+    open-pull-requests-limit: 10
+
+  - package-ecosystem: docker
+    directory: "/search-service"
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: docker
+    directory: "/recommender-service"
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: docker
+    directory: "/graphql-gateway"
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: docker
+    directory: "/web"
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly

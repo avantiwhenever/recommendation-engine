@@ -4,15 +4,13 @@ grpc:
     port: ${GRPC_PORT:9091}
 
 recommender-service:
-  pinecone:
-    # Used only for strategies that issue their own supplementary vector
-    # similarity queries (e.g. content-based expansion) — never for talking
-    # to search-service, which stays gRPC-only between Java services.
-    control-plane-host: ${PINECONE_HOST:http://pinecone-local:5080}
-    api-key: ${PINECONE_API_KEY:pclocal}
-    tls-enabled: ${PINECONE_TLS_ENABLED:false}
-    index: ${PINECONE_INDEX:wands-products}
   clickstream:
     data-path: ${CLICKSTREAM_DATA_PATH:/data/clickstream.csv}
+    # None of the five shipped strategies need per-candidate vector
+    # similarity (NeuralRankingStrategy uses a category-match proxy instead
+    # — see its class Javadoc), so product.csv is only needed for catalog
+    # metadata (name/class/category/rating) when a strategy injects a
+    # product absent from search-service's original candidates.
+    product-catalog-path: ${PRODUCT_CATALOG_PATH:/data/product.csv}
   neural-ranker:
     model-path: ${NEURAL_RANKER_MODEL_PATH:/models/neural-ranker/model.onnx}

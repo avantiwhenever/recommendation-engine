@@ -1,5 +1,5 @@
-# Build stage: matches the local toolchain (Maven 3.9.x, JDK 21) exactly.
-FROM maven:3.9.9-eclipse-temurin-21 AS build
+# Build stage: matches the local toolchain (Maven 3.9.x, JDK 26) exactly.
+FROM maven:3.9.16-eclipse-temurin-26 AS build
 WORKDIR /workspace
 
 COPY pom.xml .
@@ -15,7 +15,7 @@ RUN mvn -q -B -pl graphql-gateway -am package -DskipTests
 
 # Runtime stage: JRE only. Kept on the same jammy base as the other two
 # services for consistency, even though this one has no native dependencies.
-FROM eclipse-temurin:21-jre-jammy
+FROM eclipse-temurin:26-jre-jammy
 RUN groupadd --system --gid 1000 recengine && \
     useradd --system --uid 1000 --gid recengine --no-create-home recengine
 WORKDIR /app

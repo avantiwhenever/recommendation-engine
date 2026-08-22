@@ -30,6 +30,9 @@ services:
       GRPC_PORT: 9090
     volumes:
       - ./models:/models:ro
+      # Only the ingestion CLI (run via `docker compose run`) reads this —
+      # the served application itself never touches the raw CSVs.
+      - ./data:/data:ro
     ports:
       - "9090:9090"
     depends_on:
@@ -40,11 +43,12 @@ services:
       context: .
       dockerfile: recommender-service/Dockerfile
     environment:
-      PINECONE_HOST: http://pinecone-local:5080
-      PINECONE_API_KEY: pclocal
-      PINECONE_TLS_ENABLED: "false"
-      PINECONE_INDEX: wands-products
+      # No Pinecone dependency: none of the shipped strategies need
+      # per-candidate vector similarity (NeuralRankingStrategy uses a
+      # category-match proxy instead — see its class Javadoc), so
+      # recommender-service only needs the clickstream + catalog CSVs.
       CLICKSTREAM_DATA_PATH: /data/clickstream.csv
+      PRODUCT_CATALOG_PATH: /data/product.csv
       NEURAL_RANKER_MODEL_PATH: /models/neural-ranker/model.onnx
       GRPC_PORT: 9091
     volumes:
@@ -65,8 +69,14 @@ services:
       RECOMMENDER_SERVICE_HOST: recommender-service
       RECOMMENDER_SERVICE_GRPC_PORT: 9091
       SERVER_PORT: 8080
+      # Must match WEB_HOST_PORT below — the browser calls this gateway
+      # cross-origin from the frontend's own host port, so CORS has to know
+      # exactly which origin to allow.
+      WEB_ORIGIN: http://localhost:${WEB_HOST_PORT:-5173}
     ports:
-      - "8080:8080"
+      # Overridable so this stack can run alongside another project already
+      # bound to 8080 on the host, e.g. `GATEWAY_HOST_PORT=18080 docker compose up`.
+      - "${GATEWAY_HOST_PORT:-8080}:8080"
     depends_on:
       - search-service
       - recommender-service
@@ -74,9 +84,16 @@ services:
   web:
     build:
       context: ./web
-    environment:
-      VITE_GRAPHQL_URL: http://localhost:8080/graphql
+      # Vite env vars are baked in at build time, not read at container
+      # runtime — a plain `environment:` entry here would have no effect on
+      # the already-built static bundle nginx serves, so this must be a
+      # build arg instead.
+      args:
+        # Must match GATEWAY_HOST_PORT above — baked into the static bundle
+        # at build time, so the frontend and gateway ports have to be
+        # decided together, not just at `up` time.
+        VITE_GRAPHQL_URL: http://localhost:${GATEWAY_HOST_PORT:-8080}/graphql
     ports:
-      - "5173:80"
+      - "${WEB_HOST_PORT:-5173}:80"
     depends_on:
       - graphql-gateway

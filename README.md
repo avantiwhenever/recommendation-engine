@@ -45,7 +45,7 @@ most such projects skip:
 | Embeddings | `bge-small-en-v1.5` via ONNX Runtime, client-side | Pinecone Local has no server-side integrated inference, so embeddings are generated in-process — the one piece ported directly from the sibling `search` project, since it's self-contained (no Spring, no Elasticsearch). |
 | Recommendation strategies | Popularity, collaborative-filtering, bandit-exploration, ONNX neural ranker | Each traceable to a specific arxiv paper — see below — rather than an arbitrary re-ranking heuristic. |
 | Build tool | Maven, multi-module reactor | Same rationale as the sibling `search` project: declarative dependency graphs are easy for a reviewer to skim. |
-| Java version | JDK 21 (LTS) | Chosen over the sibling project's JDK 26 for broader gRPC/Protobuf tooling compatibility at time of writing. |
+| Java version | JDK 26 | Matches the sibling `search` project's choice — latest available toolchain. |
 
 ## arxiv grounding
 
@@ -83,8 +83,7 @@ flowchart LR
     gw -- gRPC --> ss[search-service]
     gw -- gRPC --> rs[recommender-service]
     ss -- embed + vector query --> pc[(Pinecone Local<br/>wands-products index)]
-    rs -- vector query --> pc
-    rs -- reads at startup --> cs[(clickstream.csv)]
+    rs -- reads at startup --> cs[(clickstream.csv + product.csv)]
     rs -- forward pass --> onnx[(neural-ranker.onnx)]
     ingest[ingestion CLI] -- embed + upsert --> pc
     wands[(product.csv)] --> ingest
