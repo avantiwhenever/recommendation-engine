@@ -16,6 +16,18 @@ import java.util.Set;
  * co-occur (same clickstream session) with products the requesting user has
  * already interacted with, and injects related products for the user's most
  * recent interaction if search-service didn't already surface them.
+ *
+ * <p>Classic neighborhood-based CF, using session co-occurrence rather than
+ * a factorized user/item embedding — the simpler, more interpretable half
+ * of the two approaches compared throughout the online/bandit-flavored CF
+ * literature this project draws on (see arXiv:1708.03058, "Online
+ * Interactive Collaborative Filtering Using Multi-Armed Bandit with
+ * Dependent Arms", and arXiv:2106.10898, "BanditMF"): those papers layer
+ * bandit-style exploration on top of a CF signal much like this class
+ * provides, which is exactly the relationship between this strategy and
+ * {@link BanditExploreStrategy} in this codebase — this strategy supplies
+ * the collaborative signal; bandit exploration is what a production system
+ * would compose with it, not a replacement for it.
  */
 public final class CollaborativeFilteringStrategy implements RecommendationStrategy {
 

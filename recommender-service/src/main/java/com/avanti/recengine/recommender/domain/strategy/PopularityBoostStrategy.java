@@ -17,6 +17,14 @@ import java.util.Set;
  * popularity, then injects globally popular "trending" products absent from
  * the original candidates — a real add, not just a rerank, per the "add/
  * remove results from search-service" requirement.
+ *
+ * <p>Popularity-based candidate generation/backfill is the most common
+ * production baseline recommender pattern in practice — see
+ * arXiv:2509.06002 ("A Survey of Real-World Recommender Systems:
+ * Challenges, Constraints, and Industrial Perspectives"), which discusses
+ * exactly this kind of cheap, robust fallback signal as a standard
+ * component of real candidate-generation-then-rerank pipelines, not a
+ * naive strawman.
  */
 public final class PopularityBoostStrategy implements RecommendationStrategy {
 
