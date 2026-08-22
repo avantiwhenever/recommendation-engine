@@ -213,7 +213,18 @@ redo them:
     Dependabot `ignore` rules for major-version bumps that are genuine,
     known incompatibilities (`pinecone-client` 4.0.0+, Spring Boot/JUnit/
     protobuf-java/spring-graphql majors) rather than staleness — closed the
-    5 PRs those rules retroactively cover, rebased the rest.
+    5 PRs those rules retroactively cover, rebased the rest. Two more real
+    rounds of findings followed as the CVE/rule databases updated during
+    this session: 4 MEDIUM jackson-databind/log4j-api CVEs (same
+    transitive-pin pattern, via `netty-bom`-style `dependencyManagement`
+    overrides), and one real Semgrep SAST finding in
+    `scripts/capture_demo_snapshots.py` (a CLI-arg URL reaching `urlopen`,
+    which honors `file://` — fixed with an explicit http(s)-only scheme
+    check, then a targeted `nosemgrep` since the rule is syntactic and
+    can't see that check). **As of commit `8c0372f`, CI is fully green** —
+    verify with `gh run list --workflow "Build and test" --branch main
+    --limit 1` before assuming otherwise; every fix in this bullet was
+    verified locally (`trivy`, `semgrep`) before pushing, not just hoped for.
   - **Offline evaluation harness** (`recommender-service/.../eval/EvalCli.java`,
     mirroring the sibling `search` project's `search-eval`): scores all 5
     strategies against 2,568 held-out clickstream sessions using implicit
