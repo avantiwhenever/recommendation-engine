@@ -12,6 +12,11 @@ communication throughout.
 > **Status**: actively being built. See [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md)
 > for exactly what's verified-working vs. in progress, and for anyone
 > (human or AI) picking this project up without prior context.
+>
+> **[Live snapshot demo →](https://avantiwhenever.github.io/recommendation-engine/)** —
+> real captured results comparing all 5 strategies side by side (static
+> GitHub Pages page, not a live backend — [run it yourself](HOWTO.md) for
+> the real thing).
 
 ## Reading this README
 
@@ -33,6 +38,17 @@ backed by a neural network the author trained, tested, and caught a bug in
 before trusting its results (see below). It's paired with a sibling search
 project ([`search`](https://github.com/avantiwhenever/search)) that takes a
 different, more classic approach to the same catalog, for comparison.
+[See the live snapshot demo →](https://avantiwhenever.github.io/recommendation-engine/)
+
+</details>
+
+<details>
+<summary><strong>I'm curious about the recommendation strategies specifically</strong></summary>
+
+Five strategies, each documented with how it works, how it differs from
+the other four, and its real offline-evaluation numbers — see the
+[live demo's "Five strategies, and how they differ" section](https://avantiwhenever.github.io/recommendation-engine/#five-strategies-and-how-they-differ)
+or [RESULTS.md](RESULTS.md) for the raw numbers and methodology.
 
 </details>
 
@@ -60,6 +76,14 @@ Concrete, verifiable engineering signal, not a tutorial-follow-along project:
   suspiciously perfect result — the author tracked it down to two genuine
   data-leakage bugs, fixed both, and reported the honest (lower, real)
   number afterward. See `training/TRAINING.md`.
+- **A real offline evaluation harness**, not just a training-time sanity
+  check: all 5 strategies scored against 2,568 held-out clickstream
+  sessions with standard IR metrics (nDCG, MRR, Recall, Precision) — see
+  [RESULTS.md](RESULTS.md). The results are genuinely interesting, not
+  cherry-picked: collaborative filtering wins because it's the only
+  strategy using real per-user history, and bandit exploration scores
+  *below* baseline by design (a documented explore/exploit tradeoff, not
+  a bug) — both are exactly the outcomes the underlying theory predicts.
 - **Production-adjacent engineering hygiene**: CI with dependency/image
   vulnerability scanning, SAST, secret scanning, and Dependabot (all
   actually catching and fixing real findings during development, not just
