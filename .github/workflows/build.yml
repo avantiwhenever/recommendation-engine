@@ -13,7 +13,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up JDK 26
         uses: actions/setup-java@v4
@@ -60,7 +60,7 @@ jobs:
   cve-scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Scan dependencies for known CVEs
         uses: aquasecurity/trivy-action@v0.36.0
@@ -96,7 +96,7 @@ jobs:
     container:
       image: semgrep/semgrep
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Run Semgrep (Java + TypeScript security rules)
         run: semgrep scan --config p/java --config p/typescript --config p/react --config p/security-audit --config p/secrets --metrics=off --error
       - name: Re-run as SARIF for the Security tab
@@ -113,7 +113,7 @@ jobs:
   secret-scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - uses: gitleaks/gitleaks-action@v3
@@ -126,7 +126,7 @@ jobs:
       matrix:
         service: [search-service, recommender-service, graphql-gateway, web]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: hadolint/hadolint-action@v3.4.0
         with:
           dockerfile: ${{ matrix.service }}/Dockerfile
@@ -155,7 +155,7 @@ jobs:
             context: ./web
             dockerfile: web/Dockerfile
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Build ${{ matrix.service }} image
         run: docker build -f ${{ matrix.dockerfile }} -t ${{ matrix.service }}:${{ github.sha }} ${{ matrix.context }}
