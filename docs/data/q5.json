@@ -1,0 +1,370 @@
+{
+  "query": "kids bunk bed",
+  "resultsByStrategy": {
+    "NONE": {
+      "strategyLabel": "NONE",
+      "products": [
+        {
+          "productId": "38511",
+          "name": "maryanne twin over full bunk bed",
+          "productClass": "Teen Beds|Kids Beds",
+          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds",
+          "averageRating": 4.5,
+          "ratingCount": 6692,
+          "score": 0.8640838265419006,
+          "source": "search"
+        },
+        {
+          "productId": "828",
+          "name": "standard bunk bed",
+          "productClass": null,
+          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.8590219616889954,
+          "source": "search"
+        },
+        {
+          "productId": "20617",
+          "name": "aime twin bunk bed",
+          "productClass": "Kids Beds",
+          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.8543952107429504,
+          "source": "search"
+        },
+        {
+          "productId": "19183",
+          "name": "eruh bunk bed",
+          "productClass": null,
+          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.8538901805877686,
+          "source": "search"
+        },
+        {
+          "productId": "8464",
+          "name": "kenneth twin bunk bed",
+          "productClass": "Kids Beds",
+          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds",
+          "averageRating": 4.0,
+          "ratingCount": 57,
+          "score": 0.8533415198326111,
+          "source": "search"
+        },
+        {
+          "productId": "17403",
+          "name": "govan bunk bed",
+          "productClass": "Kids Beds",
+          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds / Boy+ Kids Beds",
+          "averageRating": 5.0,
+          "ratingCount": 1,
+          "score": 0.8519535660743713,
+          "source": "search"
+        }
+      ]
+    },
+    "POPULARITY": {
+      "strategyLabel": "POPULARITY",
+      "products": [
+        {
+          "productId": "38511",
+          "name": "maryanne twin over full bunk bed",
+          "productClass": "Teen Beds|Kids Beds",
+          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds",
+          "averageRating": 4.5,
+          "ratingCount": 6692,
+          "score": 0.8571428571428572,
+          "source": "Popularity"
+        },
+        {
+          "productId": "19183",
+          "name": "eruh bunk bed",
+          "productClass": null,
+          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.4957909115924368,
+          "source": "Popularity"
+        },
+        {
+          "productId": "828",
+          "name": "standard bunk bed",
+          "productClass": null,
+          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.34962459216164155,
+          "source": "Popularity"
+        },
+        {
+          "productId": "20617",
+          "name": "aime twin bunk bed",
+          "productClass": "Kids Beds",
+          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.27791411387464693,
+          "source": "Popularity"
+        },
+        {
+          "productId": "17403",
+          "name": "govan bunk bed",
+          "productClass": "Kids Beds",
+          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds / Boy+ Kids Beds",
+          "averageRating": 5.0,
+          "ratingCount": 1,
+          "score": 0.19999999999999998,
+          "source": "Popularity"
+        },
+        {
+          "productId": "8464",
+          "name": "kenneth twin bunk bed",
+          "productClass": "Kids Beds",
+          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds",
+          "averageRating": 4.0,
+          "ratingCount": 57,
+          "score": 0.1257953198968962,
+          "source": "Popularity"
+        },
+        {
+          "productId": "29636",
+          "name": "aurora task chair",
+          "productClass": "Office Chairs",
+          "categoryHierarchy": "Furniture / Office Furniture / Office Chairs",
+          "averageRating": 4.5,
+          "ratingCount": 1168,
+          "score": 0.0,
+          "source": "Popularity"
+        },
+        {
+          "productId": "13712",
+          "name": "jennie solid wood tufted upholstered low profile platform bed",
+          "productClass": "Teen Beds|Beds",
+          "categoryHierarchy": "Furniture / Bedroom Furniture / Beds & Headboards / Beds",
+          "averageRating": 4.5,
+          "ratingCount": 9895,
+          "score": 0.0,
+          "source": "Popularity"
+        }
+      ]
+    },
+    "COLLABORATIVE": {
+      "strategyLabel": "COLLABORATIVE",
+      "products": [
+        {
+          "productId": "38511",
+          "name": "maryanne twin over full bunk bed",
+          "productClass": "Teen Beds|Kids Beds",
+          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds",
+          "averageRating": 4.5,
+          "ratingCount": 6692,
+          "score": 0.8640838265419006,
+          "source": "Collaborative Filtering"
+        },
+        {
+          "productId": "828",
+          "name": "standard bunk bed",
+          "productClass": null,
+          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.8590219616889954,
+          "source": "Collaborative Filtering"
+        },
+        {
+          "productId": "20617",
+          "name": "aime twin bunk bed",
+          "productClass": "Kids Beds",
+          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.8543952107429504,
+          "source": "Collaborative Filtering"
+        },
+        {
+          "productId": "19183",
+          "name": "eruh bunk bed",
+          "productClass": null,
+          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.8538901805877686,
+          "source": "Collaborative Filtering"
+        },
+        {
+          "productId": "8464",
+          "name": "kenneth twin bunk bed",
+          "productClass": "Kids Beds",
+          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds",
+          "averageRating": 4.0,
+          "ratingCount": 57,
+          "score": 0.8533415198326111,
+          "source": "Collaborative Filtering"
+        },
+        {
+          "productId": "17403",
+          "name": "govan bunk bed",
+          "productClass": "Kids Beds",
+          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds / Boy+ Kids Beds",
+          "averageRating": 5.0,
+          "ratingCount": 1,
+          "score": 0.8519535660743713,
+          "source": "Collaborative Filtering"
+        },
+        {
+          "productId": "36672",
+          "name": "triceratops decorative dinosaur wall hook",
+          "productClass": "Coat Racks and Hooks",
+          "categoryHierarchy": "Contractor / Entry & Hallway / Coat Racks & Umbrella Stands",
+          "averageRating": 4.5,
+          "ratingCount": 5,
+          "score": 0.0,
+          "source": "Collaborative Filtering"
+        },
+        {
+          "productId": "12179",
+          "name": "dinosaur by nic squirrell - graphic art print",
+          "productClass": "Wall Art",
+          "categoryHierarchy": "D\u00e9cor & Pillows / Art / All Wall Art / Yellow Wall Art",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.0,
+          "source": "Collaborative Filtering"
+        }
+      ]
+    },
+    "BANDIT": {
+      "strategyLabel": "BANDIT",
+      "products": [
+        {
+          "productId": "38511",
+          "name": "maryanne twin over full bunk bed",
+          "productClass": "Teen Beds|Kids Beds",
+          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds",
+          "averageRating": 4.5,
+          "ratingCount": 6692,
+          "score": 0.8640838265419006,
+          "source": "Bandit Exploration"
+        },
+        {
+          "productId": "828",
+          "name": "standard bunk bed",
+          "productClass": null,
+          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.8590219616889954,
+          "source": "Bandit Exploration"
+        },
+        {
+          "productId": "20617",
+          "name": "aime twin bunk bed",
+          "productClass": "Kids Beds",
+          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.8543952107429504,
+          "source": "Bandit Exploration"
+        },
+        {
+          "productId": "19183",
+          "name": "eruh bunk bed",
+          "productClass": null,
+          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.8538901805877686,
+          "source": "Bandit Exploration"
+        },
+        {
+          "productId": "8464",
+          "name": "kenneth twin bunk bed",
+          "productClass": "Kids Beds",
+          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds",
+          "averageRating": 4.0,
+          "ratingCount": 57,
+          "score": 0.8533415198326111,
+          "source": "Bandit Exploration"
+        },
+        {
+          "productId": "17403",
+          "name": "govan bunk bed",
+          "productClass": "Kids Beds",
+          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds / Boy+ Kids Beds",
+          "averageRating": 5.0,
+          "ratingCount": 1,
+          "score": 0.8519535660743713,
+          "source": "Bandit Exploration"
+        }
+      ]
+    },
+    "NEURAL": {
+      "strategyLabel": "NEURAL",
+      "products": [
+        {
+          "productId": "19183",
+          "name": "eruh bunk bed",
+          "productClass": null,
+          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.20310750603675842,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "17403",
+          "name": "govan bunk bed",
+          "productClass": "Kids Beds",
+          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds / Boy+ Kids Beds",
+          "averageRating": 5.0,
+          "ratingCount": 1,
+          "score": 0.18759974837303162,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "20617",
+          "name": "aime twin bunk bed",
+          "productClass": "Kids Beds",
+          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.15731880068778992,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "38511",
+          "name": "maryanne twin over full bunk bed",
+          "productClass": "Teen Beds|Kids Beds",
+          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds",
+          "averageRating": 4.5,
+          "ratingCount": 6692,
+          "score": 0.1566045582294464,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "8464",
+          "name": "kenneth twin bunk bed",
+          "productClass": "Kids Beds",
+          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds",
+          "averageRating": 4.0,
+          "ratingCount": 57,
+          "score": 0.13315242528915405,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "828",
+          "name": "standard bunk bed",
+          "productClass": null,
+          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.0787845253944397,
+          "source": "Neural Ranking"
+        }
+      ]
+    }
+  }
+}
