@@ -24,12 +24,15 @@
     <!-- Latest JDK, matching the sibling `search` project's choice. -->
     <maven.compiler.release>26</maven.compiler.release>
 
-    <!-- gRPC / Protobuf: pinned to what grpc-protobuf:1.73.0 itself depends
-         on (protobuf-java 3.25.5) rather than the latest protobuf-java, so
-         the protoc codegen and the runtime classpath agree with what grpc-java
-         was actually built and tested against. -->
-    <grpc.version>1.73.0</grpc.version>
-    <protobuf.version>3.25.5</protobuf.version>
+    <!-- gRPC / Protobuf: pinned to what grpc-protobuf itself depends on
+         (protobuf-java) rather than the latest protobuf-java, so the protoc
+         codegen and the runtime classpath agree with what grpc-java was
+         actually built and tested against. 1.83.1 (not the 1.73.0 this
+         project started on) — CI's cve-scan and docker-image-scan jobs
+         caught a real HIGH-severity CVE-2025-55163 (Netty HTTP/2 DDoS) in
+         1.73.0's transitive netty-codec-http2, fixed upstream by 1.75.0+. -->
+    <grpc.version>1.83.1</grpc.version>
+    <protobuf.version>3.25.9</protobuf.version>
     <protobuf-plugin.version>0.6.1</protobuf-plugin.version>
     <os-maven-plugin.version>1.7.1</os-maven-plugin.version>
     <grpc-spring-boot-starter.version>3.1.0.RELEASE</grpc-spring-boot-starter.version>

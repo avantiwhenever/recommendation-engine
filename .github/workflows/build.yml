@@ -136,6 +136,10 @@ jobs:
   docker-image-scan:
     runs-on: ubuntu-latest
     strategy:
+      # Without this, one service's real CVE finding cancels the sibling
+      # matrix legs before they even report — every service needs its own
+      # independent pass/fail signal.
+      fail-fast: false
       matrix:
         include:
           - service: search-service
