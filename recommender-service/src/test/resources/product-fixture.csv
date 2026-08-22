@@ -1,0 +1,4 @@
+product_id	product_name	product_class	category hierarchy	product_description	product_features	rating_count	average_rating	review_count
+p1	chair one	Chairs	Furniture / Chairs	A chair.		10	4.0	10
+p2	lamp one	Lamps	Home / Lamps	A lamp.		20	4.5	20
+p3	table one	Tables	Furniture / Tables	A table.		5	3.5	5

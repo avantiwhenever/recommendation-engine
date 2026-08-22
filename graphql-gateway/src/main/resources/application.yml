@@ -6,6 +6,16 @@ spring:
     graphiql:
       enabled: true
     path: /graphql
+    cors:
+      # The browser-facing React app (web/) always runs on a different
+      # port/origin than this gateway, even in the default docker-compose
+      # layout (5173 vs 8080) — without this, every request from the
+      # frontend is blocked by the browser's same-origin policy before it
+      # even reaches a resolver. ${WEB_ORIGIN} lets this be overridden when
+      # the frontend isn't on the default port (e.g. local dev, or another
+      # project already occupying 5173).
+      allowed-origins: ${WEB_ORIGIN:http://localhost:5173}
+      allowed-methods: POST
 
 # grpc-client-spring-boot-starter: one static gRPC channel per backend
 # service. PLAINTEXT since neither is TLS-terminated — this is all

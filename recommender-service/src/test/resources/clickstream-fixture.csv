@@ -1,0 +1,8 @@
+event_id,user_id,session_id,timestamp,query_id,query,position,product_id,event_type,dwell_time_ms
+1,u1,s1,2026-01-01T00:00:00Z,1,chair,1,p1,view,1000
+2,u1,s1,2026-01-01T00:00:01Z,1,chair,1,p1,click,5000
+3,u1,s1,2026-01-01T00:00:02Z,1,chair,2,p2,view,1000
+4,u1,s1,2026-01-01T00:00:03Z,1,chair,2,p2,click,4000
+5,u2,s2,2026-01-01T00:01:00Z,2,lamp,1,p2,view,1000
+6,u2,s2,2026-01-01T00:01:01Z,2,lamp,1,p2,click,3000
+7,u2,s2,2026-01-01T00:01:02Z,2,lamp,1,p2,add_to_cart,

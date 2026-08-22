@@ -7,7 +7,7 @@ step. No cloud account or API key needed anywhere in this flow.
 
 ## Prerequisites
 
-- JDK 21, Maven, Docker + Docker Compose plugin, Node.js (for `web/`).
+- JDK 26, Maven, Docker + Docker Compose plugin, Node.js (for `web/`).
 - **Apple Silicon Macs**: `protoc-gen-grpc-java`'s macOS binaries are
   x86_64 even for the "aarch_64" classifier (confirmed across many
   versions — this is upstream packaging, not a bug in this repo), so Maven

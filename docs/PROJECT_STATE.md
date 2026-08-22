@@ -61,38 +61,162 @@ redo them:
   working end-to-end, `rec-support` fully implemented and tested for real
   (not just compiled) against live infrastructure — see "Verified-working
   facts" below. Pushed to `avantiwhenever/recommendation-engine`.
-- **M1 — search-service: dispatched to a background fork.** Hexagonal
-  Pinecone-backed search + ingestion CLI. Check fork completion before
-  assuming this is done — read its actual files and rerun
-  `mvn -pl search-service test`, don't just trust a summary.
-- **M2 + M2.5 — recommender-service + neural ranking model: dispatched to a
-  background fork.** 5 strategies (passthrough, popularity, collaborative-
-  filtering, bandit, ONNX-based neural ranking) + `training/` Python
-  pipeline. Same caveat — verify, don't just trust.
-- **M3 — graphql-gateway: dispatched to a background fork.** Real schema
-  (already landed — see `graphql-gateway/src/main/resources/graphql/schema.graphqls`),
-  resolvers, gRPC client adapters to both backend services.
-- **M4 — web (React UI): dispatched to a background fork.** Vite + TS +
-  Apollo Client. `web/` directory exists with a real scaffold in progress
-  (node_modules already installed as of this writing) — check its actual
-  state.
-- **M5 — NOT STARTED: full docker-compose end-to-end verification, CI
-  workflow, final polished README/HOWTO, final commit + push.** This is
-  the next work to do once M1–M4 are confirmed real and correct.
+- **M1 — search-service: DONE, verified, committed** (`0f0401c`). Hexagonal
+  Pinecone-backed search + picocli ingestion CLI. Fork found and fixed two
+  real Maven packaging bugs (shade-vs-Spring-Boot-repackage plugin
+  ordering; gRPC's `NameResolverProvider` SPI file getting clobbered by
+  unmerged shading) that only surfaced when actually running the built
+  jars. Verified with a live Pinecone Local container + real ingested
+  WANDS data + a `grpcurl` call returning correctly-ranked results.
+- **M2 + M2.5 — recommender-service + neural ranking model: DONE, verified.**
+  5 strategies (passthrough, popularity,
+  collaborative-filtering, bandit, ONNX-based neural ranking), 18/18 tests
+  passing. **Deviation from the original plan**: `NeuralRankingStrategy`'s
+  "embedding cosine similarity" feature was replaced with a category-match
+  proxy — no strategy ended up needing Pinecone/vector similarity, so
+  `recommender-service` has no Pinecone dependency at all (removed from its
+  `application.yml`; reads `product.csv` directly instead for catalog
+  metadata). **Training pipeline caught its own bug**: the first two
+  training attempts produced a suspicious ~99.98% held-out pairwise
+  accuracy; traced to two real methodological bugs (negative sampling from
+  the full catalog, then a trivial leakage where negatives always got a
+  lower `base_score_proxy` than any real position could produce) — both
+  fixed. Final honest result: **0.7972** neural ranker vs. 0.7093
+  popularity-only, 0.6751 category-only, 0.4667 base-score-only (≈random,
+  confirming the leak is gone), 0.5 random baseline. Full account in
+  `training/TRAINING.md`. Real end-to-end smoke test against the live
+  service with the actual trained model and all 5 strategies via `grpcurl`
+  confirmed sensible, differentiated results per strategy.
+- **M3 — graphql-gateway: DONE, verified.** Real schema, resolvers, gRPC
+  client adapters to both backend services. 7/7 tests passing including
+  real in-process gRPC round trips. **Bug found and fixed** (by this fork,
+  then cleaned up by the main session once safe to touch the shared root
+  pom): root `pom.xml` pinned `spring-graphql.version=1.3.3`, older than
+  what `spring-boot-dependencies:3.5.16` itself manages (1.4.6) — the
+  mismatch pulled an incompatible transitive `org.dataloader:java-dataloader`,
+  breaking `GraphQlAutoConfiguration` at startup. Root pom now pins 1.4.6;
+  the module-local workaround has been removed.
+- **M4 — web (React UI): DONE, verified.** Vite + TS + Apollo Client, real component structure,
+  loading/error states, humanized "source" badges. Verified via a clean
+  `npm run build`, Vitest + RTL component tests against Apollo's
+  `MockedProvider` (2/2 passing), and a real `docker build`/`docker run`
+  round trip. **Host-level change**: Node.js wasn't installed on this
+  machine — installed via `brew install node` (v26.7.0) to do this work.
+  **Bug found and fixed in `docker-compose.yml`**: the `web` service passed
+  `VITE_GRAPHQL_URL` as a runtime `environment:` var, but Vite bakes env
+  vars in at build time — a static nginx-served bundle can't read a
+  runtime env var, so it was a no-op. Fixed to a `build.args` entry.
+- **M5 — IN PROGRESS as of this writing.** Done so far: full reactor
+  build/test passing after integrating all four forks' work; JDK bumped to
+  26 per explicit user request (see "Verified-working facts"); root
+  `pom.xml`'s `spring-graphql` version fixed and `graphql-gateway`'s
+  redundant local override removed; CI workflow
+  (`.github/workflows/build.yml`) and Dependabot config
+  (`.github/dependabot.yml`) written, adapted from the sibling `search`
+  project's six-job posture for this polyglot/gRPC repo (JDK 26, added an
+  `npm test`/`npm run build` step, matrixed `docker-lint`/`docker-image-scan`
+  across all four Dockerfiles); `docker-compose.yml` fixed twice more (see
+  below) beyond what the `web` fork already fixed. A real end-to-end
+  `docker compose` run is in progress — check `git log --oneline -5` and
+  `docker compose ps` to see how far it actually got before trusting "done":
+  the honest way to tell is whether this section has an "end-to-end
+  verified" bullet added below it, not just this bullet's presence.
+  - **Docker VM disk exhaustion mid-build**: the Docker Desktop VM's disk
+    allocation (~19.5GB) filled up building four images back-to-back
+    (`no space left on device`). Fixed by `docker image prune -f`
+    (dangling only, safe) then `docker image prune -a -f` once all target
+    images existed (removes anything with zero referencing containers —
+    verified safe because it never touches an image backing an existing
+    container, running or stopped, so it can't disrupt unrelated projects
+    sharing this Docker daemon).
+  - **Host port conflicts with unrelated running projects**: this machine
+    already has other projects' containers bound to 8080
+    (`search-search-api-1`) and 5173 (`ai-image-generation-frontend-1`).
+    Rather than stop those, `docker-compose.yml`'s `graphql-gateway` and
+    `web` ports are now overridable via `${GATEWAY_HOST_PORT:-8080}` /
+    `${WEB_HOST_PORT:-5173}` — verification used
+    `GATEWAY_HOST_PORT=18080 WEB_HOST_PORT=15173 docker compose up -d`.
+    (A `docker-compose.override.yml`-based approach was tried first and
+    abandoned: Compose merges list-type keys like `ports` by concatenation,
+    not replacement, so both the base and override port bindings were
+    attempted simultaneously and the base one still conflicted.)
+  - **The ingestion CLI must run inside the compose network, not on the
+    host**: Pinecone Local's data-plane host discovery
+    (`Pinecone.getIndexConnection`) returns whatever hostname the
+    *container* was configured with via `PINECONE_HOST`
+    (`pinecone-local` here, for other containers' benefit) — a host-run
+    process can't resolve that name even though the control-plane port is
+    published to `localhost`. Fixed by adding the ingestion CLI's shaded
+    jar into `search-service`'s Docker image
+    (`COPY --from=build .../search-service-*-ingestion-cli.jar ingestion-cli.jar`)
+    and a `./data:/data:ro` volume mount, then running it via
+    `docker compose run --entrypoint java search-service -jar ingestion-cli.jar ...`
+    — inside the network, `pinecone-local` resolves correctly. Don't try
+    the host-run path again; it's a dead end given how Pinecone Local
+    advertises its data-plane host.
+  - **Ingestion OOM-killed at default settings** (exit 137) when run
+    alongside this machine's other already-running containers (the sibling
+    `search` project's idle Elasticsearch+Kibana alone were holding ~2.9GB
+    in a 7.7GB VM). Fixed by lowering `--batch-size` from 500 to 100 and
+    capping the JVM heap (`JAVA_TOOL_OPTIONS=-Xmx1200m`) on the ingestion
+    run specifically — the served application itself hasn't shown memory
+    pressure at steady state (~380MB RSS each for search-service/
+    recommender-service). If ingestion OOMs again on a differently-loaded
+    machine, lower `--batch-size` further before assuming it's a code bug.
+  - **Frontend/gateway port and CORS mismatch, found via real user testing**:
+    the `web` image bakes `VITE_GRAPHQL_URL` in at build time, but
+    `docker-compose.yml` hardcoded `http://localhost:8080/graphql`
+    regardless of `GATEWAY_HOST_PORT` — so overriding the gateway's port
+    (needed on this machine, see above) silently broke the frontend, which
+    is exactly the error the user hit. Separately, `graphql-gateway` had
+    **no CORS configuration at all**, which would have blocked every
+    browser request regardless of port. Fixed both: `VITE_GRAPHQL_URL`'s
+    build arg now interpolates `${GATEWAY_HOST_PORT:-8080}`, and
+    `graphql-gateway/src/main/resources/application.yml` now sets
+    `spring.graphql.cors.allowed-origins` from a `WEB_ORIGIN` env var that
+    `docker-compose.yml` derives from `${WEB_HOST_PORT:-5173}` — the two
+    ports are now decided together by construction, not independently.
+    Verified via a real `curl -H "Origin: http://localhost:15173"` request
+    showing the `Access-Control-Allow-Origin` response header.
 
-**If you're resuming this session cold**: check whether the four forks
-above actually finished (look for their work in `search-service/src`,
-`recommender-service/src`, `graphql-gateway/src`, `web/src` — if those
-directories only have the M0 skeleton/placeholder files, the forks either
-didn't finish or their work wasn't integrated). Verify each module
-independently with `mvn -pl <module> test` before trusting it. Then do the
-M5 work: real end-to-end docker-compose run, CI, README/HOWTO polish,
-commit, push.
+- **M5 — DONE. Full end-to-end verification complete**, via real
+  `docker compose up` with `GATEWAY_HOST_PORT=18080 WEB_HOST_PORT=15173`
+  (this machine's other projects hold the defaults):
+  - All 42,994 WANDS products ingested into the live Pinecone Local index
+    (`wands-products`, 384-dim, cosine, confirmed `"status":{"ready":true}`
+    via the control-plane API).
+  - Queried the gateway directly (`curl`, not just the UI) with `NONE`,
+    `POPULARITY`, `BANDIT`, and `NEURAL` strategies for the same query —
+    confirmed each produces genuinely different results:
+    `POPULARITY` injected two extra products beyond the 3 original
+    candidates (the strategy's designed "add" behavior, actually observed);
+    `NEURAL` produced a fully different ranking order, not just re-scored
+    the same order; `source` field correctly reflects which strategy ran.
+  - Confirmed the web UI loads and serves correctly at the (remapped) host
+    port after the frontend/CORS fix above.
+  - Docker Desktop VM disk pressure and host port conflicts with this
+    machine's other running projects were worked around per the bullets
+    above without touching anything outside this repo or those other
+    projects' running containers.
+
+**If you're resuming this session cold**: everything above is genuinely
+done and pushed — run `git log --oneline` to confirm the latest commit
+matches what this doc describes. If it doesn't, something changed after
+this doc was last updated; trust `git log`/`git status` over this doc's
+prose. A verification `docker compose` stack may or may not still be
+running (`docker compose ps`) — it's fine to tear down
+(`docker compose down`) or leave up depending on whether someone's still
+using it; nothing about finishing this project depends on that stack's
+state.
 
 ## Verified-working facts (don't re-litigate or re-discover these)
 
-- **JDK 21** (not the sibling `search` project's JDK 26) — chosen for
-  broader gRPC/Protobuf tooling compatibility maturity. LTS.
+- **JDK 26**, matching the sibling `search` project's choice (an earlier
+  draft of this project used JDK 21 for perceived gRPC/Protobuf tooling
+  maturity, but the user asked to use the latest version instead — verified
+  the full reactor still builds/tests clean under 26, and the Docker base
+  images (`maven:3.9.16-eclipse-temurin-26`, `eclipse-temurin:26-jre-jammy`)
+  are the exact same tags the sibling project already uses).
 - **`protoc-gen-grpc-java`'s macOS binaries are x86_64 even for the
   "aarch_64" classifier**, across every version checked (1.53–1.73). This
   is Google's own packaging, not a bug specific to one version — it's
