@@ -199,6 +199,52 @@ redo them:
     above without touching anything outside this repo or those other
     projects' running containers.
 
+- **M6 — post-M5 additions, DONE and pushed:**
+  - **CI hardening**: main's first real CI run caught genuine HIGH-severity
+    CVEs (grpc-netty-shaded 1.73.0 → Netty CVE-2025-55163, then a second
+    round of 5 more Netty CVEs from a non-shaded `io.grpc:grpc-netty`
+    pulled transitively by `io.pinecone:pinecone-client` — grpc-netty-shaded's
+    *own* bundled netty is relocated/isolated and was never the problem).
+    Fixed by bumping `grpc.version` to 1.83.1 and adding an explicit
+    `netty-bom` override to 4.1.137.Final. Verified locally with `trivy`
+    before each push, not just by waiting on CI. Also added
+    `fail-fast: false` to the `docker-image-scan` matrix (one service's
+    finding was canceling its siblings before they could report), and
+    Dependabot `ignore` rules for major-version bumps that are genuine,
+    known incompatibilities (`pinecone-client` 4.0.0+, Spring Boot/JUnit/
+    protobuf-java/spring-graphql majors) rather than staleness — closed the
+    5 PRs those rules retroactively cover, rebased the rest.
+  - **Offline evaluation harness** (`recommender-service/.../eval/EvalCli.java`,
+    mirroring the sibling `search` project's `search-eval`): scores all 5
+    strategies against 2,568 held-out clickstream sessions using implicit
+    relevance grades (view/click/cart/purchase severity) since there's no
+    explicit relevance label for recommendations the way WANDS has for
+    search queries. Real, non-cherry-picked results in `RESULTS.md` —
+    Collaborative Filtering wins, Bandit Exploration scores below baseline
+    by design. Run via `scripts/run-recommender-eval.sh`.
+  - **GitHub Pages demo** (`docs/`), live at
+    <https://avantiwhenever.github.io/recommendation-engine/>: real captured
+    queries × all 5 strategies, CSS/JS fully externalized (`styles.css`/
+    `app.js`, no inline styles or scripts), hover-to-see-full-details product
+    cards, and a strategy comparison section with per-strategy modals.
+    Captured via `scripts/capture_demo_snapshots.py` against a live
+    `docker compose` stack, writing `docs/data/*.json` + a `manifest.json`
+    (the page fetches the manifest rather than embedding data or guessing
+    filenames — a deliberate difference from the sibling `search` project's
+    demo, which hand-embeds a JS block). **A real bug was found and fixed
+    via headless-browser testing before considering this done**: the
+    `hidden` modal overlay's own `display: flex` CSS was overriding the
+    browser's default `display: none` for `[hidden]`, so the "hidden"
+    overlay stayed laid out and invisibly intercepted pointer events across
+    the entire page — undetectable by reading the code, only caught by
+    actually driving the page with Playwright and finding a hover/click
+    interaction silently fail.
+  - Documented arxiv grounding on the two strategies that didn't have it
+    yet (`PopularityBoostStrategy`, `CollaborativeFilteringStrategy`), and
+    restructured the README with three audience-specific collapsible
+    sections (recruiter / technical hiring manager / code reviewer) at the
+    top, ahead of the existing deep-dive content.
+
 **If you're resuming this session cold**: everything above is genuinely
 done and pushed — run `git log --oneline` to confirm the latest commit
 matches what this doc describes. If it doesn't, something changed after
