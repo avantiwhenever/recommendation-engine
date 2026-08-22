@@ -13,6 +13,76 @@ communication throughout.
 > for exactly what's verified-working vs. in progress, and for anyone
 > (human or AI) picking this project up without prior context.
 
+## Reading this README
+
+This page serves a few different readers. Pick the path that fits — each is
+short and self-contained, no need to read the others first.
+
+<details>
+<summary><strong>I'm a recruiter / skimming this — what is it? (30 seconds)</strong></summary>
+
+A full-stack, working recommendation engine: a React search UI, a GraphQL
+API layer, three backend microservices written in Java, a real vector
+database, and a machine-learning model trained from scratch — all built by
+one person, all actually runnable on a laptop with one command
+(`docker compose up`), no cloud account needed.
+
+It searches a real furniture catalog (43,000 products) and can switch
+between five different recommendation strategies live — including one
+backed by a neural network the author trained, tested, and caught a bug in
+before trusting its results (see below). It's paired with a sibling search
+project ([`search`](https://github.com/avantiwhenever/search)) that takes a
+different, more classic approach to the same catalog, for comparison.
+
+</details>
+
+<details>
+<summary><strong>I'm a technical hiring manager — what does this actually demonstrate? (2 minutes)</strong></summary>
+
+Concrete, verifiable engineering signal, not a tutorial-follow-along project:
+
+- **System design under real constraints**: hexagonal architecture
+  enforced across three Java services, gRPC as the only inter-service
+  protocol, GraphQL confined to a single frontend-facing gateway — a
+  deliberate architectural discipline, not whatever a framework defaulted
+  to. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+- **Real debugging, documented honestly, not hidden**: this project's
+  [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md) is a running log of actual
+  problems found and fixed — a vector-DB client library incompatible with
+  its local emulator (root-caused via bytecode inspection with `javap`, not
+  guesswork), an out-of-memory crash under real load (root-caused and
+  fixed, not worked around), a missing CORS config that silently broke the
+  frontend (found via live testing, not caught by any test suite), and
+  several real HIGH-severity CVEs caught by this project's own CI pipeline
+  and fixed with version research, not suppressed.
+- **ML work with real rigor, not a black box**: the neural ranking
+  strategy's training pipeline (`training/`) initially produced a
+  suspiciously perfect result — the author tracked it down to two genuine
+  data-leakage bugs, fixed both, and reported the honest (lower, real)
+  number afterward. See `training/TRAINING.md`.
+- **Production-adjacent engineering hygiene**: CI with dependency/image
+  vulnerability scanning, SAST, secret scanning, and Dependabot (all
+  actually catching and fixing real findings during development, not just
+  configured and forgotten); tests at every layer (pure unit, in-process
+  gRPC integration, real end-to-end against live infrastructure);
+  Dockerized everything with a documented local-first, cloud-optional path.
+- **Grounded in the literature, not vibes**: every recommendation strategy
+  cites the specific arxiv paper(s) it's based on — see "arxiv grounding"
+  below.
+
+</details>
+
+<details>
+<summary><strong>I'm reviewing this codebase — where do I start?</strong></summary>
+
+Go straight to [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — it's a
+reviewer-oriented tour with a suggested reading order, a map of where the
+hexagonal layers live on disk, and what's tested at which layer. Come back
+to this README for the "why" behind specific decisions (table below) and
+[HOWTO.md](HOWTO.md) to actually run it.
+
+</details>
+
 ## Why this project
 
 Most "recommendation engine" portfolio projects are a single service with a
