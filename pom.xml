@@ -42,7 +42,7 @@
          (verified directly against the jar — IndexModel.class first
          references `vector_type` starting at 4.0.0). 3.1.0 is the newest
          version that still works against Pinecone Local. -->
-    <pinecone-client.version>3.1.0</pinecone-client.version>
+    <pinecone-client.version>6.2.0</pinecone-client.version>
     <commons-csv.version>1.11.0</commons-csv.version>
 
     <spring-boot.version>3.5.16</spring-boot.version>
