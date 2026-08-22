@@ -12,6 +12,26 @@ updates:
         update-types:
           - minor
           - patch
+    ignore:
+      # 4.0.0+ requires a `vector_type` field in index-describe responses
+      # that Pinecone Local's fixed API version doesn't return, breaking
+      # client-side deserialization on every describeIndex/createIndex call
+      # — verified directly against the jars, documented in
+      # docs/PROJECT_STATE.md. 3.1.0 is a deliberate pin, not staleness.
+      - dependency-name: "io.pinecone:pinecone-client"
+        versions: [">=4.0.0"]
+      # Major version bumps here are real framework migrations (Spring Boot
+      # 4.x, JUnit 6.x, protobuf-java 4.x breaking from the 3.25.x line
+      # grpc-java itself depends on) that need a deliberate, tested upgrade
+      # pass, not an auto-opened PR every week that just sits red.
+      - dependency-name: "org.springframework.boot:*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "org.junit.jupiter:*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "com.google.protobuf:*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "org.springframework.graphql:*"
+        update-types: ["version-update:semver-major"]
     open-pull-requests-limit: 10
 
   - package-ecosystem: npm
