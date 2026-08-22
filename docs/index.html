@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Recommendation Engine — Strategy Comparison (Snapshot Demo)</title>
+<meta name="description" content="Real captured results comparing 5 recommendation strategies (popularity, collaborative filtering, bandit exploration, and an ONNX neural ranker) over the WANDS furniture catalog." />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="snapshot-banner">
+  📸 Static snapshot — these results were captured once from a locally-running instance, not a live search.
+  <a href="https://github.com/avantiwhenever/recommendation-engine">Run it yourself</a> or read the
+  <a href="https://github.com/avantiwhenever/recommendation-engine/blob/main/RESULTS.md">offline evaluation results</a>.
+</div>
+
+<header>
+  <div class="title-row">
+    <h1>Recommendation Engine</h1>
+    <span class="subtitle">— 5 strategies, same query, same catalog, side by side</span>
+  </div>
+  <div class="controls">
+    <label for="query-select">Query</label>
+    <select id="query-select"></select>
+  </div>
+</header>
+
+<main>
+  <div class="status" id="status"></div>
+  <div class="columns-scroller">
+    <div class="columns" id="columns"></div>
+  </div>
+  <p class="hover-note">Hover any product card for its full details — category, rating, score, and why it was shown.</p>
+
+  <section class="glance">
+    <h2>Five strategies, and how they differ</h2>
+    <p class="glance-sub">
+      Every strategy receives the exact same baseline candidates from <code>search-service</code> and either
+      leaves them alone, re-ranks them, or adds/removes products — never a from-scratch retrieval of its own.
+      Numbers below are from a real offline evaluation against 2,568 held-out clickstream sessions
+      (<a href="https://github.com/avantiwhenever/recommendation-engine/blob/main/RESULTS.md">full methodology and honest caveats in RESULTS.md</a>).
+      Click any card for how it works and its grounding in the literature.
+    </p>
+    <div class="glance-grid" id="glance-grid"></div>
+  </section>
+</main>
+
+<div class="modal-overlay" id="modal-overlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-header">
+      <h3 id="modal-title"></h3>
+      <button type="button" class="modal-close" id="modal-close" aria-label="Close">✕</button>
+    </div>
+    <p class="modal-tagline" id="modal-tagline"></p>
+    <h4>How it works</h4>
+    <p id="modal-how"></p>
+    <h4>How it differs from the others</h4>
+    <p id="modal-differs"></p>
+    <h4>Offline evaluation (2,568 held-out sessions)</h4>
+    <table class="modal-metrics-table">
+      <thead>
+        <tr><th>nDCG@5</th><th>MRR</th><th>Recall@5</th><th>Precision@5</th></tr>
+      </thead>
+      <tbody>
+        <tr id="modal-metrics-row"></tr>
+      </tbody>
+    </table>
+    <h4>Grounding</h4>
+    <p id="modal-grounding"></p>
+  </div>
+</div>
+
+<div class="hover-card" id="hover-card" hidden>
+  <div class="hover-card-name" id="hover-name"></div>
+  <div class="hover-card-row"><span>Category</span><span id="hover-category"></span></div>
+  <div class="hover-card-row"><span>Product class</span><span id="hover-class"></span></div>
+  <div class="hover-card-row"><span>Rating</span><span id="hover-rating"></span></div>
+  <div class="hover-card-row"><span>Score</span><span id="hover-score"></span></div>
+  <div class="hover-card-row"><span>Why shown</span><span id="hover-source"></span></div>
+  <div class="hover-card-id">productId: <span id="hover-id"></span></div>
+</div>
+
+<footer>
+  Five recommendation strategies, same query, same catalog: None (baseline) → Popularity → Collaborative
+  Filtering → Bandit Exploration → Neural Ranking (ONNX). Architecture, offline evaluation methodology, and
+  the live demo app are all in the
+  <a href="https://github.com/avantiwhenever/recommendation-engine">GitHub repo</a>.
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

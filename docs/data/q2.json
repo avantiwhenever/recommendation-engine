@@ -1,0 +1,370 @@
+{
+  "query": "dining table",
+  "resultsByStrategy": {
+    "NONE": {
+      "strategyLabel": "NONE",
+      "products": [
+        {
+          "productId": "29339",
+          "name": "atami dining table",
+          "productClass": null,
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 5.0,
+          "ratingCount": 13,
+          "score": 0.8313280940055847,
+          "source": "search"
+        },
+        {
+          "productId": "9882",
+          "name": "alcinia extendable dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.8304022550582886,
+          "source": "search"
+        },
+        {
+          "productId": "24405",
+          "name": "isadore dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables / 6 Seat Kitchen & Dining Tables",
+          "averageRating": 4.5,
+          "ratingCount": 5,
+          "score": 0.8296107053756714,
+          "source": "search"
+        },
+        {
+          "productId": "21122",
+          "name": "dining dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 4.5,
+          "ratingCount": 41,
+          "score": 0.8256925940513611,
+          "source": "search"
+        },
+        {
+          "productId": "34228",
+          "name": "mccrea 42 '' dining table",
+          "productClass": "Conference Tables|Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.8240455985069275,
+          "source": "search"
+        },
+        {
+          "productId": "23826",
+          "name": "haleigh 48 '' pedestal dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 5.0,
+          "ratingCount": 1142,
+          "score": 0.8219703435897827,
+          "source": "search"
+        }
+      ]
+    },
+    "POPULARITY": {
+      "strategyLabel": "POPULARITY",
+      "products": [
+        {
+          "productId": "9882",
+          "name": "alcinia extendable dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.9406370822372402,
+          "source": "Popularity"
+        },
+        {
+          "productId": "29339",
+          "name": "atami dining table",
+          "productClass": null,
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 5.0,
+          "ratingCount": 13,
+          "score": 0.6421052631578947,
+          "source": "Popularity"
+        },
+        {
+          "productId": "24405",
+          "name": "isadore dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables / 6 Seat Kitchen & Dining Tables",
+          "averageRating": 4.5,
+          "ratingCount": 5,
+          "score": 0.48988452008637107,
+          "source": "Popularity"
+        },
+        {
+          "productId": "21122",
+          "name": "dining dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 4.5,
+          "ratingCount": 41,
+          "score": 0.23866315916864653,
+          "source": "Popularity"
+        },
+        {
+          "productId": "34228",
+          "name": "mccrea 42 '' dining table",
+          "productClass": "Conference Tables|Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.17516640445358828,
+          "source": "Popularity"
+        },
+        {
+          "productId": "23826",
+          "name": "haleigh 48 '' pedestal dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 5.0,
+          "ratingCount": 1142,
+          "score": 0.12631578947368424,
+          "source": "Popularity"
+        },
+        {
+          "productId": "29636",
+          "name": "aurora task chair",
+          "productClass": "Office Chairs",
+          "categoryHierarchy": "Furniture / Office Furniture / Office Chairs",
+          "averageRating": 4.5,
+          "ratingCount": 1168,
+          "score": 0.0,
+          "source": "Popularity"
+        },
+        {
+          "productId": "13712",
+          "name": "jennie solid wood tufted upholstered low profile platform bed",
+          "productClass": "Teen Beds|Beds",
+          "categoryHierarchy": "Furniture / Bedroom Furniture / Beds & Headboards / Beds",
+          "averageRating": 4.5,
+          "ratingCount": 9895,
+          "score": 0.0,
+          "source": "Popularity"
+        }
+      ]
+    },
+    "COLLABORATIVE": {
+      "strategyLabel": "COLLABORATIVE",
+      "products": [
+        {
+          "productId": "29339",
+          "name": "atami dining table",
+          "productClass": null,
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 5.0,
+          "ratingCount": 13,
+          "score": 0.8313280940055847,
+          "source": "Collaborative Filtering"
+        },
+        {
+          "productId": "9882",
+          "name": "alcinia extendable dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.8304022550582886,
+          "source": "Collaborative Filtering"
+        },
+        {
+          "productId": "24405",
+          "name": "isadore dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables / 6 Seat Kitchen & Dining Tables",
+          "averageRating": 4.5,
+          "ratingCount": 5,
+          "score": 0.8296107053756714,
+          "source": "Collaborative Filtering"
+        },
+        {
+          "productId": "21122",
+          "name": "dining dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 4.5,
+          "ratingCount": 41,
+          "score": 0.8256925940513611,
+          "source": "Collaborative Filtering"
+        },
+        {
+          "productId": "34228",
+          "name": "mccrea 42 '' dining table",
+          "productClass": "Conference Tables|Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.8240455985069275,
+          "source": "Collaborative Filtering"
+        },
+        {
+          "productId": "23826",
+          "name": "haleigh 48 '' pedestal dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 5.0,
+          "ratingCount": 1142,
+          "score": 0.8219703435897827,
+          "source": "Collaborative Filtering"
+        },
+        {
+          "productId": "36672",
+          "name": "triceratops decorative dinosaur wall hook",
+          "productClass": "Coat Racks and Hooks",
+          "categoryHierarchy": "Contractor / Entry & Hallway / Coat Racks & Umbrella Stands",
+          "averageRating": 4.5,
+          "ratingCount": 5,
+          "score": 0.0,
+          "source": "Collaborative Filtering"
+        },
+        {
+          "productId": "12179",
+          "name": "dinosaur by nic squirrell - graphic art print",
+          "productClass": "Wall Art",
+          "categoryHierarchy": "D\u00e9cor & Pillows / Art / All Wall Art / Yellow Wall Art",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.0,
+          "source": "Collaborative Filtering"
+        }
+      ]
+    },
+    "BANDIT": {
+      "strategyLabel": "BANDIT",
+      "products": [
+        {
+          "productId": "29339",
+          "name": "atami dining table",
+          "productClass": null,
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 5.0,
+          "ratingCount": 13,
+          "score": 0.8313280940055847,
+          "source": "Bandit Exploration"
+        },
+        {
+          "productId": "9882",
+          "name": "alcinia extendable dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.8304022550582886,
+          "source": "Bandit Exploration"
+        },
+        {
+          "productId": "24405",
+          "name": "isadore dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables / 6 Seat Kitchen & Dining Tables",
+          "averageRating": 4.5,
+          "ratingCount": 5,
+          "score": 0.8296107053756714,
+          "source": "Bandit Exploration"
+        },
+        {
+          "productId": "21122",
+          "name": "dining dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 4.5,
+          "ratingCount": 41,
+          "score": 0.8256925940513611,
+          "source": "Bandit Exploration"
+        },
+        {
+          "productId": "34228",
+          "name": "mccrea 42 '' dining table",
+          "productClass": "Conference Tables|Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.8240455985069275,
+          "source": "Bandit Exploration"
+        },
+        {
+          "productId": "23826",
+          "name": "haleigh 48 '' pedestal dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 5.0,
+          "ratingCount": 1142,
+          "score": 0.8219703435897827,
+          "source": "Bandit Exploration"
+        }
+      ]
+    },
+    "NEURAL": {
+      "strategyLabel": "NEURAL",
+      "products": [
+        {
+          "productId": "9882",
+          "name": "alcinia extendable dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.08468130230903625,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "23826",
+          "name": "haleigh 48 '' pedestal dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 5.0,
+          "ratingCount": 1142,
+          "score": 0.039449989795684814,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "34228",
+          "name": "mccrea 42 '' dining table",
+          "productClass": "Conference Tables|Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.02375727891921997,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "29339",
+          "name": "atami dining table",
+          "productClass": null,
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 5.0,
+          "ratingCount": 13,
+          "score": 0.01744633913040161,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "21122",
+          "name": "dining dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 4.5,
+          "ratingCount": 41,
+          "score": -0.038288414478302,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "24405",
+          "name": "isadore dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables / 6 Seat Kitchen & Dining Tables",
+          "averageRating": 4.5,
+          "ratingCount": 5,
+          "score": -0.042601943016052246,
+          "source": "Neural Ranking"
+        }
+      ]
+    }
+  }
+}

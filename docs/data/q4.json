@@ -1,0 +1,370 @@
+{
+  "query": "outdoor patio furniture",
+  "resultsByStrategy": {
+    "NONE": {
+      "strategyLabel": "NONE",
+      "products": [
+        {
+          "productId": "39115",
+          "name": "joakima 85 '' wide outdoor patio sectional with cushion",
+          "productClass": "Patio Sofas",
+          "categoryHierarchy": "Outdoor / Outdoor & Patio Furniture / Outdoor Seating & Patio Chairs / Patio Seating / Patio Sofas & Sectionals",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.8608836531639099,
+          "source": "search"
+        },
+        {
+          "productId": "8131",
+          "name": "euree 107 '' wide outdoor wicker symmetrical patio sectional with cushions",
+          "productClass": "Patio Sofas",
+          "categoryHierarchy": "Outdoor / Outdoor & Patio Furniture / Outdoor Seating & Patio Chairs / Patio Seating / Patio Sofas & Sectionals",
+          "averageRating": 5.0,
+          "ratingCount": 1,
+          "score": 0.8592032194137573,
+          "source": "search"
+        },
+        {
+          "productId": "24851",
+          "name": "alumita patio 3 piece seating group with cushions",
+          "productClass": "Outdoor Conversation Sets",
+          "categoryHierarchy": "Outdoor / Outdoor & Patio Furniture / Patio Furniture Sets / Patio Conversation Sets",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.8582971096038818,
+          "source": "search"
+        },
+        {
+          "productId": "27537",
+          "name": "cregan outdoor garden patio sectional with cushions",
+          "productClass": "Patio Sofas",
+          "categoryHierarchy": "Outdoor / Outdoor & Patio Furniture / Outdoor Seating & Patio Chairs / Patio Seating / Patio Sofas & Sectionals",
+          "averageRating": 4.0,
+          "ratingCount": 9,
+          "score": 0.8558039665222168,
+          "source": "search"
+        },
+        {
+          "productId": "4305",
+          "name": "giavanni 41.3 '' wide outdoor patio sectional with cushions",
+          "productClass": "Patio Sofas",
+          "categoryHierarchy": "Outdoor / Outdoor & Patio Furniture / Outdoor Seating & Patio Chairs / Patio Seating / Patio Sofas & Sectionals",
+          "averageRating": 5.0,
+          "ratingCount": 1,
+          "score": 0.8542651534080505,
+          "source": "search"
+        },
+        {
+          "productId": "14785",
+          "name": "garrow 75.5 '' wide outdoor patio sofas with cushions",
+          "productClass": "Patio Sofas",
+          "categoryHierarchy": "Outdoor / Outdoor & Patio Furniture / Outdoor Seating & Patio Chairs / Patio Seating / Patio Sofas & Sectionals",
+          "averageRating": 5.0,
+          "ratingCount": 27,
+          "score": 0.853891134262085,
+          "source": "search"
+        }
+      ]
+    },
+    "POPULARITY": {
+      "strategyLabel": "POPULARITY",
+      "products": [
+        {
+          "productId": "39115",
+          "name": "joakima 85 '' wide outdoor patio sectional with cushion",
+          "productClass": "Patio Sofas",
+          "categoryHierarchy": "Outdoor / Outdoor & Patio Furniture / Outdoor Seating & Patio Chairs / Patio Seating / Patio Sofas & Sectionals",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.76,
+          "source": "Popularity"
+        },
+        {
+          "productId": "24851",
+          "name": "alumita patio 3 piece seating group with cushions",
+          "productClass": "Outdoor Conversation Sets",
+          "categoryHierarchy": "Outdoor / Outdoor & Patio Furniture / Patio Furniture Sets / Patio Conversation Sets",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.6809162145871008,
+          "source": "Popularity"
+        },
+        {
+          "productId": "8131",
+          "name": "euree 107 '' wide outdoor wicker symmetrical patio sectional with cushions",
+          "productClass": "Patio Sofas",
+          "categoryHierarchy": "Outdoor / Outdoor & Patio Furniture / Outdoor Seating & Patio Chairs / Patio Seating / Patio Sofas & Sectionals",
+          "averageRating": 5.0,
+          "ratingCount": 1,
+          "score": 0.5758087201125175,
+          "source": "Popularity"
+        },
+        {
+          "productId": "4305",
+          "name": "giavanni 41.3 '' wide outdoor patio sectional with cushions",
+          "productClass": "Patio Sofas",
+          "categoryHierarchy": "Outdoor / Outdoor & Patio Furniture / Outdoor Seating & Patio Chairs / Patio Seating / Patio Sofas & Sectionals",
+          "averageRating": 5.0,
+          "ratingCount": 1,
+          "score": 0.4320930827259941,
+          "source": "Popularity"
+        },
+        {
+          "productId": "27537",
+          "name": "cregan outdoor garden patio sectional with cushions",
+          "productClass": "Patio Sofas",
+          "categoryHierarchy": "Outdoor / Outdoor & Patio Furniture / Outdoor Seating & Patio Chairs / Patio Seating / Patio Sofas & Sectionals",
+          "averageRating": 4.0,
+          "ratingCount": 9,
+          "score": 0.40984674959358514,
+          "source": "Popularity"
+        },
+        {
+          "productId": "14785",
+          "name": "garrow 75.5 '' wide outdoor patio sofas with cushions",
+          "productClass": "Patio Sofas",
+          "categoryHierarchy": "Outdoor / Outdoor & Patio Furniture / Outdoor Seating & Patio Chairs / Patio Seating / Patio Sofas & Sectionals",
+          "averageRating": 5.0,
+          "ratingCount": 27,
+          "score": 0.0,
+          "source": "Popularity"
+        },
+        {
+          "productId": "29636",
+          "name": "aurora task chair",
+          "productClass": "Office Chairs",
+          "categoryHierarchy": "Furniture / Office Furniture / Office Chairs",
+          "averageRating": 4.5,
+          "ratingCount": 1168,
+          "score": 0.0,
+          "source": "Popularity"
+        },
+        {
+          "productId": "13712",
+          "name": "jennie solid wood tufted upholstered low profile platform bed",
+          "productClass": "Teen Beds|Beds",
+          "categoryHierarchy": "Furniture / Bedroom Furniture / Beds & Headboards / Beds",
+          "averageRating": 4.5,
+          "ratingCount": 9895,
+          "score": 0.0,
+          "source": "Popularity"
+        }
+      ]
+    },
+    "COLLABORATIVE": {
+      "strategyLabel": "COLLABORATIVE",
+      "products": [
+        {
+          "productId": "39115",
+          "name": "joakima 85 '' wide outdoor patio sectional with cushion",
+          "productClass": "Patio Sofas",
+          "categoryHierarchy": "Outdoor / Outdoor & Patio Furniture / Outdoor Seating & Patio Chairs / Patio Seating / Patio Sofas & Sectionals",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.8608836531639099,
+          "source": "Collaborative Filtering"
+        },
+        {
+          "productId": "8131",
+          "name": "euree 107 '' wide outdoor wicker symmetrical patio sectional with cushions",
+          "productClass": "Patio Sofas",
+          "categoryHierarchy": "Outdoor / Outdoor & Patio Furniture / Outdoor Seating & Patio Chairs / Patio Seating / Patio Sofas & Sectionals",
+          "averageRating": 5.0,
+          "ratingCount": 1,
+          "score": 0.8592032194137573,
+          "source": "Collaborative Filtering"
+        },
+        {
+          "productId": "24851",
+          "name": "alumita patio 3 piece seating group with cushions",
+          "productClass": "Outdoor Conversation Sets",
+          "categoryHierarchy": "Outdoor / Outdoor & Patio Furniture / Patio Furniture Sets / Patio Conversation Sets",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.8582971096038818,
+          "source": "Collaborative Filtering"
+        },
+        {
+          "productId": "27537",
+          "name": "cregan outdoor garden patio sectional with cushions",
+          "productClass": "Patio Sofas",
+          "categoryHierarchy": "Outdoor / Outdoor & Patio Furniture / Outdoor Seating & Patio Chairs / Patio Seating / Patio Sofas & Sectionals",
+          "averageRating": 4.0,
+          "ratingCount": 9,
+          "score": 0.8558039665222168,
+          "source": "Collaborative Filtering"
+        },
+        {
+          "productId": "4305",
+          "name": "giavanni 41.3 '' wide outdoor patio sectional with cushions",
+          "productClass": "Patio Sofas",
+          "categoryHierarchy": "Outdoor / Outdoor & Patio Furniture / Outdoor Seating & Patio Chairs / Patio Seating / Patio Sofas & Sectionals",
+          "averageRating": 5.0,
+          "ratingCount": 1,
+          "score": 0.8542651534080505,
+          "source": "Collaborative Filtering"
+        },
+        {
+          "productId": "14785",
+          "name": "garrow 75.5 '' wide outdoor patio sofas with cushions",
+          "productClass": "Patio Sofas",
+          "categoryHierarchy": "Outdoor / Outdoor & Patio Furniture / Outdoor Seating & Patio Chairs / Patio Seating / Patio Sofas & Sectionals",
+          "averageRating": 5.0,
+          "ratingCount": 27,
+          "score": 0.853891134262085,
+          "source": "Collaborative Filtering"
+        },
+        {
+          "productId": "36672",
+          "name": "triceratops decorative dinosaur wall hook",
+          "productClass": "Coat Racks and Hooks",
+          "categoryHierarchy": "Contractor / Entry & Hallway / Coat Racks & Umbrella Stands",
+          "averageRating": 4.5,
+          "ratingCount": 5,
+          "score": 0.0,
+          "source": "Collaborative Filtering"
+        },
+        {
+          "productId": "12179",
+          "name": "dinosaur by nic squirrell - graphic art print",
+          "productClass": "Wall Art",
+          "categoryHierarchy": "D\u00e9cor & Pillows / Art / All Wall Art / Yellow Wall Art",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.0,
+          "source": "Collaborative Filtering"
+        }
+      ]
+    },
+    "BANDIT": {
+      "strategyLabel": "BANDIT",
+      "products": [
+        {
+          "productId": "24851",
+          "name": "alumita patio 3 piece seating group with cushions",
+          "productClass": "Outdoor Conversation Sets",
+          "categoryHierarchy": "Outdoor / Outdoor & Patio Furniture / Patio Furniture Sets / Patio Conversation Sets",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.8582971096038818,
+          "source": "Bandit Exploration"
+        },
+        {
+          "productId": "8131",
+          "name": "euree 107 '' wide outdoor wicker symmetrical patio sectional with cushions",
+          "productClass": "Patio Sofas",
+          "categoryHierarchy": "Outdoor / Outdoor & Patio Furniture / Outdoor Seating & Patio Chairs / Patio Seating / Patio Sofas & Sectionals",
+          "averageRating": 5.0,
+          "ratingCount": 1,
+          "score": 0.8592032194137573,
+          "source": "Bandit Exploration"
+        },
+        {
+          "productId": "39115",
+          "name": "joakima 85 '' wide outdoor patio sectional with cushion",
+          "productClass": "Patio Sofas",
+          "categoryHierarchy": "Outdoor / Outdoor & Patio Furniture / Outdoor Seating & Patio Chairs / Patio Seating / Patio Sofas & Sectionals",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.8608836531639099,
+          "source": "Bandit Exploration"
+        },
+        {
+          "productId": "27537",
+          "name": "cregan outdoor garden patio sectional with cushions",
+          "productClass": "Patio Sofas",
+          "categoryHierarchy": "Outdoor / Outdoor & Patio Furniture / Outdoor Seating & Patio Chairs / Patio Seating / Patio Sofas & Sectionals",
+          "averageRating": 4.0,
+          "ratingCount": 9,
+          "score": 0.8558039665222168,
+          "source": "Bandit Exploration"
+        },
+        {
+          "productId": "14785",
+          "name": "garrow 75.5 '' wide outdoor patio sofas with cushions",
+          "productClass": "Patio Sofas",
+          "categoryHierarchy": "Outdoor / Outdoor & Patio Furniture / Outdoor Seating & Patio Chairs / Patio Seating / Patio Sofas & Sectionals",
+          "averageRating": 5.0,
+          "ratingCount": 27,
+          "score": 0.853891134262085,
+          "source": "Bandit Exploration"
+        },
+        {
+          "productId": "4305",
+          "name": "giavanni 41.3 '' wide outdoor patio sectional with cushions",
+          "productClass": "Patio Sofas",
+          "categoryHierarchy": "Outdoor / Outdoor & Patio Furniture / Outdoor Seating & Patio Chairs / Patio Seating / Patio Sofas & Sectionals",
+          "averageRating": 5.0,
+          "ratingCount": 1,
+          "score": 0.8542651534080505,
+          "source": "Bandit Exploration"
+        }
+      ]
+    },
+    "NEURAL": {
+      "strategyLabel": "NEURAL",
+      "products": [
+        {
+          "productId": "4305",
+          "name": "giavanni 41.3 '' wide outdoor patio sectional with cushions",
+          "productClass": "Patio Sofas",
+          "categoryHierarchy": "Outdoor / Outdoor & Patio Furniture / Outdoor Seating & Patio Chairs / Patio Seating / Patio Sofas & Sectionals",
+          "averageRating": 5.0,
+          "ratingCount": 1,
+          "score": 0.15784892439842224,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "27537",
+          "name": "cregan outdoor garden patio sectional with cushions",
+          "productClass": "Patio Sofas",
+          "categoryHierarchy": "Outdoor / Outdoor & Patio Furniture / Outdoor Seating & Patio Chairs / Patio Seating / Patio Sofas & Sectionals",
+          "averageRating": 4.0,
+          "ratingCount": 9,
+          "score": 0.12832939624786377,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "24851",
+          "name": "alumita patio 3 piece seating group with cushions",
+          "productClass": "Outdoor Conversation Sets",
+          "categoryHierarchy": "Outdoor / Outdoor & Patio Furniture / Patio Furniture Sets / Patio Conversation Sets",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.11277773976325989,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "39115",
+          "name": "joakima 85 '' wide outdoor patio sectional with cushion",
+          "productClass": "Patio Sofas",
+          "categoryHierarchy": "Outdoor / Outdoor & Patio Furniture / Outdoor Seating & Patio Chairs / Patio Seating / Patio Sofas & Sectionals",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.09759059548377991,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "8131",
+          "name": "euree 107 '' wide outdoor wicker symmetrical patio sectional with cushions",
+          "productClass": "Patio Sofas",
+          "categoryHierarchy": "Outdoor / Outdoor & Patio Furniture / Outdoor Seating & Patio Chairs / Patio Seating / Patio Sofas & Sectionals",
+          "averageRating": 5.0,
+          "ratingCount": 1,
+          "score": 0.08827462792396545,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "14785",
+          "name": "garrow 75.5 '' wide outdoor patio sofas with cushions",
+          "productClass": "Patio Sofas",
+          "categoryHierarchy": "Outdoor / Outdoor & Patio Furniture / Outdoor Seating & Patio Chairs / Patio Seating / Patio Sofas & Sectionals",
+          "averageRating": 5.0,
+          "ratingCount": 27,
+          "score": 0.03613251447677612,
+          "source": "Neural Ranking"
+        }
+      ]
+    }
+  }
+}

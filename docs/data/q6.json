@@ -1,0 +1,370 @@
+{
+  "query": "coffee table",
+  "resultsByStrategy": {
+    "NONE": {
+      "strategyLabel": "NONE",
+      "products": [
+        {
+          "productId": "29365",
+          "name": "witter coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
+          "averageRating": 4.5,
+          "ratingCount": 2,
+          "score": 0.8630800843238831,
+          "source": "search"
+        },
+        {
+          "productId": "39740",
+          "name": "cutts abstract coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
+          "averageRating": 4.5,
+          "ratingCount": 98,
+          "score": 0.8413490653038025,
+          "source": "search"
+        },
+        {
+          "productId": "294",
+          "name": "aalst coffee table",
+          "productClass": null,
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.8389505743980408,
+          "source": "search"
+        },
+        {
+          "productId": "27282",
+          "name": "sebnem extendable trestle coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.8382299542427063,
+          "source": "search"
+        },
+        {
+          "productId": "42387",
+          "name": "winnie sled coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
+          "averageRating": 4.5,
+          "ratingCount": 924,
+          "score": 0.8379101157188416,
+          "source": "search"
+        },
+        {
+          "productId": "8423",
+          "name": "colm 4 legs coffee table with storage",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
+          "averageRating": 4.5,
+          "ratingCount": 295,
+          "score": 0.8352439999580383,
+          "source": "search"
+        }
+      ]
+    },
+    "POPULARITY": {
+      "strategyLabel": "POPULARITY",
+      "products": [
+        {
+          "productId": "29365",
+          "name": "witter coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
+          "averageRating": 4.5,
+          "ratingCount": 2,
+          "score": 0.875,
+          "source": "Popularity"
+        },
+        {
+          "productId": "42387",
+          "name": "winnie sled coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
+          "averageRating": 4.5,
+          "ratingCount": 924,
+          "score": 0.4574674740691888,
+          "source": "Popularity"
+        },
+        {
+          "productId": "39740",
+          "name": "cutts abstract coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
+          "averageRating": 4.5,
+          "ratingCount": 98,
+          "score": 0.2315931924661465,
+          "source": "Popularity"
+        },
+        {
+          "productId": "294",
+          "name": "aalst coffee table",
+          "productClass": null,
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.1298943067844081,
+          "source": "Popularity"
+        },
+        {
+          "productId": "27282",
+          "name": "sebnem extendable trestle coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.06436151533579436,
+          "source": "Popularity"
+        },
+        {
+          "productId": "8423",
+          "name": "colm 4 legs coffee table with storage",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
+          "averageRating": 4.5,
+          "ratingCount": 295,
+          "score": 0.0,
+          "source": "Popularity"
+        },
+        {
+          "productId": "29636",
+          "name": "aurora task chair",
+          "productClass": "Office Chairs",
+          "categoryHierarchy": "Furniture / Office Furniture / Office Chairs",
+          "averageRating": 4.5,
+          "ratingCount": 1168,
+          "score": 0.0,
+          "source": "Popularity"
+        },
+        {
+          "productId": "13712",
+          "name": "jennie solid wood tufted upholstered low profile platform bed",
+          "productClass": "Teen Beds|Beds",
+          "categoryHierarchy": "Furniture / Bedroom Furniture / Beds & Headboards / Beds",
+          "averageRating": 4.5,
+          "ratingCount": 9895,
+          "score": 0.0,
+          "source": "Popularity"
+        }
+      ]
+    },
+    "COLLABORATIVE": {
+      "strategyLabel": "COLLABORATIVE",
+      "products": [
+        {
+          "productId": "29365",
+          "name": "witter coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
+          "averageRating": 4.5,
+          "ratingCount": 2,
+          "score": 0.8630800843238831,
+          "source": "Collaborative Filtering"
+        },
+        {
+          "productId": "39740",
+          "name": "cutts abstract coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
+          "averageRating": 4.5,
+          "ratingCount": 98,
+          "score": 0.8413490653038025,
+          "source": "Collaborative Filtering"
+        },
+        {
+          "productId": "294",
+          "name": "aalst coffee table",
+          "productClass": null,
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.8389505743980408,
+          "source": "Collaborative Filtering"
+        },
+        {
+          "productId": "27282",
+          "name": "sebnem extendable trestle coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.8382299542427063,
+          "source": "Collaborative Filtering"
+        },
+        {
+          "productId": "42387",
+          "name": "winnie sled coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
+          "averageRating": 4.5,
+          "ratingCount": 924,
+          "score": 0.8379101157188416,
+          "source": "Collaborative Filtering"
+        },
+        {
+          "productId": "8423",
+          "name": "colm 4 legs coffee table with storage",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
+          "averageRating": 4.5,
+          "ratingCount": 295,
+          "score": 0.8352439999580383,
+          "source": "Collaborative Filtering"
+        },
+        {
+          "productId": "36672",
+          "name": "triceratops decorative dinosaur wall hook",
+          "productClass": "Coat Racks and Hooks",
+          "categoryHierarchy": "Contractor / Entry & Hallway / Coat Racks & Umbrella Stands",
+          "averageRating": 4.5,
+          "ratingCount": 5,
+          "score": 0.0,
+          "source": "Collaborative Filtering"
+        },
+        {
+          "productId": "12179",
+          "name": "dinosaur by nic squirrell - graphic art print",
+          "productClass": "Wall Art",
+          "categoryHierarchy": "D\u00e9cor & Pillows / Art / All Wall Art / Yellow Wall Art",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.0,
+          "source": "Collaborative Filtering"
+        }
+      ]
+    },
+    "BANDIT": {
+      "strategyLabel": "BANDIT",
+      "products": [
+        {
+          "productId": "29365",
+          "name": "witter coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
+          "averageRating": 4.5,
+          "ratingCount": 2,
+          "score": 0.8630800843238831,
+          "source": "Bandit Exploration"
+        },
+        {
+          "productId": "39740",
+          "name": "cutts abstract coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
+          "averageRating": 4.5,
+          "ratingCount": 98,
+          "score": 0.8413490653038025,
+          "source": "Bandit Exploration"
+        },
+        {
+          "productId": "294",
+          "name": "aalst coffee table",
+          "productClass": null,
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.8389505743980408,
+          "source": "Bandit Exploration"
+        },
+        {
+          "productId": "27282",
+          "name": "sebnem extendable trestle coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.8382299542427063,
+          "source": "Bandit Exploration"
+        },
+        {
+          "productId": "42387",
+          "name": "winnie sled coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
+          "averageRating": 4.5,
+          "ratingCount": 924,
+          "score": 0.8379101157188416,
+          "source": "Bandit Exploration"
+        },
+        {
+          "productId": "8423",
+          "name": "colm 4 legs coffee table with storage",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
+          "averageRating": 4.5,
+          "ratingCount": 295,
+          "score": 0.8352439999580383,
+          "source": "Bandit Exploration"
+        }
+      ]
+    },
+    "NEURAL": {
+      "strategyLabel": "NEURAL",
+      "products": [
+        {
+          "productId": "29365",
+          "name": "witter coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
+          "averageRating": 4.5,
+          "ratingCount": 2,
+          "score": 0.07005125284194946,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "42387",
+          "name": "winnie sled coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
+          "averageRating": 4.5,
+          "ratingCount": 924,
+          "score": 0.06800061464309692,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "39740",
+          "name": "cutts abstract coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
+          "averageRating": 4.5,
+          "ratingCount": 98,
+          "score": 0.039510488510131836,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "294",
+          "name": "aalst coffee table",
+          "productClass": null,
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.03511625528335571,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "27282",
+          "name": "sebnem extendable trestle coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.023392796516418457,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "8423",
+          "name": "colm 4 legs coffee table with storage",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
+          "averageRating": 4.5,
+          "ratingCount": 295,
+          "score": 0.003639042377471924,
+          "source": "Neural Ranking"
+        }
+      ]
+    }
+  }
+}
