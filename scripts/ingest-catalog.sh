@@ -18,8 +18,15 @@ cd "${ROOT_DIR}"
 echo "Rebuilding search-service (picks up any local code changes)..."
 docker compose build search-service
 
+# -Xmx1200m and a batch size of 100 (default is 500): on a machine also
+# running other Docker workloads sharing the same VM memory budget (e.g.
+# the sibling `search` project's Elasticsearch), the default batch size's
+# peak per-batch memory has been observed to OOM-kill this process (exit
+# 137) — see docs/PROJECT_STATE.md. The served search-service/
+# recommender-service processes haven't shown similar pressure at steady
+# state; this is specific to ingestion's batch embedding workload.
 echo "Running the ingestion CLI inside the compose network..."
-docker compose run --rm --entrypoint java search-service \
-  -jar ingestion-cli.jar --data-dir /data --models-dir /models "$@"
+docker compose run --rm -e JAVA_TOOL_OPTIONS="-Xmx1200m" --entrypoint java search-service \
+  -jar ingestion-cli.jar --data-dir /data --models-dir /models --batch-size 100 "$@"
 
 echo "Done."
