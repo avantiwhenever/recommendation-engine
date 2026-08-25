@@ -340,16 +340,6 @@
           "source": "Popularity (diversified)"
         },
         {
-          "productId": "2648",
-          "name": "marlowe coffee table",
-          "productClass": "Coffee & Cocktail Tables",
-          "categoryHierarchy": "Sale / Closeout / Coffee Tables / Rectangle Coffee Tables",
-          "averageRating": 1.0,
-          "ratingCount": 1,
-          "score": 0.3828920289352509,
-          "source": "Popularity (diversified)"
-        },
-        {
           "productId": "32796",
           "name": "kisner coffee table",
           "productClass": "Coffee & Cocktail Tables",
@@ -377,6 +367,16 @@
           "averageRating": 4.5,
           "ratingCount": 2,
           "score": 0.42729323132467134,
+          "source": "Popularity (diversified)"
+        },
+        {
+          "productId": "2648",
+          "name": "marlowe coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Sale / Closeout / Coffee Tables / Rectangle Coffee Tables",
+          "averageRating": 1.0,
+          "ratingCount": 1,
+          "score": 0.3828920289352509,
           "source": "Popularity (diversified)"
         },
         {

@@ -3,7 +3,6 @@ package com.avanti.recengine.recommender.adapter.out.pinecone;
 import com.avanti.recengine.recommender.port.out.VectorSimilarityPort;
 import com.avanti.recengine.support.pinecone.PineconeVectorStore;
 import com.avanti.recengine.support.pinecone.ScoredMatch;
-import io.pinecone.exceptions.PineconeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,12 +35,18 @@ public final class PineconeVectorSimilarityAdapter implements VectorSimilarityPo
             // includes productId itself (a vector is its own nearest
             // neighbor at score 1.0) — see PineconeVectorStore#queryById.
             matches = store.queryById(productId, topK + 1);
-        } catch (PineconeException e) {
-            // Pinecone Local (and real Pinecone) return an empty match list
-            // for an id absent from the index rather than throwing, but a
-            // strategy asking "what's similar to X" shouldn't itself fail
-            // on any other Pinecone-side hiccup either — treat it the same
-            // as "no similar items found," matching the port's contract.
+        } catch (RuntimeException e) {
+            // Deliberately broad, not just io.pinecone.exceptions.PineconeException:
+            // a live gRPC channel to Pinecone Local can surface a transient
+            // io.grpc.StatusRuntimeException (e.g. "channel closed" on the
+            // first call after a fresh connection) that never reaches the
+            // Pinecone client's own exception type at all — caught here in
+            // production, not just in theory (see docs/PROJECT_STATE.md). A
+            // strategy asking "what's similar to X" shouldn't itself fail on
+            // any Pinecone-side hiccup, transient or not — treat it the same
+            // as "no similar items found," matching the port's contract, and
+            // let DiversityAwareStrategy's category-proxy fallback (see that
+            // class's Javadoc) absorb the missing signal for this request.
             log.warn("Vector similarity lookup failed for productId={}: {}", productId, e.getMessage());
             return List.of();
         }

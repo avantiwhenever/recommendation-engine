@@ -360,16 +360,6 @@
           "source": "Popularity (diversified)"
         },
         {
-          "productId": "2814",
-          "name": "nautilus standard bunk bed",
-          "productClass": null,
-          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds",
-          "averageRating": 4.5,
-          "ratingCount": 6,
-          "score": 0.4594663368137869,
-          "source": "Popularity (diversified)"
-        },
-        {
           "productId": "18845",
           "name": "full over full bunk bed with twin size trundle , pine wood bunk bed with guardrails for kids and teens",
           "productClass": null,
@@ -387,6 +377,16 @@
           "averageRating": 4.0,
           "ratingCount": 57,
           "score": 0.5789831695883869,
+          "source": "Popularity (diversified)"
+        },
+        {
+          "productId": "1283",
+          "name": "nioka bunk bed",
+          "productClass": "Kids Beds",
+          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds",
+          "averageRating": 4.5,
+          "ratingCount": 8,
+          "score": 0.5707622315895021,
           "source": "Popularity (diversified)"
         }
       ]

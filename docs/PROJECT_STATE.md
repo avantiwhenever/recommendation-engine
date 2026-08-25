@@ -60,8 +60,9 @@ GraphQL schema):
    strategy's output, not just Popularity.
 
 `recommender-service` also exposes a `VectorSimilarityPort` (Pinecone-backed
-"find similar products," reusing `search-service`'s embedding index) that
-isn't yet consumed by any strategy — see "Known simplifications" below.
+"find similar products," reusing `search-service`'s embedding index),
+consumed by `DiversityAwareStrategy` (see "Known simplifications" below for
+what it's used for and what it isn't).
 
 ## Retrieval pipeline
 
@@ -126,6 +127,19 @@ so a held-out session's features never see events from after that session.
   index `search-service` owns**, as a read-only consumer — it never calls
   `ensureServerlessIndex` (unlike `search-service`'s own bean), since it
   isn't the index's owner.
+- **A live gRPC channel to Pinecone Local can drop the very first query
+  after a fresh connection** — observed in production, not just in theory:
+  `io.grpc.StatusRuntimeException: UNKNOWN: channel closed`, wrapping a
+  `ClosedChannelException`, on the first `similarProductIds` call right
+  after a container restart, even though the connection itself succeeded at
+  startup. This is a `RuntimeException`, not Pinecone's own
+  `PineconeException` type, so `PineconeVectorSimilarityAdapter` catches
+  `RuntimeException` broadly rather than just `PineconeException` — a
+  narrower catch would let this specific error propagate as a GraphQL
+  `INTERNAL_ERROR` instead of degrading to "no similar items found" the way
+  the port's contract promises. Retrying the same request immediately
+  succeeds, consistent with a one-time cold-channel hiccup rather than a
+  persistent connectivity problem.
 - **Build order**: `rec-support` must be `mvn install`ed to `~/.m2` before
   other modules build against it via `mvn -pl <module> test` (not `-am`, to
   avoid racing on `rec-support`'s own `target/` directory when multiple
@@ -147,10 +161,12 @@ so a held-out session's features never see events from after that session.
 ## Known simplifications / deliberate scope cuts
 
 - `VectorSimilarityPort` (real Pinecone-backed "find similar products" in
-  `recommender-service`) exists and is live-tested, but no strategy consumes
-  it yet — `DiversityAwareStrategy`'s similarity metric and
-  `NeuralRankingStrategy`'s zero-footprint-item fallback both use a
-  category/product-class proxy instead of real embedding similarity.
+  `recommender-service`) is consumed by `DiversityAwareStrategy`, blended
+  with its category/product-class proxy — see that class's Javadoc for why
+  it's blended (max of the two signals) rather than substituted, and why
+  one lookup per candidate up front, not one per pairwise comparison.
+  `NeuralRankingStrategy`'s zero-footprint-item fallback still uses the
+  category/product-class proxy only, not this port.
 - The GraphQL `search` query's `categoryFilter`/`minRating` arguments are a
   hard eligibility filter, but there's no pagination cursor and no
   per-result debug/explain field showing which strategy/feature contributed

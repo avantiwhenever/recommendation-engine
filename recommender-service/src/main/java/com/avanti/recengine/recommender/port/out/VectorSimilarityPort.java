@@ -31,6 +31,11 @@ import java.util.List;
  * this port reuses the exact {@code bge-small-en-v1.5} embeddings
  * {@code search-service} already computed and upserted, rather than
  * training or serving a second embedding model.
+ *
+ * <p>Current consumer: {@link com.avanti.recengine.recommender.domain.strategy.DiversityAwareStrategy}
+ * uses it for pairwise similarity scoring (approximated from ranked
+ * neighbor lists — see that class's Javadoc), not for generating new
+ * candidates outright; that use case remains open.
  */
 public interface VectorSimilarityPort {
 
