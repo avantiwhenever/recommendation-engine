@@ -215,22 +215,22 @@
           "source": "Collaborative Filtering"
         },
         {
-          "productId": "36672",
-          "name": "triceratops decorative dinosaur wall hook",
-          "productClass": "Coat Racks and Hooks",
-          "categoryHierarchy": "Contractor / Entry & Hallway / Coat Racks & Umbrella Stands",
-          "averageRating": 4.5,
-          "ratingCount": 5,
+          "productId": "24095",
+          "name": "blue dinosaur jumboz plush floor pillow",
+          "productClass": "Accent Pillows",
+          "categoryHierarchy": "D\u00e9cor & Pillows / Decorative Pillows & Blankets / Throw Pillows / Blue Throw Pillows",
+          "averageRating": 5.0,
+          "ratingCount": 88,
           "score": 0.0,
           "source": "Collaborative Filtering"
         },
         {
-          "productId": "12179",
-          "name": "dinosaur by nic squirrell - graphic art print",
-          "productClass": "Wall Art",
-          "categoryHierarchy": "D\u00e9cor & Pillows / Art / All Wall Art / Yellow Wall Art",
-          "averageRating": 0.0,
-          "ratingCount": 0,
+          "productId": "39496",
+          "name": "dinosaur land area rug",
+          "productClass": "Area Rugs",
+          "categoryHierarchy": "Rugs / Area Rugs / 4' x 6' Area Rugs",
+          "averageRating": 5.0,
+          "ratingCount": 34,
           "score": 0.0,
           "source": "Collaborative Filtering"
         }
@@ -311,27 +311,7 @@
           "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds",
           "averageRating": 0.0,
           "ratingCount": 0,
-          "score": 0.20310750603675842,
-          "source": "Neural Ranking"
-        },
-        {
-          "productId": "17403",
-          "name": "govan bunk bed",
-          "productClass": "Kids Beds",
-          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds / Boy+ Kids Beds",
-          "averageRating": 5.0,
-          "ratingCount": 1,
-          "score": 0.18759974837303162,
-          "source": "Neural Ranking"
-        },
-        {
-          "productId": "20617",
-          "name": "aime twin bunk bed",
-          "productClass": "Kids Beds",
-          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.15731880068778992,
+          "score": 0.0872093215584755,
           "source": "Neural Ranking"
         },
         {
@@ -341,7 +321,27 @@
           "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds",
           "averageRating": 4.5,
           "ratingCount": 6692,
-          "score": 0.1566045582294464,
+          "score": 0.003645410528406501,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "17403",
+          "name": "govan bunk bed",
+          "productClass": "Kids Beds",
+          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds / Boy+ Kids Beds",
+          "averageRating": 5.0,
+          "ratingCount": 1,
+          "score": -0.18849466741085052,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "20617",
+          "name": "aime twin bunk bed",
+          "productClass": "Kids Beds",
+          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": -0.43165042996406555,
           "source": "Neural Ranking"
         },
         {
@@ -351,7 +351,7 @@
           "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds",
           "averageRating": 4.0,
           "ratingCount": 57,
-          "score": 0.13315242528915405,
+          "score": -0.968600869178772,
           "source": "Neural Ranking"
         },
         {
@@ -361,7 +361,7 @@
           "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds",
           "averageRating": 0.0,
           "ratingCount": 0,
-          "score": 0.0787845253944397,
+          "score": -1.306700348854065,
           "source": "Neural Ranking"
         }
       ]

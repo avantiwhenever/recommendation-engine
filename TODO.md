@@ -2,10 +2,10 @@
 
 This is not a wishlist of new features bolted onto a working system. Every
 item below **replaces or corrects something already in the codebase that
-doesn't hold up** — found by a staff-engineer-level critical review (see
-`docs/PROJECT_STATE.md` for the review itself if it's archived there, or
-re-run the review), then matched against real, cited engineering techniques
-from companies that actually build search/recsys at scale.
+doesn't hold up** — found by a staff-engineer-level critical review, then
+matched against real, cited engineering techniques from companies that
+actually build search/recsys at scale. See `docs/PROJECT_STATE.md`'s "M7"
+section for a summary of what the review found and what fixing it changed.
 
 Ordered by severity: **P0 items fix things that are mislabeled or
 methodologically broken** (the code does something other than what its name
@@ -20,8 +20,22 @@ cited reference for the replacement technique where one exists.
 
 ## P0 — fix things that are mislabeled or methodologically broken
 
-### 1. `BanditExploreStrategy` is not a bandit — replace with a real one
+### 1. ✅ DONE — `BanditExploreStrategy` is not a bandit — replace with a real one
 **File**: `recommender-service/src/main/java/com/avanti/recengine/recommender/domain/strategy/BanditExploreStrategy.java`
+
+**Result**: rebuilt as Thompson Sampling over per-category arms (Beta(α,β)
+priors warm-started from real historical engagement via
+`ClickstreamRepositoryPort`), context-conditioned on the requesting user's
+category profile, with a windowed calibration cap (not a whole-response
+percentage cap — that turns out to be mathematically vacuous over a fixed
+candidate pool, a bug caught during implementation, not shipped). Verified
+with a 1000-trial statistical test confirming historically-favored
+categories win their slot in >85% of trials, plus a context-conditioning
+test and a 200-seed calibration-invariant check — not just a single
+deterministic-seed snapshot, which is what made the old implementation
+possible to mislabel in the first place. Honestly documented limitation:
+priors are fixed at construction, not updated from live reward, since this
+project has no live traffic loop to update from.
 
 **What's wrong**: no arms, no value estimates, no reward signal, no update
 loop, and it never reads its own `RecommendationContext` parameter. It's a
@@ -45,8 +59,24 @@ unused by this strategy today).
 
 ---
 
-### 2. `CollaborativeFilteringStrategy` is unnormalized co-occurrence counting, not item-item CF
+### 2. ✅ DONE — `CollaborativeFilteringStrategy` is unnormalized co-occurrence counting, not item-item CF
 **Files**: `recommender-service/src/main/java/com/avanti/recengine/recommender/domain/strategy/CollaborativeFilteringStrategy.java`, `adapter/out/clickstream/CsvClickstreamRepositoryAdapter.java`
+
+**Result**: took option (a), the adjusted-cosine normalization — added
+`ClickstreamRepositoryPort.itemSimilarity(a, b) = coOccurrence / sqrt(marginalCount(a) * marginalCount(b))`,
+switched the strategy's boost and its injection ranking (`relatedProducts`)
+to use it instead of raw `log1p(coOccurrenceCount)`. Verified with a test
+built specifically to demonstrate the fix: a "popular-but-unrelated" pair
+(10,000-session marginals, 40 raw co-occurrence) vs. a "niche-but-affinitive"
+pair (80-session marginals, 30 raw co-occurrence) — raw counts favor the
+popular pair (40 > 30), but normalized similarity correctly favors the
+niche pair 0.0335 vs 0.0040, an 8.4x reversal. The skip-gram embedding
+option (b) was not attempted — the cheap normalization fix was sufficient
+to correct the specific bug identified. Citation corrected too: the
+strategy no longer cites the online/bandit-flavored CF papers (which
+assume reward updating this static strategy doesn't do) as if they
+justified this technique; now cites Sarwar, Karypis, Konstan & Riedl
+(WWW 2001), the actual source of the normalization used.
 
 **What's wrong**: `coOccurrenceCount` is a raw pairwise count with zero
 normalization by either item's marginal popularity —
@@ -69,8 +99,24 @@ second in-memory matrix (43K items is small enough).
 
 ---
 
-### 3. Neural ranker's training loss doesn't match its own eval metric
+### 3. ✅ DONE — Neural ranker's training loss doesn't match its own eval metric
 **Files**: `training/train_neural_ranker.py`, `training/TRAINING.md`
+
+**Result**: switched to `xgboost.XGBRanker(objective="rank:ndcg")`, a
+genuinely pairwise objective. Added the missing linear-baseline comparison
+and 5-seed confidence intervals. Honest finding, consistent across all 5
+seeds: **a plain logistic-regression linear combination of the same 6
+features (0.8046 ± 0.0035 mean held-out pairwise accuracy) beats both the
+new pairwise XGBoost model (0.7995 ± 0.0037) and the old pointwise MLP it
+replaced (0.8018 ± 0.0040)**. Fixing the objective mismatch didn't produce
+a new best model — it revealed that neither tested model's extra capacity
+earns a measurable advantage over a linear boundary on this feature set.
+XGBoost was kept in service anyway, specifically because its training
+objective is the one that actually matches what's measured (this task's
+whole point), not because it scored highest — the linear model, despite
+its higher number, was itself trained pointwise and wouldn't have resolved
+the objective-mismatch problem either. See `training/TRAINING.md` for the
+full account.
 
 **What's wrong**: trains `sklearn.MLPRegressor` via **pointwise** regression
 against a graded implicit label, but `TRAINING.md`'s own held-out metric is
@@ -94,8 +140,30 @@ variance).
 
 ---
 
-### 4. Offline eval ground truth is circular — add an independent eval path
+### 4. ✅ DONE (except IPS) — Offline eval ground truth is circular — add an independent eval path
 **Files**: `recommender-service/src/main/java/com/avanti/recengine/recommender/eval/EvalCli.java`, `RESULTS.md`
+
+**Result — the most consequential fix in this whole list**: added a second
+ground truth (WANDS `label.csv`'s original human judgments, via a new
+`WandsLabelLoader`) scored against the exact same reranked candidates as
+the existing clickstream-derived eval, reported as two separate tables in
+`RESULTS.md`. Also fixed the point-in-time leak from item #5 in the same
+pass (a new `TemporalClickstreamIndex` replays sessions in timestamp
+order, so a held-out session's features never see future events).
+
+**This overturned the previous headline result.** With the temporal leak
+fixed alone (still the circular clickstream ground truth), Neural Ranking
+collapsed from 0.5692 to 0.3312 nDCG@5 — well below baseline — and
+Collaborative Filtering's apparent win shrank to a statistical wash (0.5013
+vs. baseline's 0.5048). Against the independent WANDS-judgment ground
+truth, no strategy shows a clear win over baseline on the metrics that are
+actually comparable (nDCG@5, MRR) — all five cluster around 0.94–0.97.
+**"Collaborative filtering is the best strategy" does not hold up** — it
+was an artifact of temporal leakage plus circular ground truth. Current
+`RESULTS.md` states this explicitly. The IPS/counterfactual estimator
+(the second half of this item) was deliberately not attempted — explicitly
+skipped rather than risk shipping a subtly-wrong estimator under time
+pressure; still open, see below.
 
 **What's wrong** (the most consequential finding in the review): the
 synthetic clickstream's session composition, click/cart/purchase
@@ -122,8 +190,21 @@ documented logging policy** (the cascade click model in
 
 ---
 
-### 5. Feature duplication between Java (serving) and Python (training) — already caused one bug
+### 5. ✅ DONE — Feature duplication between Java (serving) and Python (training) — already caused one bug
 **Files**: `recommender-service/.../domain/strategy/NeuralRankingStrategy.java` (`buildFeatures`), `training/train_neural_ranker.py`
+
+**Result**: took the golden-vector-test option — `training/feature_parity_fixtures.csv`
+is a shared fixture (5 hand-computed cases) read by both a new
+`FeatureParityTest.java` (calls `NeuralRankingStrategy.buildFeatures`
+directly) and a new `test_feature_parity.py`, so a future change to either
+side that breaks parity is caught by both `mvn test` and the Python test
+suite, from one shared source of truth, instead of relying on a comment
+table nobody re-reads. One real bug caught during implementation: the
+first tolerance (1e-9) failed on `popularity_log` — not a logic error,
+`buildFeatures` returns `float[]` (32-bit), so exact double-precision
+equality was never achievable; loosened to 1e-6 with a comment explaining
+why. The point-in-time-correctness half of this item was folded into item
+#4's `TemporalClickstreamIndex` fix (same eval-side files, done together).
 
 **What's wrong**: `TRAINING.md` maintains a hand-written "must exactly
 match" comment table between the Java feature builder and the Python
@@ -302,15 +383,20 @@ honesty norms about every other limitation.
 
 ## Suggested execution order
 
-1. **#4 (eval circularity)** first — every other number in this repo is
-   currently being measured against a circular ground truth; fixing this
-   changes how every subsequent change should be judged.
-2. **#3 (training/eval objective mismatch)** and **#5 (feature duplication)**
-   next — both are cheap, both directly address documented bugs.
-3. **#1 (real bandit)** and **#2 (real CF)** — the two mislabeled strategies,
-   independent of each other, can be done in either order.
-4. **#6 (hybrid retrieval)** and **#8 (embedding retrieval in recommender-service)**
+**P0 (#1–#5): done.** All five landed together via four parallel workstreams
+(the eval fix and feature-parity fix shared eval-side files, so were done
+in one pass) — see each item's "Result" above for what actually happened,
+including the eval-circularity fix overturning the previous "Collaborative
+Filtering wins" headline result. One loose end remains open: the IPS/
+counterfactual estimator described in item #4 was explicitly skipped, not
+attempted-and-hidden — pick it up if pursuing P1 work below, since it's the
+same eval-side code area.
+
+Next up, P1:
+1. **#6 (hybrid retrieval)** and **#8 (embedding retrieval in recommender-service)**
    — the two retrieval-capability gaps.
-5. **#7, #9, #10, #11** — capability additions, roughly independent,
+2. **#7, #9, #10, #11** — capability additions, roughly independent,
    prioritize by what's most interesting to demo.
-6. **#12, #13** — cleanup, do whenever convenient.
+3. **#12, #13** — cleanup, do whenever convenient.
+4. The IPS estimator from #4, if you want to close that loose end before
+   moving further into P1.

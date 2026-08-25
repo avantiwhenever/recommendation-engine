@@ -215,22 +215,22 @@
           "source": "Collaborative Filtering"
         },
         {
-          "productId": "36672",
-          "name": "triceratops decorative dinosaur wall hook",
-          "productClass": "Coat Racks and Hooks",
-          "categoryHierarchy": "Contractor / Entry & Hallway / Coat Racks & Umbrella Stands",
-          "averageRating": 4.5,
-          "ratingCount": 5,
+          "productId": "24095",
+          "name": "blue dinosaur jumboz plush floor pillow",
+          "productClass": "Accent Pillows",
+          "categoryHierarchy": "D\u00e9cor & Pillows / Decorative Pillows & Blankets / Throw Pillows / Blue Throw Pillows",
+          "averageRating": 5.0,
+          "ratingCount": 88,
           "score": 0.0,
           "source": "Collaborative Filtering"
         },
         {
-          "productId": "12179",
-          "name": "dinosaur by nic squirrell - graphic art print",
-          "productClass": "Wall Art",
-          "categoryHierarchy": "D\u00e9cor & Pillows / Art / All Wall Art / Yellow Wall Art",
-          "averageRating": 0.0,
-          "ratingCount": 0,
+          "productId": "39496",
+          "name": "dinosaur land area rug",
+          "productClass": "Area Rugs",
+          "categoryHierarchy": "Rugs / Area Rugs / 4' x 6' Area Rugs",
+          "averageRating": 5.0,
+          "ratingCount": 34,
           "score": 0.0,
           "source": "Collaborative Filtering"
         }
@@ -311,7 +311,7 @@
           "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
           "averageRating": 0.0,
           "ratingCount": 0,
-          "score": 0.08468130230903625,
+          "score": -1.7266792058944702,
           "source": "Neural Ranking"
         },
         {
@@ -321,17 +321,7 @@
           "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
           "averageRating": 5.0,
           "ratingCount": 1142,
-          "score": 0.039449989795684814,
-          "source": "Neural Ranking"
-        },
-        {
-          "productId": "34228",
-          "name": "mccrea 42 '' dining table",
-          "productClass": "Conference Tables|Dining Tables",
-          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.02375727891921997,
+          "score": -2.6418023109436035,
           "source": "Neural Ranking"
         },
         {
@@ -341,17 +331,7 @@
           "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
           "averageRating": 5.0,
           "ratingCount": 13,
-          "score": 0.01744633913040161,
-          "source": "Neural Ranking"
-        },
-        {
-          "productId": "21122",
-          "name": "dining dining table",
-          "productClass": "Dining Tables",
-          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
-          "averageRating": 4.5,
-          "ratingCount": 41,
-          "score": -0.038288414478302,
+          "score": -3.6089937686920166,
           "source": "Neural Ranking"
         },
         {
@@ -361,7 +341,27 @@
           "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables / 6 Seat Kitchen & Dining Tables",
           "averageRating": 4.5,
           "ratingCount": 5,
-          "score": -0.042601943016052246,
+          "score": -3.6089937686920166,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "21122",
+          "name": "dining dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 4.5,
+          "ratingCount": 41,
+          "score": -3.6089937686920166,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "34228",
+          "name": "mccrea 42 '' dining table",
+          "productClass": "Conference Tables|Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": -3.6089937686920166,
           "source": "Neural Ranking"
         }
       ]

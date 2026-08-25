@@ -1,0 +1,3 @@
+id	query_id	product_id	label
+0	q1	P1	Exact
+1	q1	P2	Partial

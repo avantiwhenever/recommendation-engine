@@ -24,6 +24,13 @@ import java.util.TreeMap;
  * from {@code CsvClickstreamRepositoryAdapter}, which builds aggregate
  * lookups (popularity, co-occurrence) rather than exposing per-session
  * candidate lists, since serving-time strategies never need raw sessions.
+ *
+ * <p>Also attaches each session's independent, WANDS-{@code label.csv}-derived
+ * relevance grades (via {@link WandsLabelLoader}) alongside the clickstream-
+ * derived implicit ones — see {@link EvalSession}'s Javadoc for why both
+ * exist. {@code labelCsv} is optional (nullable): callers that only need the
+ * (circular) clickstream-derived grades can pass {@code null} and every
+ * session's {@code independentRelevanceGrades} will be an empty map.
  */
 public final class EvalSessionLoader {
 
@@ -37,13 +44,16 @@ public final class EvalSessionLoader {
     private EvalSessionLoader() {
     }
 
-    public static List<EvalSession> load(Path clickstreamCsv, Path productCsv) {
+    public static List<EvalSession> load(Path clickstreamCsv, Path productCsv, Path labelCsv) {
         Map<String, WandsProductRow> catalog = new LinkedHashMap<>();
         for (WandsProductRow row : WandsProductCsvLoader.load(productCsv)) {
             catalog.put(row.productId(), row);
         }
 
-        record Raw(String userId, TreeMap<Integer, String> productByPosition, Map<String, Integer> grades) {
+        Map<String, Map<String, Integer>> labelsByQuery =
+                labelCsv == null ? Map.of() : WandsLabelLoader.load(labelCsv);
+
+        record Raw(String userId, String queryId, TreeMap<Integer, String> productByPosition, Map<String, Integer> grades) {
         }
         Map<String, Raw> bySession = new LinkedHashMap<>();
 
@@ -53,11 +63,12 @@ public final class EvalSessionLoader {
             for (CSVRecord record : parser) {
                 String sessionId = record.get("session_id");
                 String userId = record.get("user_id");
+                String queryId = record.get("query_id");
                 String productId = record.get("product_id");
                 int position = Integer.parseInt(record.get("position"));
                 int grade = EVENT_GRADE.getOrDefault(record.get("event_type"), 0);
 
-                Raw raw = bySession.computeIfAbsent(sessionId, id -> new Raw(userId, new TreeMap<>(), new LinkedHashMap<>()));
+                Raw raw = bySession.computeIfAbsent(sessionId, id -> new Raw(userId, queryId, new TreeMap<>(), new LinkedHashMap<>()));
                 raw.productByPosition().putIfAbsent(position, productId);
                 raw.grades().merge(productId, grade, Math::max);
             }
@@ -86,7 +97,8 @@ public final class EvalSessionLoader {
                 ));
             }
             if (!candidates.isEmpty()) {
-                sessions.add(new EvalSession(entry.getKey(), raw.userId(), candidates, raw.grades()));
+                Map<String, Integer> independentGrades = labelsByQuery.getOrDefault(raw.queryId(), Map.of());
+                sessions.add(new EvalSession(entry.getKey(), raw.userId(), raw.queryId(), candidates, raw.grades(), independentGrades));
             }
         }
         return sessions;

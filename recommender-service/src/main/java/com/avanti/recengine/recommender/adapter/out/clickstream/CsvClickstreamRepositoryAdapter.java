@@ -18,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -53,6 +54,16 @@ public final class CsvClickstreamRepositoryAdapter implements ClickstreamReposit
 
     private final Map<String, Double> popularityByProduct = new HashMap<>();
     private final Map<String, Map<String, Long>> coOccurrence = new HashMap<>();
+    /**
+     * Marginal interaction count per product: number of distinct sessions
+     * in which the product had >=1 interaction event. This is the
+     * denominator input for {@link #itemSimilarity} — deliberately not the
+     * same thing as {@code popularityByProduct} above, which mixes in
+     * weighted view events and isn't session-counted, so it wouldn't
+     * normalize {@code coOccurrence} (itself built from per-session
+     * interaction sets) consistently.
+     */
+    private final Map<String, Long> sessionInteractionCount = new HashMap<>();
     private final Map<String, UserProfile> profilesByUser = new HashMap<>();
     private final Map<String, CatalogEntry> catalogByProduct = new HashMap<>();
     private List<String> mostPopularCache;
@@ -120,6 +131,7 @@ public final class CsvClickstreamRepositoryAdapter implements ClickstreamReposit
 
         for (Set<String> sessionProducts : interactedProductsBySession.values()) {
             for (String a : sessionProducts) {
+                sessionInteractionCount.merge(a, 1L, Long::sum);
                 for (String b : sessionProducts) {
                     if (!a.equals(b)) {
                         coOccurrence.computeIfAbsent(a, k -> new HashMap<>()).merge(b, 1L, Long::sum);
@@ -166,15 +178,36 @@ public final class CsvClickstreamRepositoryAdapter implements ClickstreamReposit
     }
 
     @Override
+    public double itemSimilarity(String productIdA, String productIdB) {
+        if (productIdA.equals(productIdB)) {
+            return 1.0;
+        }
+        long marginalA = sessionInteractionCount.getOrDefault(productIdA, 0L);
+        long marginalB = sessionInteractionCount.getOrDefault(productIdB, 0L);
+        if (marginalA == 0L || marginalB == 0L) {
+            return 0.0;
+        }
+        Map<String, Long> partners = coOccurrence.get(productIdA);
+        long raw = partners == null ? 0L : partners.getOrDefault(productIdB, 0L);
+        if (raw == 0L) {
+            return 0.0;
+        }
+        return raw / Math.sqrt((double) marginalA * (double) marginalB);
+    }
+
+    @Override
     public List<String> relatedProducts(String productId, int limit) {
         Map<String, Long> partners = coOccurrence.get(productId);
         if (partners == null) {
             return List.of();
         }
-        return partners.entrySet().stream()
-                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+        // Ranked by normalized similarity, not raw co-occurrence count — a
+        // partner that's merely globally popular (and so co-occurs often
+        // with everything) shouldn't outrank a partner with a smaller raw
+        // count but much stronger relative affinity. See itemSimilarity.
+        return partners.keySet().stream()
+                .sorted(Comparator.comparingDouble((String other) -> itemSimilarity(productId, other)).reversed())
                 .limit(limit)
-                .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
     }
 

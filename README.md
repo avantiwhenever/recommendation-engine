@@ -76,14 +76,19 @@ Concrete, verifiable engineering signal, not a tutorial-follow-along project:
   suspiciously perfect result — the author tracked it down to two genuine
   data-leakage bugs, fixed both, and reported the honest (lower, real)
   number afterward. See `training/TRAINING.md`.
-- **A real offline evaluation harness**, not just a training-time sanity
-  check: all 5 strategies scored against 2,568 held-out clickstream
-  sessions with standard IR metrics (nDCG, MRR, Recall, Precision) — see
-  [RESULTS.md](RESULTS.md). The results are genuinely interesting, not
-  cherry-picked: collaborative filtering wins because it's the only
-  strategy using real per-user history, and bandit exploration scores
-  *below* baseline by design (a documented explore/exploit tradeoff, not
-  a bug) — both are exactly the outcomes the underlying theory predicts.
+- **A real offline evaluation harness that caught its own methodology bug**:
+  the first version of this eval showed collaborative filtering as the
+  clear winner — but a hard-nosed internal review questioned whether that
+  was real signal or an artifact of the eval's own construction, so the
+  eval was rebuilt to score against a second, independent ground truth
+  (WANDS' original human relevance judgments, not just clickstream-derived
+  implicit labels) and fixed for a temporal leak in its features. The
+  corrected result: **the original "collaborative filtering wins" finding
+  doesn't hold up** — it was inflated by circular ground truth and future
+  data leaking into held-out features, not real recommendation quality. See
+  [RESULTS.md](RESULTS.md) and [TODO.md](TODO.md) for the full account.
+  Finding and reporting that your own earlier result was wrong is a
+  stronger signal than the result being flattering.
 - **Production-adjacent engineering hygiene**: CI with dependency/image
   vulnerability scanning, SAST, secret scanning, and Dependabot (all
   actually catching and fixing real findings during development, not just
@@ -137,7 +142,7 @@ most such projects skip:
 | Frontend protocol | GraphQL, exactly one gateway | `graphql-gateway` is the only service with an inbound HTTP adapter; everything downstream is gRPC. |
 | Vector store | Pinecone, via **Pinecone Local** for development | A real Docker-based Pinecone emulator (`ghcr.io/pinecone-io/pinecone-local`) — no account/API key needed to run the full stack locally; pointing at a real hosted Pinecone free-tier index later is a config change (`PINECONE_HOST`/`PINECONE_API_KEY`), not a code change. Not persistent and capped at 100K vectors — a documented dev/demo tradeoff, not a production claim. |
 | Embeddings | `bge-small-en-v1.5` via ONNX Runtime, client-side | Pinecone Local has no server-side integrated inference, so embeddings are generated in-process — the one piece ported directly from the sibling `search` project, since it's self-contained (no Spring, no Elasticsearch). |
-| Recommendation strategies | Popularity, collaborative-filtering, bandit-exploration, ONNX neural ranker | Each traceable to a specific arxiv paper — see below — rather than an arbitrary re-ranking heuristic. |
+| Recommendation strategies | Popularity, collaborative-filtering, bandit-exploration, ONNX neural ranker | Each traceable to a specific paper or real engineering blog post — see "arxiv grounding" and "Additional grounding" below — rather than an arbitrary re-ranking heuristic. Two were rebuilt after a critical review found their names overclaimed their implementations; see [TODO.md](TODO.md). |
 | Build tool | Maven, multi-module reactor | Same rationale as the sibling `search` project: declarative dependency graphs are easy for a reviewer to skim. |
 | Java version | JDK 26 | Matches the sibling `search` project's choice — latest available toolchain. |
 
@@ -147,11 +152,23 @@ Recommendation strategies are each tied to real recommender-systems
 literature, not invented ad hoc:
 
 - [A Survey of Real-World Recommender Systems: Challenges, Constraints, and Industrial Perspectives](https://arxiv.org/abs/2509.06002) (arXiv:2509.06002) — candidate-generation-then-rerank architecture grounding
-- [Ranking in Contextual Multi-Armed Bandits](https://arxiv.org/abs/2207.00109) (arXiv:2207.00109) — basis for the bandit exploration strategy
+- [Ranking in Contextual Multi-Armed Bandits](https://arxiv.org/abs/2207.00109) (arXiv:2207.00109) — general bandit-ranking theory the bandit strategy draws on
 - [BanditMF: Multi-Armed Bandit Based Matrix Factorization Recommender System](https://arxiv.org/abs/2106.10898) (arXiv:2106.10898)
-- [Online Interactive Collaborative Filtering Using Multi-Armed Bandit with Dependent Arms](https://arxiv.org/abs/1708.03058) (arXiv:1708.03058)
+- [Online Interactive Collaborative Filtering Using Multi-Armed Bandit with Dependent Arms](https://arxiv.org/abs/1708.03058) (arXiv:1708.03058) — online/bandit-flavored CF; the collaborative filtering strategy itself is the static (non-bandit) technique below, not this
 - [A Survey on Generative Recommendation: Data, Model, and Tasks](https://arxiv.org/abs/2510.27157) (arXiv:2510.27157)
 - [Large Language Model Enhanced Recommender Systems: A Survey](https://arxiv.org/abs/2412.13432) (arXiv:2412.13432)
+- [Applying Deep Learning to Airbnb Search](https://arxiv.org/pdf/1810.09591) (arXiv:1810.09591) — LambdaRank-style pairwise training objective, adopted after a review found the neural ranker's original pointwise training didn't match its own pairwise eval metric
+
+## Additional grounding (not on arxiv)
+
+A [staff-engineer-level review](TODO.md) of an earlier version of this
+project found two strategies whose names overclaimed what their code
+actually did — both were rebuilt against real, cited industry technique,
+not arxiv papers this time:
+
+- Sarwar, Karypis, Konstan & Riedl, ["Item-Based Collaborative Filtering Recommendation Algorithms"](https://dl.acm.org/doi/10.1145/371920.372071) (WWW 2001) — the standard adjusted-cosine normalization the collaborative filtering strategy uses; the earlier version's raw co-occurrence counting was calling itself "CF" without this normalization, which is the actual technique that makes item-item CF work
+- Etsy — ["Building a Platform for Serving Recommendations at Etsy"](https://www.etsy.com/codeascraft/building-a-platform-for-serving-recommendations-at-etsy) (OPAR: bandit arms as product attributes, not raw items or positions)
+- Spotify Research — ["Calibrated Recommendations with Contextual Bandits on Spotify Homepage"](https://research.atspotify.com/2025/9/calibrated-recommendations-with-contextual-bandits-on-spotify-homepage) (context-conditioned arm selection + a calibration constraint) — together these replaced the bandit exploration strategy's earlier random-position-swap implementation, which had no arms, no value estimates, and never read its own request context despite being named "epsilon-greedy"
 - [A Survey on LLM-powered Agents for Recommender Systems](https://arxiv.org/abs/2502.10050) (arXiv:2502.10050)
 
 ## Architecture
@@ -205,9 +222,11 @@ Recommendation strategies (`recommender-service`), each a
 
 1. **Passthrough** — baseline, no changes (control group).
 2. **Popularity** — boosts/injects products with high clickstream view/purchase counts.
-3. **Collaborative filtering** — item-item co-occurrence from clickstream sessions.
-4. **Bandit exploration** — epsilon-greedy/UCB-style promotion of lower-ranked candidates.
-5. **Neural ranking** — a small MLP trained on the synthetic clickstream's implicit feedback, served via ONNX Runtime.
+3. **Collaborative filtering** — real item-item CF: adjusted-cosine-normalized similarity over session co-occurrence (Sarwar, Karypis, Konstan & Riedl, WWW 2001), not raw co-occurrence counts — an earlier version conflated the two, which is exactly the failure mode this normalization corrects (two independently popular items no longer look "similar" just from base rates).
+4. **Bandit exploration** — Thompson Sampling over per-category arms, warm-started from real historical engagement and conditioned on the requesting user's category profile (Etsy's OPAR pattern, Spotify's calibrated-bandit pattern) — not the epsilon-greedy position shuffle an earlier version implemented, which had no arms, no value estimates, and never read its own request context.
+5. **Neural ranking** — a gradient-boosted pairwise ranking model (XGBoost, `rank:ndcg`), served via ONNX Runtime. Replaced an earlier pointwise-trained MLP whose training objective didn't match its own pairwise eval metric — see [TODO.md](TODO.md#3-neural-rankers-training-loss-doesnt-match-its-own-eval-metric) for why, and the honest finding that a plain linear baseline still beats both models on this feature set.
+
+See [TODO.md](TODO.md) for the full list of what was fixed and why — every one of these five items replaced something that shipped first, didn't hold up under scrutiny, and was corrected rather than left mislabeled.
 
 ## Data notes
 

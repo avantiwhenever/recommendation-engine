@@ -17,6 +17,19 @@ public interface ClickstreamRepositoryPort {
     /** Raw co-occurrence count: how often productId was interacted with in the same session as anyOf. */
     long coOccurrenceCount(String productId, java.util.Set<String> anyOf);
 
+    /**
+     * Normalized item-item similarity: raw co-occurrence divided by the
+     * geometric mean of each item's own marginal interaction count (the
+     * standard adjusted-cosine / binary-cosine normalization for item-item
+     * CF — see Sarwar, Karypis, Konstan &amp; Riedl, "Item-Based
+     * Collaborative Filtering Recommendation Algorithms," WWW 2001). Unlike
+     * {@link #coOccurrenceCount}, two independently popular-but-unrelated
+     * items don't score high here just from base rates. 1.0 for a product
+     * compared to itself; 0.0 if either has no recorded interactions or
+     * they never co-occurred.
+     */
+    double itemSimilarity(String productIdA, String productIdB);
+
     /** Top globally co-occurring products with productId, most-frequent first, excluding productId itself. */
     List<String> relatedProducts(String productId, int limit);
 

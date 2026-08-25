@@ -1,0 +1,6 @@
+name,category_hierarchy,avg_rating,rating_count,user_top_category,popularity_raw,co_occurrence_raw,serve_time_score,train_time_position,expected_category_match,expected_popularity_log,expected_co_occurrence_log,expected_avg_rating_over_5,expected_rating_count_log
+matched_category_with_signal,Furniture / Chairs,4.5,120,Furniture,5.0,3,0.8,5,1.0,1.791759469228055,1.3862943611198906,0.9,4.795790545596741
+no_category_match,Home / Lamps,3.0,0,Furniture,0.0,0,0.0,1,0.0,0.0,0.0,0.6,0.0
+null_category_hierarchy,,5.0,1000,Furniture,100.0,50,0.5,10,0.0,4.61512051684126,3.9318256327243257,1.0,6.90875477931522
+no_user_top_category,Furniture / Sofas,4.0,50,,2.0,1,1.2,15,0.0,1.0986122886681098,0.6931471805599453,0.8,3.9318256327243257
+high_popularity_zero_rating,Furniture / Beds,0.0,0,Furniture,1000.0,200,-0.5,2,1.0,6.90875477931522,5.303304908059076,0.0,0.0

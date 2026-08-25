@@ -12,27 +12,40 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Item-item collaborative filtering: boosts candidates that frequently
- * co-occur (same clickstream session) with products the requesting user has
- * already interacted with, and injects related products for the user's most
- * recent interaction if search-service didn't already surface them.
+ * Item-item collaborative filtering: boosts candidates whose normalized
+ * similarity to products the requesting user has already interacted with is
+ * highest, and injects related products for the user's history if
+ * search-service didn't already surface them.
  *
- * <p>Classic neighborhood-based CF, using session co-occurrence rather than
- * a factorized user/item embedding — the simpler, more interpretable half
- * of the two approaches compared throughout the online/bandit-flavored CF
- * literature this project draws on (see arXiv:1708.03058, "Online
- * Interactive Collaborative Filtering Using Multi-Armed Bandit with
- * Dependent Arms", and arXiv:2106.10898, "BanditMF"): those papers layer
- * bandit-style exploration on top of a CF signal much like this class
- * provides, which is exactly the relationship between this strategy and
- * {@link BanditExploreStrategy} in this codebase — this strategy supplies
- * the collaborative signal; bandit exploration is what a production system
- * would compose with it, not a replacement for it.
+ * <p>Classic neighborhood-based item-item CF using an adjusted-cosine-style
+ * similarity over session co-occurrence — {@link ClickstreamRepositoryPort#itemSimilarity}
+ * divides raw co-occurrence by the geometric mean of each item's own
+ * marginal interaction count, so two items that are each independently
+ * popular don't score as "similar" just from base rates the way raw
+ * co-occurrence counting would. This is the standard normalization from
+ * Sarwar, Karypis, Konstan &amp; Riedl, "Item-Based Collaborative Filtering
+ * Recommendation Algorithms" (WWW 2001) — a static, offline technique, not
+ * the online/bandit-flavored CF this project's arXiv:1708.03058
+ * ("Online Interactive Collaborative Filtering Using Multi-Armed Bandit
+ * with Dependent Arms") and arXiv:2106.10898 ("BanditMF") citations
+ * describe; those papers assume per-arm reward updating this strategy
+ * doesn't do. The actual relationship to bandit-flavored CF in this
+ * codebase is architectural, not algorithmic: this strategy supplies a
+ * static similarity signal, and {@link BanditExploreStrategy} is a
+ * separate, independent exploration mechanism a production system could
+ * compose with it — not an implementation of the online CF those papers
+ * describe.
  */
 public final class CollaborativeFilteringStrategy implements RecommendationStrategy {
 
     private static final int MAX_INJECTED = 2;
-    private static final double CO_OCCURRENCE_WEIGHT = 0.5;
+    // Normalized similarity is bounded in [0,1] and typically much smaller
+    // in practice (session co-occurrence is sparse over a 43K-item
+    // catalog), unlike the old log1p(rawCount) boost this replaced — this
+    // weight is a reasonable starting point, not empirically tuned against
+    // real score distributions; recalibrate if boosts turn out too weak or
+    // too strong relative to search-service's base scores.
+    private static final double SIMILARITY_WEIGHT = 4.0;
 
     private final ClickstreamRepositoryPort clickstream;
 
@@ -51,8 +64,16 @@ public final class CollaborativeFilteringStrategy implements RecommendationStrat
 
         List<ScoredProduct> reranked = new ArrayList<>(baseResults.size());
         for (ScoredProduct product : baseResults) {
-            long coOccurrence = clickstream.coOccurrenceCount(product.productId(), profile.interactedProductIds());
-            double boost = CO_OCCURRENCE_WEIGHT * Math.log1p(coOccurrence);
+            // Max, not mean, across the user's history: a candidate strongly
+            // similar to just one thing the user liked is a good
+            // recommendation on its own merits — averaging in the rest of a
+            // possibly-diverse profile would dilute that signal rather than
+            // sharpen it.
+            double maxSimilarity = 0.0;
+            for (String interactedId : profile.interactedProductIds()) {
+                maxSimilarity = Math.max(maxSimilarity, clickstream.itemSimilarity(product.productId(), interactedId));
+            }
+            double boost = SIMILARITY_WEIGHT * maxSimilarity;
             reranked.add(product.withScore(product.score() + boost));
         }
         reranked.sort((a, b) -> Double.compare(b.score(), a.score()));

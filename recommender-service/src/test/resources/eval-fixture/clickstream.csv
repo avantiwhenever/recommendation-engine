@@ -1,0 +1,4 @@
+event_id,user_id,session_id,timestamp,query_id,query,position,product_id,event_type,dwell_time_ms
+3,u2,s2,2026-01-02T00:00:00.000000+00:00,q1,widget,1,P1,purchase,5000
+1,u1,s1,2026-01-01T00:00:00.000000+00:00,q1,widget,1,P1,click,3000
+2,u1,s1,2026-01-01T00:00:01.000000+00:00,q1,widget,2,P2,click,3000

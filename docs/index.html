@@ -37,8 +37,10 @@
     <p class="glance-sub">
       Every strategy receives the exact same baseline candidates from <code>search-service</code> and either
       leaves them alone, re-ranks them, or adds/removes products — never a from-scratch retrieval of its own.
-      Numbers below are from a real offline evaluation against 2,568 held-out clickstream sessions
-      (<a href="https://github.com/avantiwhenever/recommendation-engine/blob/main/RESULTS.md">full methodology and honest caveats in RESULTS.md</a>).
+      Numbers below are from RESULTS.md's independent WANDS relevance eval — scored against WANDS's own human
+      relevance grades, which no strategy is trained or tuned against, rather than the clickstream-derived
+      labels the strategies themselves read from
+      (<a href="https://github.com/avantiwhenever/recommendation-engine/blob/main/RESULTS.md">full methodology, the second implicit-clickstream table, and honest caveats in RESULTS.md</a>).
       Click any card for how it works and its grounding in the literature.
     </p>
     <div class="glance-grid" id="glance-grid"></div>
@@ -56,7 +58,7 @@
     <p id="modal-how"></p>
     <h4>How it differs from the others</h4>
     <p id="modal-differs"></p>
-    <h4>Offline evaluation (2,568 held-out sessions)</h4>
+    <h4>Independent WANDS relevance eval</h4>
     <table class="modal-metrics-table">
       <thead>
         <tr><th>nDCG@5</th><th>MRR</th><th>Recall@5</th><th>Precision@5</th></tr>
