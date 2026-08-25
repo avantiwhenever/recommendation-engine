@@ -4,6 +4,7 @@ import com.avanti.recengine.recommender.domain.CatalogEntry;
 import com.avanti.recengine.recommender.domain.UserProfile;
 import com.avanti.recengine.recommender.port.out.ClickstreamRepositoryPort;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,11 @@ final class FakeClickstreamRepository implements ClickstreamRepositoryPort {
     private final Map<String, UserProfile> profiles = new HashMap<>();
     private final Map<String, Double> popularity = new HashMap<>();
     private final Map<String, Map<String, Long>> coOccurrence = new HashMap<>();
+    /** Defaults to 1 when unset, so itemSimilarity reduces to plain raw
+     *  co-occurrence for tests that don't care about normalization
+     *  (denominator sqrt(1*1) == 1) — keeps older co-occurrence-only tests
+     *  valid without every test needing to set marginal counts explicitly. */
+    private final Map<String, Long> marginalCounts = new HashMap<>();
     private final List<String> popularOrder;
     private final Map<String, CatalogEntry> catalog = new HashMap<>();
 
@@ -33,6 +39,10 @@ final class FakeClickstreamRepository implements ClickstreamRepositoryPort {
 
     void withCoOccurrence(String productId, String other, long count) {
         coOccurrence.computeIfAbsent(productId, k -> new HashMap<>()).put(other, count);
+    }
+
+    void withMarginalCount(String productId, long count) {
+        marginalCounts.put(productId, count);
     }
 
     void withCatalogEntry(CatalogEntry entry) {
@@ -63,12 +73,26 @@ final class FakeClickstreamRepository implements ClickstreamRepositoryPort {
     }
 
     @Override
+    public double itemSimilarity(String productIdA, String productIdB) {
+        if (productIdA.equals(productIdB)) {
+            return 1.0;
+        }
+        long marginalA = marginalCounts.getOrDefault(productIdA, 1L);
+        long marginalB = marginalCounts.getOrDefault(productIdB, 1L);
+        Map<String, Long> partners = coOccurrence.get(productIdA);
+        long raw = partners == null ? 0L : partners.getOrDefault(productIdB, 0L);
+        if (raw == 0L) {
+            return 0.0;
+        }
+        return raw / Math.sqrt((double) marginalA * (double) marginalB);
+    }
+
+    @Override
     public List<String> relatedProducts(String productId, int limit) {
         Map<String, Long> partners = coOccurrence.getOrDefault(productId, Map.of());
-        return partners.entrySet().stream()
-                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+        return partners.keySet().stream()
+                .sorted(Comparator.comparingDouble((String other) -> itemSimilarity(productId, other)).reversed())
                 .limit(limit)
-                .map(Map.Entry::getKey)
                 .toList();
     }
 

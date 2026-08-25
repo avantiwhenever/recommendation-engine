@@ -215,22 +215,22 @@
           "source": "Collaborative Filtering"
         },
         {
-          "productId": "36672",
-          "name": "triceratops decorative dinosaur wall hook",
-          "productClass": "Coat Racks and Hooks",
-          "categoryHierarchy": "Contractor / Entry & Hallway / Coat Racks & Umbrella Stands",
-          "averageRating": 4.5,
-          "ratingCount": 5,
+          "productId": "24095",
+          "name": "blue dinosaur jumboz plush floor pillow",
+          "productClass": "Accent Pillows",
+          "categoryHierarchy": "D\u00e9cor & Pillows / Decorative Pillows & Blankets / Throw Pillows / Blue Throw Pillows",
+          "averageRating": 5.0,
+          "ratingCount": 88,
           "score": 0.0,
           "source": "Collaborative Filtering"
         },
         {
-          "productId": "12179",
-          "name": "dinosaur by nic squirrell - graphic art print",
-          "productClass": "Wall Art",
-          "categoryHierarchy": "D\u00e9cor & Pillows / Art / All Wall Art / Yellow Wall Art",
-          "averageRating": 0.0,
-          "ratingCount": 0,
+          "productId": "39496",
+          "name": "dinosaur land area rug",
+          "productClass": "Area Rugs",
+          "categoryHierarchy": "Rugs / Area Rugs / 4' x 6' Area Rugs",
+          "averageRating": 5.0,
+          "ratingCount": 34,
           "score": 0.0,
           "source": "Collaborative Filtering"
         }
@@ -305,23 +305,23 @@
       "strategyLabel": "NEURAL",
       "products": [
         {
-          "productId": "29365",
-          "name": "witter coffee table",
-          "productClass": "Coffee & Cocktail Tables",
-          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
-          "averageRating": 4.5,
-          "ratingCount": 2,
-          "score": 0.07005125284194946,
-          "source": "Neural Ranking"
-        },
-        {
           "productId": "42387",
           "name": "winnie sled coffee table",
           "productClass": "Coffee & Cocktail Tables",
           "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
           "averageRating": 4.5,
           "ratingCount": 924,
-          "score": 0.06800061464309692,
+          "score": -1.7333953380584717,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "29365",
+          "name": "witter coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
+          "averageRating": 4.5,
+          "ratingCount": 2,
+          "score": -1.7768524885177612,
           "source": "Neural Ranking"
         },
         {
@@ -331,7 +331,7 @@
           "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
           "averageRating": 4.5,
           "ratingCount": 98,
-          "score": 0.039510488510131836,
+          "score": -2.6418023109436035,
           "source": "Neural Ranking"
         },
         {
@@ -341,7 +341,7 @@
           "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
           "averageRating": 0.0,
           "ratingCount": 0,
-          "score": 0.03511625528335571,
+          "score": -3.0049026012420654,
           "source": "Neural Ranking"
         },
         {
@@ -351,7 +351,7 @@
           "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
           "averageRating": 0.0,
           "ratingCount": 0,
-          "score": 0.023392796516418457,
+          "score": -3.6089937686920166,
           "source": "Neural Ranking"
         },
         {
@@ -361,7 +361,7 @@
           "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
           "averageRating": 4.5,
           "ratingCount": 295,
-          "score": 0.003639042377471924,
+          "score": -3.6089937686920166,
           "source": "Neural Ranking"
         }
       ]

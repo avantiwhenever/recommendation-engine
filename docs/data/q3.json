@@ -215,22 +215,22 @@
           "source": "Collaborative Filtering"
         },
         {
-          "productId": "36672",
-          "name": "triceratops decorative dinosaur wall hook",
-          "productClass": "Coat Racks and Hooks",
-          "categoryHierarchy": "Contractor / Entry & Hallway / Coat Racks & Umbrella Stands",
-          "averageRating": 4.5,
-          "ratingCount": 5,
+          "productId": "24095",
+          "name": "blue dinosaur jumboz plush floor pillow",
+          "productClass": "Accent Pillows",
+          "categoryHierarchy": "D\u00e9cor & Pillows / Decorative Pillows & Blankets / Throw Pillows / Blue Throw Pillows",
+          "averageRating": 5.0,
+          "ratingCount": 88,
           "score": 0.0,
           "source": "Collaborative Filtering"
         },
         {
-          "productId": "12179",
-          "name": "dinosaur by nic squirrell - graphic art print",
-          "productClass": "Wall Art",
-          "categoryHierarchy": "D\u00e9cor & Pillows / Art / All Wall Art / Yellow Wall Art",
-          "averageRating": 0.0,
-          "ratingCount": 0,
+          "productId": "39496",
+          "name": "dinosaur land area rug",
+          "productClass": "Area Rugs",
+          "categoryHierarchy": "Rugs / Area Rugs / 4' x 6' Area Rugs",
+          "averageRating": 5.0,
+          "ratingCount": 34,
           "score": 0.0,
           "source": "Collaborative Filtering"
         }
@@ -240,13 +240,13 @@
       "strategyLabel": "BANDIT",
       "products": [
         {
-          "productId": "20865",
-          "name": "penobscot 28.5 '' wide polyester wingback chair",
+          "productId": "35740",
+          "name": "aljo 26.7 '' wide armchair",
           "productClass": "Accent Chairs",
           "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
-          "averageRating": 4.5,
-          "ratingCount": 15,
-          "score": 0.8259655237197876,
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": 0.8313445448875427,
           "source": "Bandit Exploration"
         },
         {
@@ -290,13 +290,13 @@
           "source": "Bandit Exploration"
         },
         {
-          "productId": "35740",
-          "name": "aljo 26.7 '' wide armchair",
+          "productId": "20865",
+          "name": "penobscot 28.5 '' wide polyester wingback chair",
           "productClass": "Accent Chairs",
           "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.8313445448875427,
+          "averageRating": 4.5,
+          "ratingCount": 15,
+          "score": 0.8259655237197876,
           "source": "Bandit Exploration"
         }
       ]
@@ -311,17 +311,7 @@
           "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
           "averageRating": 0.0,
           "ratingCount": 0,
-          "score": 0.08342069387435913,
-          "source": "Neural Ranking"
-        },
-        {
-          "productId": "36060",
-          "name": "tate 26 '' wide armchair",
-          "productClass": null,
-          "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.06706887483596802,
+          "score": -1.7266792058944702,
           "source": "Neural Ranking"
         },
         {
@@ -331,17 +321,17 @@
           "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
           "averageRating": 0.0,
           "ratingCount": 0,
-          "score": 0.06700783967971802,
+          "score": -2.278136730194092,
           "source": "Neural Ranking"
         },
         {
-          "productId": "20865",
-          "name": "penobscot 28.5 '' wide polyester wingback chair",
-          "productClass": "Accent Chairs",
+          "productId": "36060",
+          "name": "tate 26 '' wide armchair",
+          "productClass": null,
           "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
-          "averageRating": 4.5,
-          "ratingCount": 15,
-          "score": 0.0335041880607605,
+          "averageRating": 0.0,
+          "ratingCount": 0,
+          "score": -2.278136730194092,
           "source": "Neural Ranking"
         },
         {
@@ -351,7 +341,17 @@
           "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
           "averageRating": 4.0,
           "ratingCount": 11,
-          "score": 0.02746516466140747,
+          "score": -3.0049026012420654,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "20865",
+          "name": "penobscot 28.5 '' wide polyester wingback chair",
+          "productClass": "Accent Chairs",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
+          "averageRating": 4.5,
+          "ratingCount": 15,
+          "score": -3.0049026012420654,
           "source": "Neural Ranking"
         },
         {
@@ -361,7 +361,7 @@
           "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
           "averageRating": 5.0,
           "ratingCount": 12,
-          "score": -0.034583091735839844,
+          "score": -3.6089937686920166,
           "source": "Neural Ranking"
         }
       ]

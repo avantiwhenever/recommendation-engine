@@ -1,0 +1,3 @@
+product_id	product_name	product_class	category hierarchy	product_description	product_features	rating_count	average_rating	review_count
+P1	widget one	Widgets	Home / Widgets	desc	color:red	10	4.5	10
+P2	widget two	Widgets	Home / Widgets	desc	color:blue	5	4.0	5

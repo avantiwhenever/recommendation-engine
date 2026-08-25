@@ -47,7 +47,7 @@ public class RecommenderConfig {
                 Strategy.NONE, new PassthroughStrategy(),
                 Strategy.POPULARITY, new PopularityBoostStrategy(clickstream),
                 Strategy.COLLABORATIVE, new CollaborativeFilteringStrategy(clickstream),
-                Strategy.BANDIT, new BanditExploreStrategy(),
+                Strategy.BANDIT, new BanditExploreStrategy(clickstream),
                 Strategy.NEURAL, new NeuralRankingStrategy(clickstream, rankingModel)
         );
     }

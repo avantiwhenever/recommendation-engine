@@ -215,22 +215,22 @@
           "source": "Collaborative Filtering"
         },
         {
-          "productId": "36672",
-          "name": "triceratops decorative dinosaur wall hook",
-          "productClass": "Coat Racks and Hooks",
-          "categoryHierarchy": "Contractor / Entry & Hallway / Coat Racks & Umbrella Stands",
-          "averageRating": 4.5,
-          "ratingCount": 5,
+          "productId": "24095",
+          "name": "blue dinosaur jumboz plush floor pillow",
+          "productClass": "Accent Pillows",
+          "categoryHierarchy": "D\u00e9cor & Pillows / Decorative Pillows & Blankets / Throw Pillows / Blue Throw Pillows",
+          "averageRating": 5.0,
+          "ratingCount": 88,
           "score": 0.0,
           "source": "Collaborative Filtering"
         },
         {
-          "productId": "12179",
-          "name": "dinosaur by nic squirrell - graphic art print",
-          "productClass": "Wall Art",
-          "categoryHierarchy": "D\u00e9cor & Pillows / Art / All Wall Art / Yellow Wall Art",
-          "averageRating": 0.0,
-          "ratingCount": 0,
+          "productId": "39496",
+          "name": "dinosaur land area rug",
+          "productClass": "Area Rugs",
+          "categoryHierarchy": "Rugs / Area Rugs / 4' x 6' Area Rugs",
+          "averageRating": 5.0,
+          "ratingCount": 34,
           "score": 0.0,
           "source": "Collaborative Filtering"
         }
@@ -311,7 +311,7 @@
           "categoryHierarchy": null,
           "averageRating": 0.0,
           "ratingCount": 0,
-          "score": 0.07555967569351196,
+          "score": -1.7768524885177612,
           "source": "Neural Ranking"
         },
         {
@@ -321,7 +321,7 @@
           "categoryHierarchy": null,
           "averageRating": 4.5,
           "ratingCount": 2659,
-          "score": 0.05552703142166138,
+          "score": -1.7768524885177612,
           "source": "Neural Ranking"
         },
         {
@@ -331,7 +331,7 @@
           "categoryHierarchy": null,
           "averageRating": 4.5,
           "ratingCount": 6,
-          "score": 0.05129510164260864,
+          "score": -2.328397035598755,
           "source": "Neural Ranking"
         },
         {
@@ -341,7 +341,7 @@
           "categoryHierarchy": null,
           "averageRating": 4.5,
           "ratingCount": 206,
-          "score": 0.029347360134124756,
+          "score": -3.0049026012420654,
           "source": "Neural Ranking"
         },
         {
@@ -351,7 +351,7 @@
           "categoryHierarchy": null,
           "averageRating": 5.0,
           "ratingCount": 34,
-          "score": 0.014325439929962158,
+          "score": -3.6089937686920166,
           "source": "Neural Ranking"
         },
         {
@@ -361,7 +361,7 @@
           "categoryHierarchy": null,
           "averageRating": 4.5,
           "ratingCount": 853,
-          "score": -0.05026119947433472,
+          "score": -3.6089937686920166,
           "source": "Neural Ranking"
         }
       ]

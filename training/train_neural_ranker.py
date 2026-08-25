@@ -3,29 +3,47 @@
 
 Builds implicit-feedback (user, product) pairs from data/clickstream.csv,
 computes the 6 features documented in NeuralRankingStrategy's Javadoc (and
-duplicated below — the two MUST stay in sync, since this script's feature
-order is exactly what the exported ONNX model expects at serving time),
-trains a small MLP regressor, and exports it to ONNX at
-models/neural-ranker/model.onnx.
+duplicated below — the two MUST stay in sync; see
+feature_parity_fixtures.csv / test_feature_parity.py / FeatureParityTest.java
+for the golden-vector test that now catches drift automatically instead of
+relying on someone re-reading a comment table), trains a ranking model, and
+exports it to ONNX at models/neural-ranker/model.onnx.
+
+**Training objective**: pairwise (XGBoost `rank:ndcg`, i.e. LambdaMART-style
+— pairwise gradients weighted by the |NDCG delta| swapping each pair would
+cause), not pointwise regression. The held-out evaluation metric has always
+been pairwise ranking accuracy; training pointwise (as an earlier version of
+this script did, via sklearn's MLPRegressor) optimized a different objective
+than the one being measured. See TRAINING.md's "Training objective" section
+for the actual numbers this change produced, including an honest comparison
+against the old pointwise model and a linear-combination-of-all-6-features
+baseline that the single-feature ablations alone didn't previously rule out.
 
 See TRAINING.md for the full methodology, the actual held-out numbers this
 run produced, and an honest account of where the training-time features are
 a proxy for what's available at serving time (they aren't identical — see
 FEATURE 1 below).
 
-Usage: python3 train_neural_ranker.py [--seed 42]
+Usage:
+  python3 train_neural_ranker.py [--seed 42]              # train + export the model
+  python3 train_neural_ranker.py --ci-seeds 5              # also report a
+                                                             # multi-seed mean/std
+                                                             # confidence interval
 """
 import argparse
 import csv
 import math
 import random
+import statistics
 from collections import defaultdict
 from pathlib import Path
 
 import numpy as np
-from sklearn.neural_network import MLPRegressor
-from skl2onnx import to_onnx
-from skl2onnx.common.data_types import FloatTensorType
+import xgboost as xgb
+from onnxmltools import convert_xgboost
+from onnxmltools.convert.common.data_types import FloatTensorType as MTFloatTensorType
+from onnxmltools.convert.xgboost._parse import WrappedBooster
+from sklearn.linear_model import LogisticRegression
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT_DIR / "data"
@@ -223,6 +241,79 @@ def pairwise_ranking_accuracy(y_true, y_pred, groups):
     return correct / total if total else float("nan")
 
 
+def sort_by_group(X, y, groups):
+    """XGBoost's group-based ranking API requires rows contiguous per group
+    (it takes group *sizes*, not group *labels*), unlike this script's other
+    per-user loops which don't care about row order."""
+    order = np.argsort(groups, kind="stable")
+    X_sorted, y_sorted, groups_sorted = X[order], y[order], groups[order]
+    # group sizes must be in the same order groups appear in groups_sorted —
+    # np.unique(..., return_counts=True) sorts by value instead, which
+    # silently pairs the wrong size with the wrong group, so sizes are
+    # computed by run-length over groups_sorted directly instead.
+    sizes = []
+    current, count = None, 0
+    for g in groups_sorted:
+        if g != current:
+            if current is not None:
+                sizes.append(count)
+            current, count = g, 1
+        else:
+            count += 1
+    sizes.append(count)
+    return X_sorted, y_sorted, groups_sorted, sizes
+
+
+# rank:ndcg requires integer relevance grades (XGBoost rejects continuous
+# labels for its NDCG-based objective) — quantizing the 5 distinct label
+# values already in use (0.0/0.2/0.5/0.8/1.0 for none/view/click/cart/
+# purchase) to integer grades 0-4 preserves the exact same relative
+# ordering, so nothing about the labeling *scheme* changes, only its
+# representation for this one training call.
+LABEL_TO_GRADE = {0.0: 0, 0.2: 1, 0.5: 2, 0.8: 3, 1.0: 4}
+
+
+def to_integer_relevance(y):
+    return np.array([LABEL_TO_GRADE[round(float(v), 1)] for v in y], dtype=np.int32)
+
+
+def train_pairwise_ranker(X_train, y_train, groups_train, seed):
+    """The model actually exported and served — XGBoost with rank:ndcg
+    (LambdaMART: pairwise gradients weighted by the |ΔNDCG| swapping each
+    pair would cause), matching Airbnb's Applying Deep Learning to Airbnb
+    Search (KDD 2019, arXiv:1810.09591) rather than pointwise regression."""
+    X_sorted, y_sorted, _, group_sizes = sort_by_group(X_train, y_train, groups_train)
+    model = xgb.XGBRanker(
+        objective="rank:ndcg",
+        n_estimators=100,
+        max_depth=4,
+        learning_rate=0.1,
+        random_state=seed,
+    )
+    model.fit(X_sorted, to_integer_relevance(y_sorted), group=group_sizes)
+    return model
+
+
+def train_pointwise_mlp(X_train, y_train, seed):
+    """The OLD model this script used to train and export, kept here only
+    as an honest comparison baseline against the new pairwise objective —
+    no longer exported or served."""
+    from sklearn.neural_network import MLPRegressor
+    model = MLPRegressor(hidden_layer_sizes=(16, 8), activation="relu", max_iter=500, random_state=seed)
+    model.fit(X_train, y_train)
+    return model
+
+
+def train_linear_baseline(X_train, y_train, seed):
+    """The missing baseline: a linear combination of all 6 features, not
+    just any ONE feature alone. Beating every single-feature baseline (as
+    both models above already do) is a low bar; beating this is the real
+    test of whether nonlinearity/tree-splits are earning their complexity."""
+    model = LogisticRegression(max_iter=1000, random_state=seed)
+    model.fit(X_train, (y_train > 0).astype(int))
+    return model
+
+
 def rename_onnx_output(onnx_model, new_name):
     old_name = onnx_model.graph.output[0].name
     onnx_model.graph.output[0].name = new_name
@@ -232,23 +323,34 @@ def rename_onnx_output(onnx_model, new_name):
                 node.output[i] = new_name
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--seed", type=int, default=42)
-    args = parser.parse_args()
+def export_xgb_ranker_to_onnx(model):
+    """onnxmltools has no direct XGBRanker converter (only XGBClassifier/
+    XGBRegressor/XGBRFClassifier/XGBRFRegressor are registered) — but a
+    ranker's underlying tree ensemble predicts identically to a regressor at
+    inference time (sum of leaf values); only the *training* gradient
+    differs. WrappedBooster's own num_class-sniffing heuristic misfires for
+    ranking objectives (misdetects num_class=1 and picks the classifier
+    path, producing a "label"/"probabilities" output pair rather than a raw
+    score), so operator_name is forced to XGBRegressor explicitly here —
+    verified this produces bit-identical output to the sklearn API's
+    .predict() before relying on it."""
+    wrapped = WrappedBooster(model.get_booster())
+    wrapped.operator_name = "XGBRegressor"
+    onx = convert_xgboost(wrapped, initial_types=[("features", MTFloatTensorType([None, 6]))])
+    rename_onnx_output(onx, "score")
+    return onx
 
-    rng = random.Random(args.seed)
-    np.random.seed(args.seed)
 
-    print("Loading data...")
-    products = load_products()
-    rows = load_clickstream()
-    aggregates = build_aggregates(rows, products)
+def run_one_seed(rows, products, aggregates, seed, train_pointwise_too=False):
+    """Runs the full pair-construction + train + held-out-eval pipeline for
+    one seed. Returns a dict of pairwise-accuracy numbers. Data loading and
+    aggregation (the expensive, seed-independent parts) are done once by the
+    caller and passed in — only negative sampling and the train/holdout user
+    split vary per seed."""
+    rng = random.Random(seed)
+    np.random.seed(seed)
 
-    print("Building labeled (user, product) pairs with negative sampling...")
     X, y, groups = build_dataset(rows, products, aggregates, rng)
-    print(f"Dataset: {len(X)} pairs ({int((y > 0).sum())} positive, {int((y == 0).sum())} negative), "
-          f"{len(set(groups))} users")
 
     unique_users = sorted(set(groups))
     rng.shuffle(unique_users)
@@ -257,49 +359,84 @@ def main():
     train_mask = np.array([g in train_users for g in groups])
     holdout_mask = np.array([g in holdout_users for g in groups])
 
-    print(f"Held-out split: {len(train_users)} train users, {len(holdout_users)} held-out users")
+    results = {}
 
-    model = MLPRegressor(
-        hidden_layer_sizes=(16, 8),
-        activation="relu",
-        max_iter=500,
-        random_state=args.seed,
-    )
-    model.fit(X[train_mask], y[train_mask])
+    pairwise_model = train_pairwise_ranker(X[train_mask], y[train_mask], groups[train_mask], seed)
+    pred_pairwise = pairwise_model.predict(X[holdout_mask])
+    results["pairwise_xgb_ndcg"] = pairwise_ranking_accuracy(y[holdout_mask], pred_pairwise, groups[holdout_mask])
 
-    pred_holdout = model.predict(X[holdout_mask])
-    neural_acc = pairwise_ranking_accuracy(y[holdout_mask], pred_holdout, groups[holdout_mask])
+    linear_model = train_linear_baseline(X[train_mask], y[train_mask], seed)
+    pred_linear = linear_model.decision_function(X[holdout_mask])
+    results["linear_all_6_features"] = pairwise_ranking_accuracy(y[holdout_mask], pred_linear, groups[holdout_mask])
 
-    # Baselines for honest comparison, same held-out pairs.
-    popularity_only = X[holdout_mask][:, 2]  # feature index 2 = popularity_log
-    popularity_acc = pairwise_ranking_accuracy(y[holdout_mask], popularity_only, groups[holdout_mask])
-    category_only = X[holdout_mask][:, 0]  # feature index 0 = category_match
-    category_acc = pairwise_ranking_accuracy(y[holdout_mask], category_only, groups[holdout_mask])
-    base_score_only = X[holdout_mask][:, 1]  # feature index 1 = base_score_proxy
-    base_score_acc = pairwise_ranking_accuracy(y[holdout_mask], base_score_only, groups[holdout_mask])
-    random_acc = 0.5
+    popularity_only = X[holdout_mask][:, 2]
+    results["popularity_only"] = pairwise_ranking_accuracy(y[holdout_mask], popularity_only, groups[holdout_mask])
+    category_only = X[holdout_mask][:, 0]
+    results["category_only"] = pairwise_ranking_accuracy(y[holdout_mask], category_only, groups[holdout_mask])
+    base_score_only = X[holdout_mask][:, 1]
+    results["base_score_only"] = pairwise_ranking_accuracy(y[holdout_mask], base_score_only, groups[holdout_mask])
+    results["random"] = 0.5
 
-    print(f"\nHeld-out pairwise ranking accuracy (fraction of positive>negative pairs correctly ordered):")
-    print(f"  Neural ranker (MLP, this model):  {neural_acc:.4f}")
-    print(f"  base_score_proxy-only baseline:   {base_score_acc:.4f}")
-    print(f"  Category-match-only baseline:     {category_acc:.4f}")
-    print(f"  Popularity-only baseline:         {popularity_acc:.4f}")
-    print(f"  Random baseline:                  {random_acc:.4f}")
+    if train_pointwise_too:
+        pointwise_model = train_pointwise_mlp(X[train_mask], y[train_mask], seed)
+        pred_pointwise = pointwise_model.predict(X[holdout_mask])
+        results["pointwise_mlp_OLD"] = pairwise_ranking_accuracy(y[holdout_mask], pred_pointwise, groups[holdout_mask])
 
+    results["_pairwise_model"] = pairwise_model
+    results["_sample_row"] = X[:1]
+    return results
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--seed", type=int, default=42, help="Seed for the exported model")
+    parser.add_argument("--ci-seeds", type=int, default=0,
+                         help="If >0, also run this many additional seeds (seed, seed+1, ...) "
+                              "and report a mean+/-std confidence interval across all of them")
+    args = parser.parse_args()
+
+    print("Loading data...")
+    products = load_products()
+    rows = load_clickstream()
+    aggregates = build_aggregates(rows, products)
+
+    seeds = [args.seed] + [args.seed + i for i in range(1, args.ci_seeds)] if args.ci_seeds > 0 else [args.seed]
+    all_results = []
+    primary_result = None
+
+    for seed in seeds:
+        print(f"\n=== seed {seed} ===")
+        result = run_one_seed(rows, products, aggregates, seed, train_pointwise_too=True)
+        all_results.append(result)
+        if seed == args.seed:
+            primary_result = result
+        for key in ["pairwise_xgb_ndcg", "pointwise_mlp_OLD", "linear_all_6_features",
+                    "popularity_only", "category_only", "base_score_only"]:
+            print(f"  {key}: {result[key]:.4f}")
+
+    if len(seeds) > 1:
+        print(f"\n=== summary across {len(seeds)} seeds ({seeds}) ===")
+        for key in ["pairwise_xgb_ndcg", "pointwise_mlp_OLD", "linear_all_6_features",
+                    "popularity_only", "category_only", "base_score_only"]:
+            values = [r[key] for r in all_results]
+            mean = statistics.mean(values)
+            std = statistics.stdev(values) if len(values) > 1 else 0.0
+            print(f"  {key}: {mean:.4f} +/- {std:.4f}  (n={len(values)}, values={[round(v, 4) for v in values]})")
+
+    # Export the primary seed's pairwise model — the one actually served.
     MODEL_OUT.parent.mkdir(parents=True, exist_ok=True)
-    onx = to_onnx(model, X[:1], initial_types=[("features", FloatTensorType([None, 6]))])
-    rename_onnx_output(onx, "score")
+    onx = export_xgb_ranker_to_onnx(primary_result["_pairwise_model"])
     MODEL_OUT.write_bytes(onx.SerializeToString())
-    print(f"\nWrote ONNX model -> {MODEL_OUT}")
+    print(f"\nWrote ONNX model (pairwise XGBoost rank:ndcg, seed {args.seed}) -> {MODEL_OUT}")
 
     # Sanity-check the exported model loads and runs, matching what
     # OnnxRankingModelAdapter (Java) will do at serving time.
     import onnxruntime
     session = onnxruntime.InferenceSession(str(MODEL_OUT))
-    sample = X[:1]
+    sample = primary_result["_sample_row"]
     result = session.run(["score"], {"features": sample})
-    print(f"ONNX sanity check: sklearn predict={model.predict(sample)[0]:.4f}, "
-          f"onnxruntime output={result[0][0][0]:.4f}")
+    sklearn_pred = primary_result["_pairwise_model"].predict(sample)[0]
+    print(f"ONNX sanity check: xgboost predict={sklearn_pred:.4f}, onnxruntime output={result[0][0][0]:.4f}")
 
 
 if __name__ == "__main__":

@@ -316,6 +316,51 @@ state.
   catalog (42,994 products), real clickstream (170,990 events / 5,000
   users), real `bge-small-en-v1.5` ONNX weights (128MB, fp32).
 
+## M7 — staff-engineer review, industry research, and P0 fixes (DONE)
+
+A deliberately hard-nosed critical review (persona: Pinterest staff search/
+ML engineer) was requested and run against this codebase, followed by
+research into real, cited techniques from Pinterest/Netflix/Airbnb/Spotify/
+Etsy/LinkedIn/DoorDash/Uber/Amazon engineering blogs to address the
+findings. Both were synthesized into **[TODO.md](../TODO.md)** — read that
+file for the full, cited fix list (P0/P1/P2). All 5 P0 items (things that
+were mislabeled or methodologically broken, not just simple) are now fixed:
+
+1. Real Thompson Sampling bandit (was: random position shuffle with no
+   arms, calling itself "epsilon-greedy").
+2. Real adjusted-cosine item-item CF (was: raw co-occurrence counting with
+   no popularity normalization).
+3. Neural ranker retrained with a genuinely pairwise objective (was:
+   pointwise regression scored by a pairwise metric) — honest finding: a
+   plain linear baseline still beats both the new and old models on this
+   feature set; kept the pairwise model in service anyway since matching
+   the eval objective was the actual point.
+4. **Independent offline eval against WANDS' real human judgments, plus a
+   point-in-time-correctness fix** — this is the important one.
+5. Java/Python feature-parity golden-vector test (already caught one real
+   float-precision issue during its own construction).
+
+**The eval fix overturned the project's own previous headline result.**
+The original "Collaborative Filtering is the best strategy" conclusion in
+an earlier `RESULTS.md` doesn't hold up — once the point-in-time leak is
+fixed, Neural Ranking's old score (0.5692 nDCG@5) collapses to 0.3312, and
+CF's apparent win shrinks to a statistical wash against baseline (0.5013 vs
+0.5048). Against the independent WANDS-judgment ground truth, no strategy
+shows a clear win over baseline. **If you're citing this project's results
+anywhere, cite current `RESULTS.md`, not any earlier version or anything
+said about it before this milestone.**
+
+Execution note for future similar work: all 4 fixes were built as parallel
+forks with disjoint file ownership (verified no two forks needed to edit
+the same file's logic, only occasional one-line cross-fork compatibility
+fixes when a shared call site like `RecommenderConfig`'s strategy wiring
+needed to track another fork's constructor signature change) — this
+pattern worked cleanly and is worth reusing for P1.
+
+One open loose end from P0: the IPS/counterfactual estimator described in
+TODO.md item #4 was explicitly skipped (not attempted-and-hidden) rather
+than risk shipping a subtly-wrong estimator under time pressure.
+
 ## Known simplifications / deliberate scope cuts (be upfront about these, don't silently "fix")
 
 - Proto stubs are generated independently in all three consuming modules

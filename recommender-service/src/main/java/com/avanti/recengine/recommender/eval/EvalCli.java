@@ -1,6 +1,5 @@
 package com.avanti.recengine.recommender.eval;
 
-import com.avanti.recengine.recommender.adapter.out.clickstream.CsvClickstreamRepositoryAdapter;
 import com.avanti.recengine.recommender.adapter.out.onnx.OnnxRankingModelAdapter;
 import com.avanti.recengine.recommender.domain.RecommendationContext;
 import com.avanti.recengine.recommender.domain.RecommendationStrategy;
@@ -11,8 +10,6 @@ import com.avanti.recengine.recommender.domain.strategy.CollaborativeFilteringSt
 import com.avanti.recengine.recommender.domain.strategy.NeuralRankingStrategy;
 import com.avanti.recengine.recommender.domain.strategy.PassthroughStrategy;
 import com.avanti.recengine.recommender.domain.strategy.PopularityBoostStrategy;
-import com.avanti.recengine.recommender.port.out.ClickstreamRepositoryPort;
-import com.avanti.recengine.recommender.port.out.RankingModelPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
@@ -22,6 +19,7 @@ import picocli.CommandLine.Option;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -36,13 +34,41 @@ import java.util.stream.Collectors;
  * nDCG@5/MRR/Recall@5/Precision@5, writing a fresh {@code RESULTS.md} each
  * run rather than patching individual rows.
  *
- * <p><b>Ground truth</b>: unlike {@code search-eval} (explicit WANDS
- * relevance judgments), there's no explicit "this product is relevant to
- * this query" label for recommendations — so each clickstream <i>session</i>
- * is treated as an eval unit: the products shown (view events, in position
- * order) are the candidates, and the strongest observed event per product
- * (view=0, click=1, cart=2, purchase=3) is its implicit relevance grade.
- * See {@link EvalSessionLoader}.
+ * <p><b>Two independent ground truths, reported separately</b> (this is the
+ * important part — read this before trusting either table alone):
+ * <ul>
+ *   <li><b>Implicit clickstream eval</b>: each session's strongest observed
+ *       event per product (view=0, click=1, cart=2, purchase=3). This is
+ *       <b>circular</b> — the synthetic clickstream generator's session
+ *       composition and click/cart/purchase probabilities are themselves a
+ *       probabilistic function of the same WANDS {@code label.csv} grade
+ *       used to construct the session's candidate order in the first place
+ *       (see {@code WANDS/scripts/generate_clickstream.py}). A strategy
+ *       scoring well here is partly just recovering the synthetic
+ *       generator's own parameters, not demonstrating real recommendation
+ *       quality.</li>
+ *   <li><b>Independent WANDS relevance eval</b>: the same sessions' same
+ *       candidates, scored instead against Wayfair's original human
+ *       annotation ({@code label.csv}, via {@link WandsLabelLoader}) for
+ *       that session's query — entirely independent of the clickstream
+ *       generator's click-probability model. This is the eval to trust for
+ *       "is this strategy actually surfacing relevant products," at the
+ *       cost of not being able to credit personalization signal at all
+ *       (WANDS' judgments are query-level, not user-level — a strategy that
+ *       improves personalization without changing which products are
+ *       objectively relevant to the query won't show a difference here).</li>
+ * </ul>
+ * Both tables are computed from the exact same reranked list per
+ * (strategy, session) pair — the strategies are only run once per session;
+ * only which grade map scores the result differs.
+ *
+ * <p><b>Point-in-time correctness</b>: strategy features (popularity,
+ * co-occurrence, user profile) are computed by {@link TemporalClickstreamIndex},
+ * which replays sessions in timestamp order and evaluates each held-out
+ * session against only the aggregate state accumulated from events strictly
+ * before that session — fixing a temporal leak the previous full-history-at-once
+ * approach had (a held-out session's features could previously include
+ * events from *after* that session). See that class's Javadoc.
  *
  * <p><b>Held-out split</b>: a seeded 80/20 split by user id (same
  * philosophy as {@code training/train_neural_ranker.py}'s split, though a
@@ -51,21 +77,22 @@ import java.util.stream.Collectors;
  * Applied uniformly to all 5 strategies for a fair comparison, even though
  * only {@code NeuralRankingStrategy} has anything that could leak from
  * training in the ML sense — {@code PopularityBoostStrategy} and
- * {@code CollaborativeFilteringStrategy}'s aggregates are still computed
- * from the full clickstream (all users, held-out included), which is not a
- * leak: they're online-style running statistics, not a fitted model.
+ * {@code CollaborativeFilteringStrategy}'s aggregates are online-style
+ * running statistics, not a fitted model, so a held-out user's own past
+ * actions legitimately informing later aggregates (their own or others') is
+ * not a leak in that sense — only the temporal-ordering leak above is.
  *
  * <p><b>A known, honest limitation</b>: {@code PopularityBoostStrategy} and
  * {@code CollaborativeFilteringStrategy} can inject products absent from a
  * session's original candidates — this eval has no way to know whether a
  * user would have engaged with an injected product they were never shown,
- * so injected products always score as irrelevant (grade 0) here. This
- * under-scores exactly the "serendipitous discovery" behavior those two
- * strategies are designed to provide — a standard, acknowledged gap between
- * offline click-log evaluation and real online/interactive evaluation (see
- * arXiv:2509.06002's discussion of this exact tension). Take the injecting
- * strategies' numbers here as a lower bound on their real value, not the
- * full picture.
+ * so injected products always score as irrelevant (grade 0) in both tables
+ * here. This under-scores exactly the "serendipitous discovery" behavior
+ * those two strategies are designed to provide — a standard, acknowledged
+ * gap between offline click-log evaluation and real online/interactive
+ * evaluation (see arXiv:2509.06002's discussion of this exact tension).
+ * Take the injecting strategies' numbers here as a lower bound on their
+ * real value, not the full picture.
  */
 @Command(name = "recommender-eval", mixinStandardHelpOptions = true,
         description = "Evaluates all recommendation strategies against held-out clickstream sessions.")
@@ -95,57 +122,95 @@ public class EvalCli implements Callable<Integer> {
     public Integer call() throws Exception {
         Path clickstreamCsv = dataDir.resolve("clickstream.csv");
         Path productCsv = dataDir.resolve("product.csv");
+        Path labelCsv = dataDir.resolve("label.csv");
         Path neuralModelPath = modelsDir.resolve("neural-ranker/model.onnx");
 
-        List<EvalSession> allSessions = EvalSessionLoader.load(clickstreamCsv, productCsv);
-        List<EvalSession> heldOut = restrictToHeldOutUsers(allSessions);
-        log.info("Loaded {} sessions total, {} held out for eval ({} users)", allSessions.size(), heldOut.size(),
-                heldOut.stream().map(EvalSession::userId).distinct().count());
+        List<EvalSession> allSessions = EvalSessionLoader.load(clickstreamCsv, productCsv, labelCsv);
+        Map<String, EvalSession> sessionsById = allSessions.stream()
+                .collect(Collectors.toMap(EvalSession::sessionId, s -> s));
 
-        List<StrategySummary> summaries = new ArrayList<>();
+        var heldOutUsers = restrictToHeldOutUsers(allSessions);
+        log.info("Loaded {} sessions total; {} users held out for eval", allSessions.size(), heldOutUsers.size());
+
+        TemporalClickstreamIndex index = TemporalClickstreamIndex.load(clickstreamCsv, productCsv);
+
+        Map<Strategy, List<QueryMetrics>> clickstreamMetrics = new LinkedHashMap<>();
+        Map<Strategy, List<QueryMetrics>> independentMetrics = new LinkedHashMap<>();
+        Map<Strategy, List<Long>> latenciesMs = new LinkedHashMap<>();
+        for (Strategy type : Strategy.values()) {
+            clickstreamMetrics.put(type, new ArrayList<>());
+            independentMetrics.put(type, new ArrayList<>());
+            latenciesMs.put(type, new ArrayList<>());
+        }
+
         try (OnnxRankingModelAdapter rankingModel = new OnnxRankingModelAdapter(neuralModelPath)) {
-            ClickstreamRepositoryPort clickstream = new CsvClickstreamRepositoryAdapter(clickstreamCsv, productCsv);
-
             Map<Strategy, RecommendationStrategy> strategies = Map.of(
                     Strategy.NONE, new PassthroughStrategy(),
-                    Strategy.POPULARITY, new PopularityBoostStrategy(clickstream),
-                    Strategy.COLLABORATIVE, new CollaborativeFilteringStrategy(clickstream),
-                    Strategy.BANDIT, new BanditExploreStrategy(new Random(SEED)),
-                    Strategy.NEURAL, new NeuralRankingStrategy(clickstream, rankingModel)
+                    Strategy.POPULARITY, new PopularityBoostStrategy(index),
+                    Strategy.COLLABORATIVE, new CollaborativeFilteringStrategy(index),
+                    Strategy.BANDIT, new BanditExploreStrategy(index, new Random(SEED)),
+                    Strategy.NEURAL, new NeuralRankingStrategy(index, rankingModel)
             );
 
-            for (Strategy type : Strategy.values()) {
-                summaries.add(evaluate(type, strategies.get(type), heldOut));
+            // Single time-ordered replay, shared by every strategy: for each
+            // session, evaluate the held-out ones against the index's
+            // *current* (pre-advance) state, then advance — this is what
+            // makes the point-in-time correctness real rather than cosmetic.
+            for (String sessionId : index.sessionIdsInTimeOrder()) {
+                EvalSession session = sessionsById.get(sessionId);
+                if (session != null && heldOutUsers.contains(session.userId())) {
+                    for (Strategy type : Strategy.values()) {
+                        RecommendationStrategy strategy = strategies.get(type);
+                        RecommendationContext context = new RecommendationContext("", session.userId(), type);
+
+                        long start = System.nanoTime();
+                        List<ScoredProduct> reranked = strategy.apply(context, session.baseCandidates());
+                        latenciesMs.get(type).add((System.nanoTime() - start) / 1_000_000);
+
+                        List<String> rankedIds = reranked.stream().map(ScoredProduct::productId).toList();
+                        clickstreamMetrics.get(type).add(toMetrics(session.sessionId(), rankedIds, session.relevanceGrades()));
+                        independentMetrics.get(type).add(toMetrics(session.sessionId(), rankedIds, session.independentRelevanceGrades()));
+                    }
+                }
+                index.advance(sessionId);
             }
         }
 
-        writeResultsMarkdown(summaries, heldOut.size());
+        int evaluatedSessions = clickstreamMetrics.get(Strategy.NONE).size();
+        List<StrategySummary> clickstreamSummaries = summarize(clickstreamMetrics, latenciesMs);
+        List<StrategySummary> independentSummaries = summarize(independentMetrics, latenciesMs);
+
+        writeResultsMarkdown(clickstreamSummaries, independentSummaries, evaluatedSessions);
         return 0;
     }
 
-    private StrategySummary evaluate(Strategy type, RecommendationStrategy strategy, List<EvalSession> sessions) {
-        log.info("Evaluating strategy: {}", strategy.name());
-        List<QueryMetrics> perSession = new ArrayList<>(sessions.size());
-        List<Long> latenciesMs = new ArrayList<>();
-
-        for (EvalSession session : sessions) {
-            RecommendationContext context = new RecommendationContext("", session.userId(), type);
-            long start = System.nanoTime();
-            List<ScoredProduct> reranked = strategy.apply(context, session.baseCandidates());
-            latenciesMs.add((System.nanoTime() - start) / 1_000_000);
-
-            List<String> rankedIds = reranked.stream().map(ScoredProduct::productId).toList();
-            Map<String, Integer> grades = session.relevanceGrades();
-            perSession.add(new QueryMetrics(
-                    session.sessionId(),
-                    MetricsCalculator.ndcgAtK(rankedIds, grades, K),
-                    MetricsCalculator.reciprocalRank(rankedIds, grades),
-                    MetricsCalculator.recallAtK(rankedIds, grades, K),
-                    MetricsCalculator.precisionAtK(rankedIds, grades, K)
-            ));
+    private List<StrategySummary> summarize(Map<Strategy, List<QueryMetrics>> metricsByStrategy, Map<Strategy, List<Long>> latenciesMs) {
+        List<StrategySummary> summaries = new ArrayList<>();
+        for (Strategy type : Strategy.values()) {
+            String name = strategyDisplayName(type);
+            summaries.add(StrategySummary.aggregate(name, metricsByStrategy.get(type), latenciesMs.get(type)));
         }
+        return summaries;
+    }
 
-        return StrategySummary.aggregate(strategy.name(), perSession, latenciesMs);
+    private static String strategyDisplayName(Strategy type) {
+        return switch (type) {
+            case NONE -> "None";
+            case POPULARITY -> "Popularity";
+            case COLLABORATIVE -> "Collaborative Filtering";
+            case BANDIT -> "Bandit Exploration";
+            case NEURAL -> "Neural Ranking";
+        };
+    }
+
+    private QueryMetrics toMetrics(String sessionId, List<String> rankedIds, Map<String, Integer> grades) {
+        return new QueryMetrics(
+                sessionId,
+                MetricsCalculator.ndcgAtK(rankedIds, grades, K),
+                MetricsCalculator.reciprocalRank(rankedIds, grades),
+                MetricsCalculator.recallAtK(rankedIds, grades, K),
+                MetricsCalculator.precisionAtK(rankedIds, grades, K)
+        );
     }
 
     /**
@@ -153,22 +218,78 @@ public class EvalCli implements Callable<Integer> {
      * identical to) {@code train_neural_ranker.py}'s own Python-side split;
      * see class Javadoc.
      */
-    private List<EvalSession> restrictToHeldOutUsers(List<EvalSession> sessions) {
+    private java.util.Set<String> restrictToHeldOutUsers(List<EvalSession> sessions) {
         List<String> users = sessions.stream().map(EvalSession::userId).distinct().sorted().collect(Collectors.toCollection(ArrayList::new));
         java.util.Collections.shuffle(users, new Random(SEED));
         int holdOutCount = (int) Math.round(users.size() * HOLD_OUT_FRACTION);
-        var holdOutUsers = new java.util.HashSet<>(users.subList(0, holdOutCount));
-        return sessions.stream().filter(s -> holdOutUsers.contains(s.userId())).toList();
+        return new java.util.HashSet<>(users.subList(0, holdOutCount));
     }
 
-    private void writeResultsMarkdown(List<StrategySummary> summaries, int sessionCount) throws IOException {
+    private void writeResultsMarkdown(List<StrategySummary> clickstreamSummaries, List<StrategySummary> independentSummaries, int sessionCount) throws IOException {
         StringBuilder sb = new StringBuilder();
         sb.append("# Recommender Evaluation Results\n\n");
         sb.append("Offline evaluation of each recommendation strategy against ").append(sessionCount)
-                .append(" held-out clickstream sessions (20% of users, seed 42) — implicit relevance\n");
-        sb.append("grades derived from observed event severity per product per session ")
-                .append("(view=0, click=1, cart=2, purchase=3).\n");
+                .append(" held-out clickstream sessions (20% of users, seed 42), scored against **two independent ");
+        sb.append("ground truths** — read both tables' intro paragraphs before trusting either alone. Strategy ");
+        sb.append("features (popularity, co-occurrence) are point-in-time-correct: computed by replaying sessions in ");
+        sb.append("timestamp order, so a held-out session's features never include events from after that session. ");
         sb.append("Regenerate with `./scripts/run-recommender-eval.sh`.\n\n");
+
+        sb.append("## Implicit clickstream eval\n\n");
+        sb.append("Ground truth: each session's strongest observed event per product ");
+        sb.append("(view=0, click=1, cart=2, purchase=3). **Circular** — the synthetic clickstream generator's ");
+        sb.append("session composition and click/cart/purchase probabilities are themselves a probabilistic function ");
+        sb.append("of the same WANDS `label.csv` grade used to construct the session's candidate order in the first ");
+        sb.append("place (see `WANDS/scripts/generate_clickstream.py`). A strategy scoring well here is partly just ");
+        sb.append("recovering the synthetic generator's own parameters, not demonstrating real recommendation ");
+        sb.append("quality — compare against the independent table below before drawing conclusions.\n\n");
+        appendTable(sb, clickstreamSummaries);
+
+        sb.append("\n## Independent WANDS relevance eval\n\n");
+        sb.append("Ground truth: Wayfair's original human relevance annotation (`label.csv`: Exact=2/Partial=1/");
+        sb.append("Irrelevant=0) for each session's query — entirely independent of the clickstream generator's ");
+        sb.append("click-probability model, even though the candidate *ordering* was influenced by it. This is the ");
+        sb.append("table to trust for \"is this strategy actually surfacing relevant products,\" at the cost of not ");
+        sb.append("crediting personalization at all: WANDS' judgments are query-level, not user-level, so a strategy ");
+        sb.append("that improves personalization without changing which products are objectively relevant to the ");
+        sb.append("query won't show a difference here.\n\n");
+        appendTable(sb, independentSummaries);
+
+        sb.append("\n_Independent-eval Recall@5 is tiny (~0.06) compared to the clickstream eval's Recall@5 (~0.6) ");
+        sb.append("— not a bug, a scale mismatch: Recall's denominator is \"all relevant items,\" and under WANDS' ");
+        sb.append("judgments that's every Exact/Partial product for the query (often 100+), while under the ");
+        sb.append("clickstream eval it's only the 8-15 products the synthetic generator ever showed in that session. ");
+        sb.append("Similarly, independent-eval Precision@5 is near-ceiling (~0.99) for nearly every strategy ");
+        sb.append("uniformly — expected, since the synthetic generator only ever samples session candidates from ");
+        sb.append("WANDS-judged (mostly Exact/Partial) products in the first place, so almost everything shown is ");
+        sb.append("already relevant by WANDS' standard regardless of ranking. nDCG@5/MRR (rank-order-sensitive, not ");
+        sb.append("just presence) are the metrics actually worth comparing between strategies in this table._\n");
+        sb.append("\n_Recall@5 is near-ceiling by construction for sessions whose candidate pool is close to size 5 ");
+        sb.append("(the synthetic clickstream generator uses page sizes 8-15) — nDCG@5 and Precision@5 are the more ");
+        sb.append("discriminative metrics here since they depend on rank order within the top 5, not just presence ");
+        sb.append("in an already-small, mostly-fully-retrieved pool._\n");
+        sb.append("\n_`Popularity` and `Collaborative Filtering` can inject products absent from a session's original ");
+        sb.append("candidates; neither eval has a signal on whether a user would have engaged with a product they ");
+        sb.append("were never shown, so injected products always score as irrelevant in both tables — their ");
+        sb.append("real-world value from serendipitous discovery is not captured by these numbers. See EvalCli's ");
+        sb.append("class Javadoc._\n");
+        sb.append("\n_`Bandit Exploration` scoring below `None` (the unmodified baseline) is expected, not a bug — ");
+        sb.append("it deliberately trades ranking quality for Thompson-Sampling exploration over category arms ");
+        sb.append("warm-started from real historical engagement (Etsy's OPAR pattern, Spotify's context-conditioned ");
+        sb.append("calibrated bandits — see BanditExploreStrategy's class Javadoc for both citations), the standard ");
+        sb.append("explore/exploit tradeoff. Neither offline eval can credit exploration's real purpose — surfacing ");
+        sb.append("under-exposed products over time — the same kind of offline/online eval gap noted above for the ");
+        sb.append("injecting strategies. Priors are fixed at construction from historical data, not updated from ");
+        sb.append("live reward — this project has no live traffic loop to update from; see the strategy's Javadoc._\n");
+        sb.append("\n_All p95 latencies round to 0ms — every strategy here is in-memory arithmetic over a small ");
+        sb.append("candidate list (no ONNX/gRPC/disk I/O in the hot path even for `Neural Ranking`'s forward pass), ");
+        sb.append("genuinely sub-millisecond rather than an unmeasured placeholder._\n");
+
+        java.nio.file.Files.writeString(resultsMdPath, sb.toString());
+        log.info("Wrote {}", resultsMdPath);
+    }
+
+    private void appendTable(StringBuilder sb, List<StrategySummary> summaries) {
         sb.append("| Strategy | nDCG@5 | MRR | Recall@5 | Precision@5 | p95 latency (ms) |\n");
         sb.append("|---|---|---|---|---|---|\n");
         for (StrategySummary s : summaries) {
@@ -180,26 +301,6 @@ public class EvalCli implements Callable<Integer> {
                     .append(" | ").append(s.p95LatencyMs())
                     .append(" |\n");
         }
-        sb.append("\n_Recall@5 is near-ceiling by construction for sessions whose candidate pool is close to size 5 ");
-        sb.append("(the synthetic clickstream generator uses page sizes 8-15) — nDCG@5 and Precision@5 are the more ");
-        sb.append("discriminative metrics here since they depend on rank order within the top 5, not just presence ");
-        sb.append("in an already-small, mostly-fully-retrieved pool._\n");
-        sb.append("\n_`Popularity` and `Collaborative Filtering` can inject products absent from a session's original ");
-        sb.append("candidates; this offline eval has no signal on whether a user would have engaged with a product ");
-        sb.append("they were never shown, so injected products always score as irrelevant here — their real-world ");
-        sb.append("value from serendipitous discovery is not captured by these numbers. See EvalCli's class Javadoc._\n");
-        sb.append("\n_`Bandit Exploration` scoring below `None` (the unmodified baseline) is expected, not a bug — ");
-        sb.append("it deliberately trades ranking quality for exploration (occasionally promoting a lower-ranked ");
-        sb.append("candidate), the standard explore/exploit tradeoff per arXiv:2207.00109 and arXiv:2106.10898. This ");
-        sb.append("offline eval only measures exploitation quality on already-observed sessions, so it structurally ");
-        sb.append("can't credit exploration's real purpose — surfacing under-exposed products over time — the same ");
-        sb.append("kind of offline/online eval gap noted above for the injecting strategies._\n");
-        sb.append("\n_All p95 latencies round to 0ms — every strategy here is in-memory arithmetic over a small ");
-        sb.append("candidate list (no ONNX/gRPC/disk I/O in the hot path even for `Neural Ranking`'s forward pass), ");
-        sb.append("genuinely sub-millisecond rather than an unmeasured placeholder._\n");
-
-        java.nio.file.Files.writeString(resultsMdPath, sb.toString());
-        log.info("Wrote {}", resultsMdPath);
     }
 
     private static String format(double value) {

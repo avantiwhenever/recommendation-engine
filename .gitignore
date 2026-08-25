@@ -13,6 +13,10 @@ models/*/
 web/node_modules/
 web/dist/
 
+# Python
+training/__pycache__/
+*.pyc
+
 # IDE
 .idea/
 *.iml
