@@ -132,6 +132,20 @@ most such projects skip:
    no cloud account, no API key, and no cost, while staying a config change
    away from a real hosted Pinecone index.
 
+**The honest tradeoff (TODO.md item #13)**: hexagonal-architecture-plus-
+gRPC-only-plus-four-services is more service boundary than a single-node,
+43K-product, no-real-traffic system actually needs. A staff-engineer-level
+review of this repo named that plainly, and it's worth repeating here rather
+than only in `TODO.md`: this is here to demonstrate hexagonal/gRPC/GraphQL-
+gateway competency on purpose, not because 43K products need three JVMs and
+a protobuf contract between them. A system this size, built to actually
+ship, would likely be one service with clean internal module boundaries —
+the *pattern* (ports & adapters, a tested domain core) is the same either
+way, but the network hops between services aren't earning their keep at
+this scale. Read the rest of this README as "here's how I'd structure the
+boundaries if this had to scale to many teams and services," not as "this
+is the right size for this problem."
+
 ## Key decisions
 
 | Decision | Choice | Why |

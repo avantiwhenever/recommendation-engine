@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Recommendation Engine — Strategy Comparison (Snapshot Demo)</title>
-<meta name="description" content="Real captured results comparing 5 recommendation strategies (popularity, collaborative filtering, bandit exploration, and an ONNX neural ranker) over the WANDS furniture catalog." />
+<meta name="description" content="Real captured results comparing 6 recommendation strategies (popularity, collaborative filtering, bandit exploration, an ONNX neural ranker, and MMR diversity) over the WANDS furniture catalog." />
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -17,7 +17,7 @@
 <header>
   <div class="title-row">
     <h1>Recommendation Engine</h1>
-    <span class="subtitle">— 5 strategies, same query, same catalog, side by side</span>
+    <span class="subtitle">— 6 strategies, same query, same catalog, side by side</span>
   </div>
   <div class="controls">
     <label for="query-select">Query</label>
@@ -33,9 +33,10 @@
   <p class="hover-note">Hover any product card for its full details — category, rating, score, and why it was shown.</p>
 
   <section class="glance" id="five-strategies-and-how-they-differ">
-    <h2>Five strategies, and how they differ</h2>
+    <h2>Six strategies, and how they differ</h2>
     <p class="glance-sub">
-      Every strategy receives the exact same baseline candidates from <code>search-service</code> and either
+      Every strategy receives the exact same baseline candidates — a widened pool from <code>search-service</code>
+      (hybrid dense + lexical retrieval), narrowed by a hard eligibility filter before any strategy runs — and either
       leaves them alone, re-ranks them, or adds/removes products — never a from-scratch retrieval of its own.
       Numbers below are from RESULTS.md's independent WANDS relevance eval — scored against WANDS's own human
       relevance grades, which no strategy is trained or tuned against, rather than the clickstream-derived
@@ -83,9 +84,9 @@
 </div>
 
 <footer>
-  Five recommendation strategies, same query, same catalog: None (baseline) → Popularity → Collaborative
-  Filtering → Bandit Exploration → Neural Ranking (ONNX). Architecture, offline evaluation methodology, and
-  the live demo app are all in the
+  Six recommendation strategies, same query, same catalog: None (baseline) → Popularity → Collaborative
+  Filtering → Bandit Exploration → Neural Ranking (ONNX) → Diverse Popularity (MMR). Architecture, offline
+  evaluation methodology, and the live demo app are all in the
   <a href="https://github.com/avantiwhenever/recommendation-engine">GitHub repo</a>.
 </footer>
 

@@ -49,6 +49,14 @@ class PineconeVectorStoreSmokeTest {
             assertThat(matches.get(0).id()).isEqualTo("p1");
             assertThat(matches.get(0).metadata()).containsEntry("name", "chair");
             assertThat(matches.get(0).metadata().get("rating")).isEqualTo(4.5);
+
+            // queryById: no client-side vector needed, Pinecone looks up
+            // p1's stored vector server-side. p1's own nearest neighbor is
+            // itself (score 1.0), then p3 (0.9,0.1,0,0 — close to p1), then
+            // p2 (orthogonal, furthest).
+            List<ScoredMatch> byId = store.queryById("p1", 3);
+            assertThat(byId).hasSize(3);
+            assertThat(byId.stream().map(ScoredMatch::id).toList()).containsExactly("p1", "p3", "p2");
         }
     }
 

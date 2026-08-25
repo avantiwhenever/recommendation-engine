@@ -5,13 +5,23 @@
       "strategyLabel": "NONE",
       "products": [
         {
+          "productId": "38673",
+          "name": "abdulsamet coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables / Rectangle Coffee Tables",
+          "averageRating": 4.5,
+          "ratingCount": 80,
+          "score": 0.020823510922520824,
+          "source": "search"
+        },
+        {
           "productId": "29365",
           "name": "witter coffee table",
           "productClass": "Coffee & Cocktail Tables",
           "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
           "averageRating": 4.5,
           "ratingCount": 2,
-          "score": 0.8630800843238831,
+          "score": 0.01639344262295082,
           "source": "search"
         },
         {
@@ -21,27 +31,27 @@
           "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
           "averageRating": 4.5,
           "ratingCount": 98,
-          "score": 0.8413490653038025,
+          "score": 0.016129032258064516,
           "source": "search"
         },
         {
-          "productId": "294",
-          "name": "aalst coffee table",
+          "productId": "16877",
+          "name": "mendivil coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables / Square Coffee Tables",
+          "averageRating": 4.5,
+          "ratingCount": 42,
+          "score": 0.016129032258064516,
+          "source": "search"
+        },
+        {
+          "productId": "16878",
+          "name": "sahlberg coffee table",
           "productClass": null,
           "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.8389505743980408,
-          "source": "search"
-        },
-        {
-          "productId": "27282",
-          "name": "sebnem extendable trestle coffee table",
-          "productClass": "Coffee & Cocktail Tables",
-          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.8382299542427063,
+          "averageRating": 4.5,
+          "ratingCount": 82,
+          "score": 0.015625,
           "source": "search"
         },
         {
@@ -51,17 +61,7 @@
           "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
           "averageRating": 4.5,
           "ratingCount": 924,
-          "score": 0.8379101157188416,
-          "source": "search"
-        },
-        {
-          "productId": "8423",
-          "name": "colm 4 legs coffee table with storage",
-          "productClass": "Coffee & Cocktail Tables",
-          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
-          "averageRating": 4.5,
-          "ratingCount": 295,
-          "score": 0.8352439999580383,
+          "score": 0.015384615384615385,
           "source": "search"
         }
       ]
@@ -70,13 +70,33 @@
       "strategyLabel": "POPULARITY",
       "products": [
         {
+          "productId": "38673",
+          "name": "abdulsamet coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables / Rectangle Coffee Tables",
+          "averageRating": 4.5,
+          "ratingCount": 80,
+          "score": 0.6842105263157894,
+          "source": "Popularity"
+        },
+        {
+          "productId": "32796",
+          "name": "kisner coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
+          "averageRating": 1.0,
+          "ratingCount": 1,
+          "score": 0.5985032774041683,
+          "source": "Popularity"
+        },
+        {
           "productId": "29365",
           "name": "witter coffee table",
           "productClass": "Coffee & Cocktail Tables",
           "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
           "averageRating": 4.5,
           "ratingCount": 2,
-          "score": 0.875,
+          "score": 0.42729323132467134,
           "source": "Popularity"
         },
         {
@@ -86,67 +106,27 @@
           "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
           "averageRating": 4.5,
           "ratingCount": 924,
-          "score": 0.4574674740691888,
+          "score": 0.40227698910968873,
           "source": "Popularity"
         },
         {
-          "productId": "39740",
-          "name": "cutts abstract coffee table",
+          "productId": "2648",
+          "name": "marlowe coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Sale / Closeout / Coffee Tables / Rectangle Coffee Tables",
+          "averageRating": 1.0,
+          "ratingCount": 1,
+          "score": 0.3828920289352509,
+          "source": "Popularity"
+        },
+        {
+          "productId": "13955",
+          "name": "erachidia coffee table",
           "productClass": "Coffee & Cocktail Tables",
           "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
-          "averageRating": 4.5,
-          "ratingCount": 98,
-          "score": 0.2315931924661465,
-          "source": "Popularity"
-        },
-        {
-          "productId": "294",
-          "name": "aalst coffee table",
-          "productClass": null,
-          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.1298943067844081,
-          "source": "Popularity"
-        },
-        {
-          "productId": "27282",
-          "name": "sebnem extendable trestle coffee table",
-          "productClass": "Coffee & Cocktail Tables",
-          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.06436151533579436,
-          "source": "Popularity"
-        },
-        {
-          "productId": "8423",
-          "name": "colm 4 legs coffee table with storage",
-          "productClass": "Coffee & Cocktail Tables",
-          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
-          "averageRating": 4.5,
-          "ratingCount": 295,
-          "score": 0.0,
-          "source": "Popularity"
-        },
-        {
-          "productId": "29636",
-          "name": "aurora task chair",
-          "productClass": "Office Chairs",
-          "categoryHierarchy": "Furniture / Office Furniture / Office Chairs",
-          "averageRating": 4.5,
-          "ratingCount": 1168,
-          "score": 0.0,
-          "source": "Popularity"
-        },
-        {
-          "productId": "13712",
-          "name": "jennie solid wood tufted upholstered low profile platform bed",
-          "productClass": "Teen Beds|Beds",
-          "categoryHierarchy": "Furniture / Bedroom Furniture / Beds & Headboards / Beds",
-          "averageRating": 4.5,
-          "ratingCount": 9895,
-          "score": 0.0,
+          "averageRating": 5.0,
+          "ratingCount": 3,
+          "score": 0.3678986866507342,
           "source": "Popularity"
         }
       ]
@@ -155,13 +135,23 @@
       "strategyLabel": "COLLABORATIVE",
       "products": [
         {
+          "productId": "38673",
+          "name": "abdulsamet coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables / Rectangle Coffee Tables",
+          "averageRating": 4.5,
+          "ratingCount": 80,
+          "score": 0.020823510922520824,
+          "source": "Collaborative Filtering"
+        },
+        {
           "productId": "29365",
           "name": "witter coffee table",
           "productClass": "Coffee & Cocktail Tables",
           "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
           "averageRating": 4.5,
           "ratingCount": 2,
-          "score": 0.8630800843238831,
+          "score": 0.01639344262295082,
           "source": "Collaborative Filtering"
         },
         {
@@ -171,27 +161,27 @@
           "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
           "averageRating": 4.5,
           "ratingCount": 98,
-          "score": 0.8413490653038025,
+          "score": 0.016129032258064516,
           "source": "Collaborative Filtering"
         },
         {
-          "productId": "294",
-          "name": "aalst coffee table",
+          "productId": "16877",
+          "name": "mendivil coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables / Square Coffee Tables",
+          "averageRating": 4.5,
+          "ratingCount": 42,
+          "score": 0.016129032258064516,
+          "source": "Collaborative Filtering"
+        },
+        {
+          "productId": "16878",
+          "name": "sahlberg coffee table",
           "productClass": null,
           "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.8389505743980408,
-          "source": "Collaborative Filtering"
-        },
-        {
-          "productId": "27282",
-          "name": "sebnem extendable trestle coffee table",
-          "productClass": "Coffee & Cocktail Tables",
-          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.8382299542427063,
+          "averageRating": 4.5,
+          "ratingCount": 82,
+          "score": 0.015625,
           "source": "Collaborative Filtering"
         },
         {
@@ -201,37 +191,7 @@
           "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
           "averageRating": 4.5,
           "ratingCount": 924,
-          "score": 0.8379101157188416,
-          "source": "Collaborative Filtering"
-        },
-        {
-          "productId": "8423",
-          "name": "colm 4 legs coffee table with storage",
-          "productClass": "Coffee & Cocktail Tables",
-          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
-          "averageRating": 4.5,
-          "ratingCount": 295,
-          "score": 0.8352439999580383,
-          "source": "Collaborative Filtering"
-        },
-        {
-          "productId": "24095",
-          "name": "blue dinosaur jumboz plush floor pillow",
-          "productClass": "Accent Pillows",
-          "categoryHierarchy": "D\u00e9cor & Pillows / Decorative Pillows & Blankets / Throw Pillows / Blue Throw Pillows",
-          "averageRating": 5.0,
-          "ratingCount": 88,
-          "score": 0.0,
-          "source": "Collaborative Filtering"
-        },
-        {
-          "productId": "39496",
-          "name": "dinosaur land area rug",
-          "productClass": "Area Rugs",
-          "categoryHierarchy": "Rugs / Area Rugs / 4' x 6' Area Rugs",
-          "averageRating": 5.0,
-          "ratingCount": 34,
-          "score": 0.0,
+          "score": 0.015384615384615385,
           "source": "Collaborative Filtering"
         }
       ]
@@ -240,13 +200,23 @@
       "strategyLabel": "BANDIT",
       "products": [
         {
+          "productId": "38673",
+          "name": "abdulsamet coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables / Rectangle Coffee Tables",
+          "averageRating": 4.5,
+          "ratingCount": 80,
+          "score": 0.020823510922520824,
+          "source": "Bandit Exploration"
+        },
+        {
           "productId": "29365",
           "name": "witter coffee table",
           "productClass": "Coffee & Cocktail Tables",
           "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
           "averageRating": 4.5,
           "ratingCount": 2,
-          "score": 0.8630800843238831,
+          "score": 0.01639344262295082,
           "source": "Bandit Exploration"
         },
         {
@@ -256,47 +226,37 @@
           "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
           "averageRating": 4.5,
           "ratingCount": 98,
-          "score": 0.8413490653038025,
+          "score": 0.016129032258064516,
           "source": "Bandit Exploration"
         },
         {
-          "productId": "294",
-          "name": "aalst coffee table",
+          "productId": "2648",
+          "name": "marlowe coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Sale / Closeout / Coffee Tables / Rectangle Coffee Tables",
+          "averageRating": 1.0,
+          "ratingCount": 1,
+          "score": 0.014705882352941176,
+          "source": "Bandit Exploration"
+        },
+        {
+          "productId": "16877",
+          "name": "mendivil coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables / Square Coffee Tables",
+          "averageRating": 4.5,
+          "ratingCount": 42,
+          "score": 0.016129032258064516,
+          "source": "Bandit Exploration"
+        },
+        {
+          "productId": "16878",
+          "name": "sahlberg coffee table",
           "productClass": null,
           "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.8389505743980408,
-          "source": "Bandit Exploration"
-        },
-        {
-          "productId": "27282",
-          "name": "sebnem extendable trestle coffee table",
-          "productClass": "Coffee & Cocktail Tables",
-          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.8382299542427063,
-          "source": "Bandit Exploration"
-        },
-        {
-          "productId": "42387",
-          "name": "winnie sled coffee table",
-          "productClass": "Coffee & Cocktail Tables",
-          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
           "averageRating": 4.5,
-          "ratingCount": 924,
-          "score": 0.8379101157188416,
-          "source": "Bandit Exploration"
-        },
-        {
-          "productId": "8423",
-          "name": "colm 4 legs coffee table with storage",
-          "productClass": "Coffee & Cocktail Tables",
-          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
-          "averageRating": 4.5,
-          "ratingCount": 295,
-          "score": 0.8352439999580383,
+          "ratingCount": 82,
+          "score": 0.015625,
           "source": "Bandit Exploration"
         }
       ]
@@ -305,13 +265,53 @@
       "strategyLabel": "NEURAL",
       "products": [
         {
+          "productId": "32796",
+          "name": "kisner coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
+          "averageRating": 1.0,
+          "ratingCount": 1,
+          "score": -1.7060881853103638,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "2648",
+          "name": "marlowe coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Sale / Closeout / Coffee Tables / Rectangle Coffee Tables",
+          "averageRating": 1.0,
+          "ratingCount": 1,
+          "score": -1.8773856163024902,
+          "source": "Neural Ranking"
+        },
+        {
           "productId": "42387",
           "name": "winnie sled coffee table",
           "productClass": "Coffee & Cocktail Tables",
           "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
           "averageRating": 4.5,
           "ratingCount": 924,
-          "score": -1.7333953380584717,
+          "score": -2.0196664333343506,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "13955",
+          "name": "erachidia coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
+          "averageRating": 5.0,
+          "ratingCount": 3,
+          "score": -2.0343236923217773,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "38673",
+          "name": "abdulsamet coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables / Rectangle Coffee Tables",
+          "averageRating": 4.5,
+          "ratingCount": 80,
+          "score": -2.071957588195801,
           "source": "Neural Ranking"
         },
         {
@@ -321,48 +321,73 @@
           "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
           "averageRating": 4.5,
           "ratingCount": 2,
-          "score": -1.7768524885177612,
+          "score": -2.071957588195801,
           "source": "Neural Ranking"
+        }
+      ]
+    },
+    "DIVERSE_POPULARITY": {
+      "strategyLabel": "DIVERSE_POPULARITY",
+      "products": [
+        {
+          "productId": "38673",
+          "name": "abdulsamet coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables / Rectangle Coffee Tables",
+          "averageRating": 4.5,
+          "ratingCount": 80,
+          "score": 0.6842105263157894,
+          "source": "Popularity (diversified)"
         },
         {
-          "productId": "39740",
-          "name": "cutts abstract coffee table",
+          "productId": "2648",
+          "name": "marlowe coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Sale / Closeout / Coffee Tables / Rectangle Coffee Tables",
+          "averageRating": 1.0,
+          "ratingCount": 1,
+          "score": 0.3828920289352509,
+          "source": "Popularity (diversified)"
+        },
+        {
+          "productId": "32796",
+          "name": "kisner coffee table",
           "productClass": "Coffee & Cocktail Tables",
           "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
-          "averageRating": 4.5,
-          "ratingCount": 98,
-          "score": -2.6418023109436035,
-          "source": "Neural Ranking"
+          "averageRating": 1.0,
+          "ratingCount": 1,
+          "score": 0.5985032774041683,
+          "source": "Popularity (diversified)"
         },
         {
-          "productId": "294",
-          "name": "aalst coffee table",
+          "productId": "16878",
+          "name": "sahlberg coffee table",
           "productClass": null,
           "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": -3.0049026012420654,
-          "source": "Neural Ranking"
+          "averageRating": 4.5,
+          "ratingCount": 82,
+          "score": 0.3043179344346267,
+          "source": "Popularity (diversified)"
         },
         {
-          "productId": "27282",
-          "name": "sebnem extendable trestle coffee table",
-          "productClass": "Coffee & Cocktail Tables",
-          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": -3.6089937686920166,
-          "source": "Neural Ranking"
-        },
-        {
-          "productId": "8423",
-          "name": "colm 4 legs coffee table with storage",
+          "productId": "29365",
+          "name": "witter coffee table",
           "productClass": "Coffee & Cocktail Tables",
           "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
           "averageRating": 4.5,
-          "ratingCount": 295,
-          "score": -3.6089937686920166,
-          "source": "Neural Ranking"
+          "ratingCount": 2,
+          "score": 0.42729323132467134,
+          "source": "Popularity (diversified)"
+        },
+        {
+          "productId": "42387",
+          "name": "winnie sled coffee table",
+          "productClass": "Coffee & Cocktail Tables",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Coffee Tables & End Tables / Coffee Tables",
+          "averageRating": 4.5,
+          "ratingCount": 924,
+          "score": 0.40227698910968873,
+          "source": "Popularity (diversified)"
         }
       ]
     }

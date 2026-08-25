@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -54,18 +55,58 @@ class NeuralRankingStrategyTest {
     }
 
     @Test
-    void buildsSixFeaturesInDocumentedOrder() {
+    void buildsSevenFeaturesInDocumentedOrder() {
         FakeClickstreamRepository repo = new FakeClickstreamRepository(List.of());
         repo.withPopularity("p1", Math.E - 1); // log1p(e-1) = 1.0
         NeuralRankingStrategy strategy = new NeuralRankingStrategy(repo, f -> 0.0);
 
         ScoredProduct product = new ScoredProduct("p1", 0.0, "a", "Chairs", "Furniture / Chairs", 5.0, (int) Math.E - 1);
+        // 3-arg overload defaults the new 7th (session-category-overlap) feature to 0 —
+        // exercised separately below with real session data.
         float[] features = strategy.buildFeatures(product, java.util.Optional.of("Furniture"), Set.of());
 
-        assertThat(features).hasSize(6);
+        assertThat(features).hasSize(7);
         assertThat(features[0]).isEqualTo(1.0f); // category match
         assertThat(features[1]).isCloseTo(0.5f, offset(0.001f)); // sigmoid(0) = 0.5
         assertThat(features[2]).isCloseTo(1.0f, offset(0.01f)); // log1p popularity
         assertThat(features[4]).isEqualTo(1.0f); // averageRating/5.0 = 5.0/5.0
+        assertThat(features[6]).isEqualTo(0.0f); // no session signal -> session category overlap is 0
+    }
+
+    @Test
+    void sessionCategoryOverlapFeatureReflectsRecentProductIds() {
+        FakeClickstreamRepository repo = new FakeClickstreamRepository(List.of());
+        repo.withCatalogEntry(new com.avanti.recengine.recommender.domain.CatalogEntry(
+                "recent-1", "lamp", "Lamps", "Home / Lamps", 4.0, 5));
+        repo.withCatalogEntry(new com.avanti.recengine.recommender.domain.CatalogEntry(
+                "recent-2", "chair", "Chairs", "Furniture / Chairs", 4.0, 5));
+        NeuralRankingStrategy strategy = new NeuralRankingStrategy(repo, f -> 0.0);
+
+        ScoredProduct furnitureCandidate = new ScoredProduct("cand", 0.0, "a", "Chairs", "Furniture / Chairs", 4.0, 5);
+        float[] features = strategy.buildFeatures(furnitureCandidate, Optional.empty(), Set.of(),
+                List.of("Furniture", "Home")); // 1 of 2 recent categories match "Furniture"
+
+        assertThat(features).hasSize(7);
+        assertThat(features[6]).isCloseTo(0.5f, offset(0.001f));
+    }
+
+    @Test
+    void applyPassesSessionSignalThroughToSessionCategoryOverlapFeature() {
+        FakeClickstreamRepository repo = new FakeClickstreamRepository(List.of());
+        repo.withCatalogEntry(new com.avanti.recengine.recommender.domain.CatalogEntry(
+                "recent-1", "chair", "Chairs", "Furniture / Chairs", 4.0, 5));
+        // Model just echoes back the session-overlap feature (index 6) as the score.
+        RankingModelPort model = features -> features[6];
+
+        NeuralRankingStrategy strategy = new NeuralRankingStrategy(repo, model);
+        List<ScoredProduct> base = List.of(
+                new ScoredProduct("furniture-item", 0.0, "a", "Chairs", "Furniture / Chairs", 4.0, 10),
+                new ScoredProduct("home-item", 0.0, "b", "Lamps", "Home / Lamps", 4.0, 10)
+        );
+
+        List<ScoredProduct> result = strategy.apply(
+                new RecommendationContext("x", null, Strategy.NEURAL, List.of("recent-1")), base);
+
+        assertThat(result.get(0).productId()).isEqualTo("furniture-item");
     }
 }

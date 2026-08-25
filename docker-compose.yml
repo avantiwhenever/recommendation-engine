@@ -27,11 +27,14 @@ services:
       PINECONE_TLS_ENABLED: "false"
       PINECONE_INDEX: wands-products
       SEARCH_MODELS_EMBEDDING_DIR: /models/bge-small-en-v1.5
+      # The served application builds an in-memory BM25 lexical index from
+      # this file at startup (TODO.md #6's hybrid dense+lexical retrieval),
+      # in addition to the ingestion CLI (run via `docker compose run`)
+      # reading it to embed products into Pinecone — both need this mount.
+      SEARCH_DATA_PRODUCT_CSV: /data/product.csv
       GRPC_PORT: 9090
     volumes:
       - ./models:/models:ro
-      # Only the ingestion CLI (run via `docker compose run`) reads this —
-      # the served application itself never touches the raw CSVs.
       - ./data:/data:ro
     ports:
       - "9090:9090"
@@ -43,14 +46,17 @@ services:
       context: .
       dockerfile: recommender-service/Dockerfile
     environment:
-      # No Pinecone dependency: none of the shipped strategies need
-      # per-candidate vector similarity (NeuralRankingStrategy uses a
-      # category-match proxy instead — see its class Javadoc), so
-      # recommender-service only needs the clickstream + catalog CSVs.
       CLICKSTREAM_DATA_PATH: /data/clickstream.csv
       PRODUCT_CATALOG_PATH: /data/product.csv
       NEURAL_RANKER_MODEL_PATH: /models/neural-ranker/model.onnx
       GRPC_PORT: 9091
+      # Reuses search-service's wands-products index via VectorSimilarityPort
+      # (see recommender-service's application.yml) — same index, no second
+      # embedding pipeline.
+      PINECONE_HOST: http://pinecone-local:5080
+      PINECONE_API_KEY: pclocal
+      PINECONE_TLS_ENABLED: "false"
+      PINECONE_INDEX: wands-products
     volumes:
       - ./data:/data:ro
       - ./models:/models:ro

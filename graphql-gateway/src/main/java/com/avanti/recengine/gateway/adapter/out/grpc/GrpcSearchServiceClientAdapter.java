@@ -25,11 +25,19 @@ public class GrpcSearchServiceClientAdapter implements SearchPort {
 
     @Override
     public List<Product> search(String query, int topK) {
-        SearchRequest request = SearchRequest.newBuilder()
+        return search(query, topK, null, 0.0);
+    }
+
+    @Override
+    public List<Product> search(String query, int topK, String categoryFilter, double minRating) {
+        SearchRequest.Builder builder = SearchRequest.newBuilder()
                 .setQuery(query)
                 .setTopK(topK)
-                .build();
-        SearchResponse response = searchStub.search(request);
+                .setMinRating(minRating);
+        if (categoryFilter != null) {
+            builder.setCategoryFilter(categoryFilter);
+        }
+        SearchResponse response = searchStub.search(builder.build());
         return response.getResultsList().stream().map(GrpcSearchServiceClientAdapter::toDomain).toList();
     }
 

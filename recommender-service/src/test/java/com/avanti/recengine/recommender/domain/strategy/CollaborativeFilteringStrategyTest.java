@@ -17,16 +17,69 @@ import static org.assertj.core.api.Assertions.tuple;
 class CollaborativeFilteringStrategyTest {
 
     @Test
-    void fallsBackToBaseRankingForUnknownUser() {
+    void coldStartUserWithNoHistoryAndNoSessionSignalFallsBackToPopularityBlend() {
+        // Genuine cold start (TODO.md item #10): no all-time profile AND no
+        // session signal. Policy is a named, explicit fallback to
+        // PopularityBoostStrategy, not a silent unmodified passthrough —
+        // assert the result matches calling that strategy directly, not
+        // just "the result differs from base" (which a bug could also do).
         FakeClickstreamRepository repo = new FakeClickstreamRepository(List.of());
         List<ScoredProduct> base = List.of(
-                new ScoredProduct("1", 5.0, "a", "Chairs", "Furniture / Chairs", 4.0, 10)
+                new ScoredProduct("1", 5.0, "a", "Chairs", "Furniture / Chairs", 4.0, 10),
+                new ScoredProduct("2", 1.0, "b", "Lamps", "Home / Lamps", 4.0, 10)
         );
+        RecommendationContext context = new RecommendationContext("chair", "unknown-user", Strategy.COLLABORATIVE);
 
-        List<ScoredProduct> result = new CollaborativeFilteringStrategy(repo)
-                .apply(new RecommendationContext("chair", "unknown-user", Strategy.COLLABORATIVE), base);
+        List<ScoredProduct> result = new CollaborativeFilteringStrategy(repo).apply(context, base);
+        List<ScoredProduct> expectedFallback = new PopularityBoostStrategy(repo).apply(context, base);
 
-        assertThat(result).isEqualTo(base);
+        assertThat(result).isEqualTo(expectedFallback);
+        assertThat(result).isNotEqualTo(base); // sanity: the fallback actually did something, not a no-op
+    }
+
+    @Test
+    void sessionSignalAloneWithNoAllTimeHistoryIsNotTreatedAsColdStart() {
+        // A user with live session signal but no persisted all-time
+        // history should NOT hit the cold-start branch — the session
+        // similarity term alone should drive personalization.
+        FakeClickstreamRepository repo = new FakeClickstreamRepository(List.of());
+        repo.withCoOccurrence("high-similarity", "session-seed", 50);
+        repo.withCoOccurrence("low-similarity", "session-seed", 1);
+        List<ScoredProduct> base = List.of(
+                new ScoredProduct("low-similarity", 5.0, "a", "Chairs", "Furniture / Chairs", 4.0, 10),
+                new ScoredProduct("high-similarity", 5.0, "b", "Chairs", "Furniture / Chairs", 4.0, 10)
+        );
+        RecommendationContext context = new RecommendationContext(
+                "chair", "brand-new-user", Strategy.COLLABORATIVE, List.of("session-seed"));
+
+        List<ScoredProduct> result = new CollaborativeFilteringStrategy(repo).apply(context, base);
+
+        assertThat(result).extracting(ScoredProduct::productId)
+                .containsExactly("high-similarity", "low-similarity");
+    }
+
+    @Test
+    void sessionSignalWeighsMoreHeavilyThanAllTimeHistoryForTheSameSimilarity() {
+        // Two users each have the same itemSimilarity(candidate, seed) to a
+        // single seed product — one via context.recentProductIds() (this
+        // session), the other via the all-time ClickstreamRepositoryPort
+        // profile. The resulting boost should be measurably larger for the
+        // session-sourced match (TODO.md item #11's "weighted more
+        // heavily" requirement).
+        FakeClickstreamRepository repo = new FakeClickstreamRepository(List.of());
+        repo.withCoOccurrence("candidate", "seed", 10);
+        List<ScoredProduct> base = List.of(new ScoredProduct("candidate", 0.0, "a", "Chairs", "Furniture / Chairs", 4.0, 10));
+
+        RecommendationContext sessionContext = new RecommendationContext(
+                "chair", "user-a", Strategy.COLLABORATIVE, List.of("seed"));
+        double sessionBoost = new CollaborativeFilteringStrategy(repo).apply(sessionContext, base).get(0).score();
+
+        repo.withProfile(new UserProfile("user-b", Set.of("seed"), Map.of()));
+        RecommendationContext historyContext = new RecommendationContext("chair", "user-b", Strategy.COLLABORATIVE);
+        double historyBoost = new CollaborativeFilteringStrategy(repo).apply(historyContext, base).get(0).score();
+
+        assertThat(sessionBoost).isGreaterThan(historyBoost);
+        assertThat(sessionBoost).isCloseTo(historyBoost * 2.5, org.assertj.core.data.Offset.offset(0.0001));
     }
 
     @Test

@@ -140,7 +140,7 @@ variance).
 
 ---
 
-### 4. ✅ DONE (except IPS) — Offline eval ground truth is circular — add an independent eval path
+### 4. ✅ DONE — Offline eval ground truth is circular — add an independent eval path
 **Files**: `recommender-service/src/main/java/com/avanti/recengine/recommender/eval/EvalCli.java`, `RESULTS.md`
 
 **Result — the most consequential fix in this whole list**: added a second
@@ -160,10 +160,21 @@ truth, no strategy shows a clear win over baseline on the metrics that are
 actually comparable (nDCG@5, MRR) — all five cluster around 0.94–0.97.
 **"Collaborative filtering is the best strategy" does not hold up** — it
 was an artifact of temporal leakage plus circular ground truth. Current
-`RESULTS.md` states this explicitly. The IPS/counterfactual estimator
-(the second half of this item) was deliberately not attempted — explicitly
-skipped rather than risk shipping a subtly-wrong estimator under time
-pressure; still open, see below.
+`RESULTS.md` states this explicitly.
+
+**Update — the IPS/counterfactual estimator (this item's second half) is
+now also done**: `recommender-service/.../eval/IpsEvaluator.java` computes
+an item-level Inverse Propensity Scoring estimate per strategy, using the
+exact, documented cascade click-model constants from
+`avantiwhenever/WANDS`'s `CLICKSTREAM.md` (not estimated) — implementable
+here specifically because, unlike almost any real production system, this
+project's synthetic logging policy is fully known. Reports both a raw and
+a propensity-clipped (floor 1e-3) estimate plus a Hájek/Kish effective-
+sample-size diagnostic, so the honest instability of IPS (a rare high-
+reward event with a tiny propensity can dominate the sum) is visible
+rather than hidden behind a single clean-looking number. See RESULTS.md's
+"Off-policy (IPS) evaluation" section for the real numbers and the ESS
+caveat that should accompany them.
 
 **What's wrong** (the most consequential finding in the review): the
 synthetic clickstream's session composition, click/cart/purchase
@@ -232,8 +243,22 @@ session's timestamp when computing features for eval.
 
 ## P1 — close real capability gaps
 
-### 6. `search-service` is dense-retrieval-only — no lexical fallback
+### 6. ✅ DONE — `search-service` is dense-retrieval-only — no lexical fallback
 **File**: `search-service/src/main/java/com/avanti/recengine/search/`
+
+**Result**: added a hand-rolled, in-memory Okapi BM25 index (`domain/lexical/BM25Index.java`,
+no Elasticsearch/Lucene/Solr — this project's whole premise is Pinecone-only,
+no self-hosted search server, so the lexical index is a lightweight embedded
+one built once at startup from `product.csv`, not a second server dependency),
+fused with the existing Pinecone dense retrieval via Reciprocal Rank Fusion
+(`domain/RrfFusion.java`, same formula as the sibling `search` project's own
+RRF fusion, ported as this project's own copy). `SearchProductsService` now
+widens both sub-retrievers to a shared candidate pool before fusing, rather
+than fusing two already-truncated top-K lists. Verified live: a query for an
+exact, distinctive brand token ("baldwin prestige alcott") now correctly
+surfaces the branded product at #1, with visibly RRF-fused scores rather than
+raw cosine similarity — confirmed via a real GraphQL query against the live
+stack, not just a passing unit test.
 
 **What's wrong**: pure `bge-small-en-v1.5` embedding search, no BM25/lexical
 path, no hybrid fusion, no query understanding. Known-worse than hybrid on
@@ -252,8 +277,24 @@ README and `WRITEUP.md`.
 
 ---
 
-### 7. No diversity mechanism anywhere — a top-5 can be 5 near-duplicates
-**Files**: new — a decorator/wrapper strategy in `recommender-service/.../domain/strategy/`
+### 7. ✅ DONE — No diversity mechanism anywhere — a top-5 can be 5 near-duplicates
+**Files**: `recommender-service/.../domain/strategy/DiversityAwareStrategy.java` (new), wired as `Strategy.DIVERSE_POPULARITY`
+
+**Result**: a real `DiversityAwareStrategy` decorator — wraps any existing
+strategy, runs it first, then a greedy MMR (maximal marginal relevance) pass:
+`mmr = λ·relevance − (1−λ)·maxSimilarity(candidate, alreadySelected)`, with
+`λ` a constructor parameter (default 0.7) and similarity a category/
+product-class proxy. Wired into the system end-to-end as a new selectable
+`Strategy.DIVERSE_POPULARITY` value (proto enum, domain enum in both
+services, GraphQL schema enum, `RecommenderConfig` wiring) — not just a
+library class nobody calls. Verified live: a `DIVERSE_POPULARITY` query for
+"coffee table" visibly injects an office chair and a bed frame into what
+would otherwise be an all-coffee-table top-8, and scores measurably lower
+than plain `Popularity` in both eval tables (0.9061 vs 0.9721 nDCG@5,
+independent eval) — the honest, expected cost of the diversity tradeoff, not
+a bug. Honestly documented gap: similarity is category/class-based, not
+real embedding cosine distance — swapping in item #8's `VectorSimilarityPort`
+is a clear next step, not implemented here.
 
 **What's wrong**: all 5 strategies optimize a single scalar score per item
 with no diversity penalty. No category/brand diversity constraint exists
@@ -269,8 +310,23 @@ higher in the list.
 
 ---
 
-### 8. `recommender-service` has zero Pinecone access — no real second retrieval source
-**Files**: `recommender-service/src/main/java/com/avanti/recengine/recommender/port/out/`, new adapter
+### 8. ✅ DONE (port built; not yet consumed by a strategy) — `recommender-service` has zero Pinecone access — no real second retrieval source
+**Files**: `recommender-service/.../port/out/VectorSimilarityPort.java` (new), `.../adapter/out/pinecone/PineconeVectorSimilarityAdapter.java` (new), `config/RecommenderConfig.java`
+
+**Result**: `VectorSimilarityPort.similarProductIds(productId, topK)`, backed
+by a `PineconeVectorSimilarityAdapter` that reuses `rec-support`'s
+`PineconeVectorStore` (extended with a `queryById` method — Pinecone's
+server-side "find neighbors of this already-stored vector" call, no
+client-side re-embedding needed) against the exact same `wands-products`
+index `search-service` populates — a direct infrastructure dependency, per
+the original architecture plan's own carve-out for this case, not a gRPC
+call to `search-service`. `RecommenderConfig` now wires a `PineconeVectorStore`
+bean (read-only consumer, unlike `search-service`'s index-owning bean) and
+the port bean. Verified against the real live index (`PineconeVectorSimilarityAdapterSmokeTest`,
+requires the Docker network — passed for real, not skipped). **Honest gap**:
+built and wired as an available bean, but no strategy calls it yet — items
+#7 and #10 both flag it as their natural next step (real embedding
+similarity instead of a category proxy) rather than silently ignoring it.
 
 **What's wrong**: every strategy only reranks/injects within the fixed
 list `search-service` already returned. There's no "more like this"
@@ -287,8 +343,24 @@ generation, not just reranking.
 
 ---
 
-### 9. Single-pass reranking — no real multi-stage retrieval→cheap-cut→heavy-rerank
-**Files**: `graphql-gateway/.../application/SearchOrchestrationUseCase.java`, `search-service` topK handling
+### 9. ✅ DONE — Single-pass reranking — no real multi-stage retrieval→cheap-cut→heavy-rerank
+**Files**: `graphql-gateway/.../application/SearchOrchestrationUseCase.java`
+
+**Result**: `SearchOrchestrationUseCase` now asks `search-service` for a
+widened pool (`WIDE_POOL_SIZE = 200`, not just the caller's display `topK`),
+applies a hard eligibility **selection** stage — drops zero-social-proof
+candidates (`ratingCount == 0`), then cuts to `ELIGIBLE_POOL_SIZE = 50` by
+`search-service`'s own score (free, no second scoring pass) — distinct in
+kind from any strategy's own scoring, and applies it *uniformly*, including
+to `NONE` (a deliberate change: `NONE` is no longer a byte-for-byte
+passthrough of raw search results, only of the eligibility-filtered ones).
+Only the reduced set is handed to whichever strategy runs, and the final
+output is truncated to the caller's `topK` only at the very end. Verified
+live: a `COLLABORATIVE` query for "coffee table" now surfaces a genuinely
+different top result than the pre-fix narrow-candidate-list version — a
+product the old ~6-10-candidate pool never had a chance to include. New unit
+tests cover the widening, the selection-stage filter/cut, and final
+truncation.
 
 **What's wrong**: exactly one candidate list, exactly one scoring pass.
 `NeuralRankingStrategy`'s ONNX forward pass runs on whatever `search-service`
@@ -306,8 +378,23 @@ scoring → run the expensive strategy only on the reduced set.
 
 ---
 
-### 10. Cold start is silent and implicit, not a designed policy
+### 10. ✅ DONE (item cold-start is a partial fix) — Cold start is silent and implicit, not a designed policy
 **Files**: `recommender-service/.../domain/strategy/CollaborativeFilteringStrategy.java`, `NeuralRankingStrategy.java`, `config/RecommenderConfig.java`
+
+**Result**: `CollaborativeFilteringStrategy` now takes an explicit, named
+`PopularityBoostStrategy` fallback (a shared instance from `RecommenderConfig`,
+not a second independently-constructed copy), triggered only when a user has
+**both** zero all-time history and zero session signal — a stated policy, not
+a silent no-op. New-item cold start (features that would collapse to 0 for
+the ~97% of the catalog with no clickstream footprint) is a **partial** fix:
+it depends on item #8's `VectorSimilarityPort`, which landed in a different
+parallel workstream and isn't wired into `NeuralRankingStrategy` here. What's
+implemented instead is the fallback available without it — feature 1
+(category match) and the new feature 7 (session category overlap, item #11)
+both still produce real, non-zero signal for a zero-footprint item, since
+they come from the candidate's own metadata, not clickstream history. Wiring
+in real embedding similarity is a documented, explicit follow-on, not a
+hidden gap.
 
 **What's wrong**: `CollaborativeFilteringStrategy` just returns
 `List.copyOf(baseResults)` when a user profile is empty; `NeuralRankingStrategy`'s
@@ -329,8 +416,25 @@ behavioral features.
 
 ---
 
-### 11. All history is treated as one flat signal — no session-level recency weighting
-**Files**: `proto/recommender_service.proto` (`RecommendRequest`), `CollaborativeFilteringStrategy.java`, `NeuralRankingStrategy.java`
+### 11. ✅ DONE — All history is treated as one flat signal — no session-level recency weighting
+**Files**: `proto/recommender_service.proto`, `graphql-gateway` (schema + orchestration + gRPC client adapter), `CollaborativeFilteringStrategy.java`, `NeuralRankingStrategy.java`, `training/train_neural_ranker.py`
+
+**Result**: added `recent_product_ids` to `RecommendRequest`, threaded end
+to end — proto → recommender-service's `RecommendationContext` → an optional
+`recentProductIds: [ID!]` GraphQL argument on `search`, through the gateway's
+orchestration layer and gRPC client adapter. `CollaborativeFilteringStrategy`
+weights a session match (2.5x) more heavily than the same signal from
+all-time history. `NeuralRankingStrategy` gained a 7th feature — same-session
+category overlap, built from real per-session grouping in
+`train_neural_ranker.py` (using clickstream.csv's actual `session_id` column,
+not a synthetic proxy) — bumping `FEATURE_COUNT` from 6 to 7 and requiring a
+full retrain (`feature_parity_fixtures.csv`/`FeatureParityTest`/
+`test_feature_parity.py` all updated together, keeping the Java/Python golden-
+vector parity test from item #5 honest). Real, reported retrain result: the
+7th feature raised every model's held-out pairwise accuracy by ~6-7 points
+(XGBoost 0.7995→0.8687, linear baseline 0.8046→0.8751, old MLP 0.8018→0.8700)
+— a genuinely informative feature, without changing which model wins (the
+linear baseline still does; same honest finding as item #3).
 
 **What's wrong**: `ClickstreamRepositoryPort` loads all-time history as
 one undifferentiated profile — there's no distinction between "this
@@ -350,8 +454,25 @@ category overlap, distinct from the existing all-time `co_occurrence_log`.
 
 ## P2 — architecture/contract cleanups (not urgent correctness bugs)
 
-### 12. `SearchRequest`/`RecommendRequest` proto contracts are too thin for the ceremony wrapped around them
-**File**: `proto/search_service.proto`, `proto/recommender_service.proto`
+### 12. ✅ DONE (filters only — pagination cursor and debug/explain field still open) — `SearchRequest`/`RecommendRequest` proto contracts are too thin for the ceremony wrapped around them
+**File**: `proto/search_service.proto`, `search-service` (`SearchProductsUseCase`/`SearchProductsService`/`SearchGrpcService`), `graphql-gateway` (`SearchPort`/`GrpcSearchServiceClientAdapter`/`SearchOrchestrationUseCase`/schema/controller)
+
+**Result — a deliberately scoped, partial fix**: added `category_filter`
+(case-insensitive substring match against `categoryHierarchy`) and
+`min_rating` to `SearchRequest`, threaded end to end as optional GraphQL
+arguments (`categoryFilter: String`, `minRating: Float`) on `search`,
+applied as a hard eligibility filter on the widened candidate pool (same
+selection stage as item #9, before any strategy runs — applies uniformly
+regardless of strategy). Verified live: filtering an "outdoor patio
+furniture" query by `categoryFilter: "Bedroom"` correctly returns zero
+results; filtering by `minRating: 4.5` correctly narrows to only ≥4.5-rated
+candidates. **Not done, honestly left open**: a pagination cursor and a
+per-result debug/explain field (which strategy/feature contributed to a
+score) — both still real gaps, not silently dropped from scope, just not
+implemented in this pass. Applied post-fusion, not pre-retrieval, so a
+narrow filter can legitimately return fewer than `topK` results — a stated
+limitation, not a bug; over-fetching until enough eligible results are
+found is a further follow-on.
 
 **What's wrong**: `SearchRequest` has only `query` + `top_k` — no filters,
 facets, pagination cursor, or explain/debug fields, despite the heavyweight
@@ -364,8 +485,15 @@ both the demo UI's hover cards and for debugging strategy behavior).
 
 ---
 
-### 13. Document the architecture/complexity tradeoff explicitly in the README
+### 13. ✅ DONE — Document the architecture/complexity tradeoff explicitly in the README
 **File**: `README.md`
+
+**Result**: added an explicit "The honest tradeoff" paragraph right after
+the "Why this project" section — states plainly that hexagonal-plus-gRPC-
+only-plus-four-services is more service boundary than a 43K-product,
+no-real-traffic system needs, that it's here to demonstrate the pattern on
+purpose, and that a system this size built to actually ship would likely be
+one service with clean internal module boundaries.
 
 **What's wrong**: the review's core architecture finding is that
 hexagonal-architecture-plus-gRPC-only-plus-four-services is disproportionate
@@ -383,20 +511,33 @@ honesty norms about every other limitation.
 
 ## Suggested execution order
 
-**P0 (#1–#5): done.** All five landed together via four parallel workstreams
-(the eval fix and feature-parity fix shared eval-side files, so were done
-in one pass) — see each item's "Result" above for what actually happened,
-including the eval-circularity fix overturning the previous "Collaborative
-Filtering wins" headline result. One loose end remains open: the IPS/
-counterfactual estimator described in item #4 was explicitly skipped, not
-attempted-and-hidden — pick it up if pursuing P1 work below, since it's the
-same eval-side code area.
+**Everything in this document is now done, except two explicitly-scoped
+partial items** — see each item's "Result" above for what actually happened,
+not just what was planned.
 
-Next up, P1:
-1. **#6 (hybrid retrieval)** and **#8 (embedding retrieval in recommender-service)**
-   — the two retrieval-capability gaps.
-2. **#7, #9, #10, #11** — capability additions, roughly independent,
-   prioritize by what's most interesting to demo.
-3. **#12, #13** — cleanup, do whenever convenient.
-4. The IPS estimator from #4, if you want to close that loose end before
-   moving further into P1.
+- **P0 (#1–#5): done**, including the IPS/counterfactual estimator from
+  item #4 (initially deferred, closed in the P1 pass below). All five
+  landed together via four parallel workstreams (the eval fix and feature-
+  parity fix shared eval-side files, so were done in one pass) — the
+  eval-circularity fix overturned the previous "Collaborative Filtering
+  wins" headline result; current `RESULTS.md` is the only version to trust.
+- **P1 (#6–#11): done**, via five more parallel workstreams (hybrid
+  retrieval, embedding-similarity port, diversity decorator, cold-start +
+  session-recency bundled together since they share files, and the IPS
+  estimator) plus one sequential follow-on (#9, multi-stage retrieval —
+  held back a batch since it touches the same file as #12's filter
+  plumbing). Two honest partial gaps remain, tracked explicitly rather than
+  hidden: item #8's `VectorSimilarityPort` is built and live-tested but not
+  yet consumed by any strategy (items #7 and #10 both name it as their
+  natural next step); item #10's new-item cold-start fix is real but
+  partial for the same reason.
+- **P2 (#12–#13): done**, with #12 itself a deliberately scoped partial fix
+  — category/rating filters are real and live-verified; a pagination cursor
+  and a per-result debug/explain field are still open, not implemented here.
+
+Execution note for future similar work: the same disjoint-file-ownership
+parallel-fork pattern that worked for P0 scaled cleanly to this larger,
+more interdependent P1/P2 batch too — the only real coordination points
+were a few shared files two forks both needed (`RecommenderConfig.java`,
+`proto/*.proto`), each resolved by having exactly one fork/session own the
+final edit rather than two forks racing on the same file.

@@ -14,5 +14,6 @@ public enum RecommenderStrategy {
     POPULARITY,
     COLLABORATIVE,
     BANDIT,
-    NEURAL
+    NEURAL,
+    DIVERSE_POPULARITY
 }

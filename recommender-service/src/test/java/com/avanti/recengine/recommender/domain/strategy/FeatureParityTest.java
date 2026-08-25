@@ -24,9 +24,9 @@ import static org.assertj.core.api.Assertions.offset;
  * {@code training/feature_parity_fixtures.csv} that
  * {@code training/test_feature_parity.py} reads, and asserts
  * {@link NeuralRankingStrategy#buildFeatures} produces the expected values
- * for the 4 features that must be train/serve-identical (category match,
- * popularity, co-occurrence, avg rating, rating count — see
- * {@code training/TRAINING.md}). Feature 1 (base_score_proxy) is
+ * for the features that must be train/serve-identical (category match,
+ * popularity, co-occurrence, avg rating, rating count, session category
+ * overlap — see {@code training/TRAINING.md}). Feature 1 (base_score_proxy) is
  * deliberately not cross-checked against the Python side's train-time
  * formula here — they're different formulas by design (documented
  * train/serve skew) — only that it's a valid sigmoid of the serve-time
@@ -64,6 +64,9 @@ class FeatureParityTest {
             double popularityRaw = Double.parseDouble(row.get("popularity_raw"));
             int coOccurrenceRaw = Integer.parseInt(row.get("co_occurrence_raw"));
             double serveTimeScore = Double.parseDouble(row.get("serve_time_score"));
+            String recentCategoriesRaw = blankToNull(row.get("recent_categories"));
+            List<String> recentCategorySegments = recentCategoriesRaw == null
+                    ? List.of() : List.of(recentCategoriesRaw.split(";"));
 
             FakeClickstreamRepository repo = new FakeClickstreamRepository(List.of());
             repo.withPopularity("fixture-product", popularityRaw);
@@ -77,9 +80,9 @@ class FeatureParityTest {
             Optional<String> userTopCategory = Optional.ofNullable(userTopCategoryRaw);
             Set<String> userInteracted = coOccurrenceRaw > 0 ? Set.of(OTHER_PRODUCT) : Set.of();
 
-            float[] features = strategy.buildFeatures(product, userTopCategory, userInteracted);
+            float[] features = strategy.buildFeatures(product, userTopCategory, userInteracted, recentCategorySegments);
 
-            assertThat(features).as(caseName).hasSize(6);
+            assertThat(features).as(caseName).hasSize(7);
             assertThat((double) features[0]).as(caseName + ": category_match")
                     .isCloseTo(Double.parseDouble(row.get("expected_category_match")), offset(TOLERANCE));
             assertThat((double) features[2]).as(caseName + ": popularity_log")
@@ -96,6 +99,9 @@ class FeatureParityTest {
             double expectedServeFeature1 = 1.0 / (1.0 + Math.exp(-serveTimeScore));
             assertThat((double) features[1]).as(caseName + ": base_score_proxy (serve-time formula)")
                     .isCloseTo(expectedServeFeature1, offset(TOLERANCE));
+
+            assertThat((double) features[6]).as(caseName + ": session_category_overlap")
+                    .isCloseTo(Double.parseDouble(row.get("expected_session_category_overlap")), offset(TOLERANCE));
         }
     }
 

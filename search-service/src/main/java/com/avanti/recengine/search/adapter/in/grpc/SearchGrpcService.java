@@ -21,7 +21,8 @@ public class SearchGrpcService extends SearchServiceGrpc.SearchServiceImplBase {
 
     @Override
     public void search(SearchRequest request, StreamObserver<SearchResponse> responseObserver) {
-        var results = searchProductsUseCase.search(request.getQuery(), request.getTopK());
+        var results = searchProductsUseCase.search(
+                request.getQuery(), request.getTopK(), request.getCategoryFilter(), request.getMinRating());
 
         SearchResponse.Builder response = SearchResponse.newBuilder();
         for (ScoredResult result : results) {

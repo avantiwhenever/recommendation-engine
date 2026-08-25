@@ -1,4 +1,4 @@
-export type RecommenderStrategy = "NONE" | "POPULARITY" | "COLLABORATIVE" | "BANDIT" | "NEURAL";
+export type RecommenderStrategy = "NONE" | "POPULARITY" | "COLLABORATIVE" | "BANDIT" | "NEURAL" | "DIVERSE_POPULARITY";
 
 export const STRATEGIES: { value: RecommenderStrategy; label: string }[] = [
   { value: "NONE", label: "None (baseline search only)" },
@@ -6,6 +6,7 @@ export const STRATEGIES: { value: RecommenderStrategy; label: string }[] = [
   { value: "COLLABORATIVE", label: "Collaborative filtering" },
   { value: "BANDIT", label: "Bandit exploration" },
   { value: "NEURAL", label: "Neural ranking (ONNX)" },
+  { value: "DIVERSE_POPULARITY", label: "Diverse popularity (MMR)" },
 ];
 
 export interface Product {

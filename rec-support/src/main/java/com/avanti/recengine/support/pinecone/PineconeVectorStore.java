@@ -88,6 +88,25 @@ public final class PineconeVectorStore implements AutoCloseable {
         return matches;
     }
 
+    /**
+     * Nearest neighbors of a vector already stored under {@code id} — no
+     * client-side embedding step, Pinecone looks up the stored vector
+     * server-side and queries with it directly. {@code topK} matches
+     * typically include {@code id} itself (score 1.0, since a vector is its
+     * own nearest neighbor); callers that want "other similar items" should
+     * filter it out and should over-request {@code topK} by one to
+     * compensate.
+     */
+    public List<ScoredMatch> queryById(String id, int topK) {
+        QueryResponseWithUnsignedIndices response =
+                index.queryByVectorId(topK, id, DEFAULT_NAMESPACE, false, true);
+        List<ScoredMatch> matches = new ArrayList<>();
+        for (ScoredVectorWithUnsignedIndices match : response.getMatchesList()) {
+            matches.add(new ScoredMatch(match.getId(), match.getScore(), fromStruct(match.getMetadata())));
+        }
+        return matches;
+    }
+
     private static List<Float> toFloatList(float[] values) {
         List<Float> list = new ArrayList<>(values.length);
         for (float v : values) {

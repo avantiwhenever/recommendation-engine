@@ -11,47 +11,7 @@
           "categoryHierarchy": null,
           "averageRating": 5.0,
           "ratingCount": 34,
-          "score": 0.8861277103424072,
-          "source": "search"
-        },
-        {
-          "productId": "37750",
-          "name": "grubb platform bed",
-          "productClass": "Bed Frames|Beds",
-          "categoryHierarchy": null,
-          "averageRating": 4.5,
-          "ratingCount": 853,
-          "score": 0.8759084343910217,
-          "source": "search"
-        },
-        {
-          "productId": "37752",
-          "name": "guerra 38 '' platform bed",
-          "productClass": "Bed Frames|Beds",
-          "categoryHierarchy": null,
-          "averageRating": 4.5,
-          "ratingCount": 206,
-          "score": 0.8734377026557922,
-          "source": "search"
-        },
-        {
-          "productId": "24865",
-          "name": "rysing 37.01 '' bed frame",
-          "productClass": "Bed Frames",
-          "categoryHierarchy": null,
-          "averageRating": 4.5,
-          "ratingCount": 6,
-          "score": 0.8697658777236938,
-          "source": "search"
-        },
-        {
-          "productId": "29256",
-          "name": "12.01 '' bed frame",
-          "productClass": "Bed Frames",
-          "categoryHierarchy": null,
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.8668612837791443,
+          "score": 0.03252247488101534,
           "source": "search"
         },
         {
@@ -61,7 +21,47 @@
           "categoryHierarchy": null,
           "averageRating": 4.5,
           "ratingCount": 2659,
-          "score": 0.8634351491928101,
+          "score": 0.02964426877470356,
+          "source": "search"
+        },
+        {
+          "productId": "37750",
+          "name": "grubb platform bed",
+          "productClass": "Bed Frames|Beds",
+          "categoryHierarchy": null,
+          "averageRating": 4.5,
+          "ratingCount": 853,
+          "score": 0.02946236559139785,
+          "source": "search"
+        },
+        {
+          "productId": "37752",
+          "name": "guerra 38 '' platform bed",
+          "productClass": "Bed Frames|Beds",
+          "categoryHierarchy": null,
+          "averageRating": 4.5,
+          "ratingCount": 206,
+          "score": 0.028531243721117136,
+          "source": "search"
+        },
+        {
+          "productId": "37751",
+          "name": "grubbs 38 '' platform bed",
+          "productClass": "Bed Frames|Beds",
+          "categoryHierarchy": null,
+          "averageRating": 4.5,
+          "ratingCount": 142,
+          "score": 0.027313266443701224,
+          "source": "search"
+        },
+        {
+          "productId": "8215",
+          "name": "harden wood slat and metal platform bed frame",
+          "productClass": "Bed Frames|Beds",
+          "categoryHierarchy": null,
+          "averageRating": 4.5,
+          "ratingCount": 624,
+          "score": 0.0253441802252816,
           "source": "search"
         }
       ]
@@ -70,33 +70,33 @@
       "strategyLabel": "POPULARITY",
       "products": [
         {
+          "productId": "8194",
+          "name": "ryland platform bed frame",
+          "productClass": "Bed Frames|Beds",
+          "categoryHierarchy": null,
+          "averageRating": 4.5,
+          "ratingCount": 2659,
+          "score": 0.6299397208821444,
+          "source": "Popularity"
+        },
+        {
           "productId": "2017",
           "name": "platform twin bed frame",
           "productClass": "Bed Frames",
           "categoryHierarchy": null,
           "averageRating": 5.0,
           "ratingCount": 34,
-          "score": 0.6615384615384615,
+          "score": 0.6190476190476191,
           "source": "Popularity"
         },
         {
-          "productId": "29256",
-          "name": "12.01 '' bed frame",
-          "productClass": "Bed Frames",
-          "categoryHierarchy": null,
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.4905883094573937,
-          "source": "Popularity"
-        },
-        {
-          "productId": "24865",
-          "name": "rysing 37.01 '' bed frame",
-          "productClass": "Bed Frames",
+          "productId": "8215",
+          "name": "harden wood slat and metal platform bed frame",
+          "productClass": "Bed Frames|Beds",
           "categoryHierarchy": null,
           "averageRating": 4.5,
-          "ratingCount": 6,
-          "score": 0.41354073093470767,
+          "ratingCount": 624,
+          "score": 0.6086872864940711,
           "source": "Popularity"
         },
         {
@@ -106,17 +106,17 @@
           "categoryHierarchy": null,
           "averageRating": 4.5,
           "ratingCount": 206,
-          "score": 0.38754826406946874,
+          "score": 0.5211319822857775,
           "source": "Popularity"
         },
         {
-          "productId": "8194",
-          "name": "ryland platform bed frame",
-          "productClass": "Bed Frames|Beds",
-          "categoryHierarchy": null,
-          "averageRating": 4.5,
-          "ratingCount": 2659,
-          "score": 0.36923076923076925,
+          "productId": "1974",
+          "name": "berryman platform bed frame",
+          "productClass": "Bed Frames",
+          "categoryHierarchy": "Furniture / Bedroom Furniture / Beds & Headboards / Bed Frames / Twin Bed Frames",
+          "averageRating": 4.0,
+          "ratingCount": 21,
+          "score": 0.5109321074781241,
           "source": "Popularity"
         },
         {
@@ -126,27 +126,7 @@
           "categoryHierarchy": null,
           "averageRating": 4.5,
           "ratingCount": 853,
-          "score": 0.32979843348620236,
-          "source": "Popularity"
-        },
-        {
-          "productId": "29636",
-          "name": "aurora task chair",
-          "productClass": "Office Chairs",
-          "categoryHierarchy": "Furniture / Office Furniture / Office Chairs",
-          "averageRating": 4.5,
-          "ratingCount": 1168,
-          "score": 0.0,
-          "source": "Popularity"
-        },
-        {
-          "productId": "13712",
-          "name": "jennie solid wood tufted upholstered low profile platform bed",
-          "productClass": "Teen Beds|Beds",
-          "categoryHierarchy": "Furniture / Bedroom Furniture / Beds & Headboards / Beds",
-          "averageRating": 4.5,
-          "ratingCount": 9895,
-          "score": 0.0,
+          "score": 0.5103233234790726,
           "source": "Popularity"
         }
       ]
@@ -161,47 +141,7 @@
           "categoryHierarchy": null,
           "averageRating": 5.0,
           "ratingCount": 34,
-          "score": 0.8861277103424072,
-          "source": "Collaborative Filtering"
-        },
-        {
-          "productId": "37750",
-          "name": "grubb platform bed",
-          "productClass": "Bed Frames|Beds",
-          "categoryHierarchy": null,
-          "averageRating": 4.5,
-          "ratingCount": 853,
-          "score": 0.8759084343910217,
-          "source": "Collaborative Filtering"
-        },
-        {
-          "productId": "37752",
-          "name": "guerra 38 '' platform bed",
-          "productClass": "Bed Frames|Beds",
-          "categoryHierarchy": null,
-          "averageRating": 4.5,
-          "ratingCount": 206,
-          "score": 0.8734377026557922,
-          "source": "Collaborative Filtering"
-        },
-        {
-          "productId": "24865",
-          "name": "rysing 37.01 '' bed frame",
-          "productClass": "Bed Frames",
-          "categoryHierarchy": null,
-          "averageRating": 4.5,
-          "ratingCount": 6,
-          "score": 0.8697658777236938,
-          "source": "Collaborative Filtering"
-        },
-        {
-          "productId": "29256",
-          "name": "12.01 '' bed frame",
-          "productClass": "Bed Frames",
-          "categoryHierarchy": null,
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.8668612837791443,
+          "score": 0.03252247488101534,
           "source": "Collaborative Filtering"
         },
         {
@@ -211,27 +151,47 @@
           "categoryHierarchy": null,
           "averageRating": 4.5,
           "ratingCount": 2659,
-          "score": 0.8634351491928101,
+          "score": 0.02964426877470356,
           "source": "Collaborative Filtering"
         },
         {
-          "productId": "24095",
-          "name": "blue dinosaur jumboz plush floor pillow",
-          "productClass": "Accent Pillows",
-          "categoryHierarchy": "D\u00e9cor & Pillows / Decorative Pillows & Blankets / Throw Pillows / Blue Throw Pillows",
-          "averageRating": 5.0,
-          "ratingCount": 88,
-          "score": 0.0,
+          "productId": "37750",
+          "name": "grubb platform bed",
+          "productClass": "Bed Frames|Beds",
+          "categoryHierarchy": null,
+          "averageRating": 4.5,
+          "ratingCount": 853,
+          "score": 0.02946236559139785,
           "source": "Collaborative Filtering"
         },
         {
-          "productId": "39496",
-          "name": "dinosaur land area rug",
-          "productClass": "Area Rugs",
-          "categoryHierarchy": "Rugs / Area Rugs / 4' x 6' Area Rugs",
-          "averageRating": 5.0,
-          "ratingCount": 34,
-          "score": 0.0,
+          "productId": "37752",
+          "name": "guerra 38 '' platform bed",
+          "productClass": "Bed Frames|Beds",
+          "categoryHierarchy": null,
+          "averageRating": 4.5,
+          "ratingCount": 206,
+          "score": 0.028531243721117136,
+          "source": "Collaborative Filtering"
+        },
+        {
+          "productId": "37751",
+          "name": "grubbs 38 '' platform bed",
+          "productClass": "Bed Frames|Beds",
+          "categoryHierarchy": null,
+          "averageRating": 4.5,
+          "ratingCount": 142,
+          "score": 0.027313266443701224,
+          "source": "Collaborative Filtering"
+        },
+        {
+          "productId": "8215",
+          "name": "harden wood slat and metal platform bed frame",
+          "productClass": "Bed Frames|Beds",
+          "categoryHierarchy": null,
+          "averageRating": 4.5,
+          "ratingCount": 624,
+          "score": 0.0253441802252816,
           "source": "Collaborative Filtering"
         }
       ]
@@ -240,63 +200,63 @@
       "strategyLabel": "BANDIT",
       "products": [
         {
+          "productId": "1974",
+          "name": "berryman platform bed frame",
+          "productClass": "Bed Frames",
+          "categoryHierarchy": "Furniture / Bedroom Furniture / Beds & Headboards / Bed Frames / Twin Bed Frames",
+          "averageRating": 4.0,
+          "ratingCount": 21,
+          "score": 0.02395833333333333,
+          "source": "Bandit Exploration"
+        },
+        {
+          "productId": "20347",
+          "name": "dildy platform bed frame",
+          "productClass": null,
+          "categoryHierarchy": "Furniture / Bedroom Furniture / Beds & Headboards / Beds",
+          "averageRating": 4.5,
+          "ratingCount": 10,
+          "score": 0.021554834054834056,
+          "source": "Bandit Exploration"
+        },
+        {
+          "productId": "6151",
+          "name": "16 '' steel bed frame",
+          "productClass": "Bed Frames|Beds",
+          "categoryHierarchy": "Furniture / Bedroom Furniture / Beds & Headboards / Beds / Queen Size Beds",
+          "averageRating": 4.5,
+          "ratingCount": 39,
+          "score": 0.020410039532959456,
+          "source": "Bandit Exploration"
+        },
+        {
+          "productId": "8196",
+          "name": "westover twin platform bed",
+          "productClass": "Beds|Kids Beds",
+          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds",
+          "averageRating": 4.5,
+          "ratingCount": 130,
+          "score": 0.016511458952513044,
+          "source": "Bandit Exploration"
+        },
+        {
           "productId": "2017",
           "name": "platform twin bed frame",
           "productClass": "Bed Frames",
           "categoryHierarchy": null,
           "averageRating": 5.0,
           "ratingCount": 34,
-          "score": 0.8861277103424072,
+          "score": 0.03252247488101534,
           "source": "Bandit Exploration"
         },
         {
-          "productId": "37750",
-          "name": "grubb platform bed",
-          "productClass": "Bed Frames|Beds",
-          "categoryHierarchy": null,
+          "productId": "39322",
+          "name": "ostrowski upholstered platform bed",
+          "productClass": "Beds",
+          "categoryHierarchy": "Furniture / Bedroom Furniture / Beds & Headboards / Beds",
           "averageRating": 4.5,
-          "ratingCount": 853,
-          "score": 0.8759084343910217,
-          "source": "Bandit Exploration"
-        },
-        {
-          "productId": "37752",
-          "name": "guerra 38 '' platform bed",
-          "productClass": "Bed Frames|Beds",
-          "categoryHierarchy": null,
-          "averageRating": 4.5,
-          "ratingCount": 206,
-          "score": 0.8734377026557922,
-          "source": "Bandit Exploration"
-        },
-        {
-          "productId": "24865",
-          "name": "rysing 37.01 '' bed frame",
-          "productClass": "Bed Frames",
-          "categoryHierarchy": null,
-          "averageRating": 4.5,
-          "ratingCount": 6,
-          "score": 0.8697658777236938,
-          "source": "Bandit Exploration"
-        },
-        {
-          "productId": "29256",
-          "name": "12.01 '' bed frame",
-          "productClass": "Bed Frames",
-          "categoryHierarchy": null,
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.8668612837791443,
-          "source": "Bandit Exploration"
-        },
-        {
-          "productId": "8194",
-          "name": "ryland platform bed frame",
-          "productClass": "Bed Frames|Beds",
-          "categoryHierarchy": null,
-          "averageRating": 4.5,
-          "ratingCount": 2659,
-          "score": 0.8634351491928101,
+          "ratingCount": 491,
+          "score": 0.019808365579509858,
           "source": "Bandit Exploration"
         }
       ]
@@ -305,15 +265,70 @@
       "strategyLabel": "NEURAL",
       "products": [
         {
-          "productId": "29256",
-          "name": "12.01 '' bed frame",
-          "productClass": "Bed Frames",
-          "categoryHierarchy": null,
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": -1.7768524885177612,
+          "productId": "8196",
+          "name": "westover twin platform bed",
+          "productClass": "Beds|Kids Beds",
+          "categoryHierarchy": "Baby & Kids / Toddler & Kids Bedroom Furniture / Kids Beds",
+          "averageRating": 4.5,
+          "ratingCount": 130,
+          "score": -0.9289587736129761,
           "source": "Neural Ranking"
         },
+        {
+          "productId": "2060",
+          "name": "14 '' steel platform bed",
+          "productClass": "Bed Frames|Beds",
+          "categoryHierarchy": null,
+          "averageRating": 4.5,
+          "ratingCount": 4349,
+          "score": -1.8461424112319946,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "8215",
+          "name": "harden wood slat and metal platform bed frame",
+          "productClass": "Bed Frames|Beds",
+          "categoryHierarchy": null,
+          "averageRating": 4.5,
+          "ratingCount": 624,
+          "score": -1.883003830909729,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "4910",
+          "name": "mcdonell wooden frame platform bed",
+          "productClass": "Beds",
+          "categoryHierarchy": "Furniture / Bedroom Furniture / Beds & Headboards / Beds",
+          "averageRating": 4.5,
+          "ratingCount": 3,
+          "score": -1.883003830909729,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "16760",
+          "name": "ehren platform bed frame",
+          "productClass": "Bed Frames",
+          "categoryHierarchy": null,
+          "averageRating": 4.5,
+          "ratingCount": 30,
+          "score": -1.883003830909729,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "8199",
+          "name": "kaela 46 '' metal heavy duty bed frame",
+          "productClass": "Bed Frames|Beds",
+          "categoryHierarchy": null,
+          "averageRating": 4.5,
+          "ratingCount": 222,
+          "score": -1.9159399271011353,
+          "source": "Neural Ranking"
+        }
+      ]
+    },
+    "DIVERSE_POPULARITY": {
+      "strategyLabel": "DIVERSE_POPULARITY",
+      "products": [
         {
           "productId": "8194",
           "name": "ryland platform bed frame",
@@ -321,28 +336,18 @@
           "categoryHierarchy": null,
           "averageRating": 4.5,
           "ratingCount": 2659,
-          "score": -1.7768524885177612,
-          "source": "Neural Ranking"
+          "score": 0.6299397208821444,
+          "source": "Popularity (diversified)"
         },
         {
-          "productId": "24865",
-          "name": "rysing 37.01 '' bed frame",
+          "productId": "1974",
+          "name": "berryman platform bed frame",
           "productClass": "Bed Frames",
-          "categoryHierarchy": null,
-          "averageRating": 4.5,
-          "ratingCount": 6,
-          "score": -2.328397035598755,
-          "source": "Neural Ranking"
-        },
-        {
-          "productId": "37752",
-          "name": "guerra 38 '' platform bed",
-          "productClass": "Bed Frames|Beds",
-          "categoryHierarchy": null,
-          "averageRating": 4.5,
-          "ratingCount": 206,
-          "score": -3.0049026012420654,
-          "source": "Neural Ranking"
+          "categoryHierarchy": "Furniture / Bedroom Furniture / Beds & Headboards / Bed Frames / Twin Bed Frames",
+          "averageRating": 4.0,
+          "ratingCount": 21,
+          "score": 0.5109321074781241,
+          "source": "Popularity (diversified)"
         },
         {
           "productId": "2017",
@@ -351,18 +356,38 @@
           "categoryHierarchy": null,
           "averageRating": 5.0,
           "ratingCount": 34,
-          "score": -3.6089937686920166,
-          "source": "Neural Ranking"
+          "score": 0.6190476190476191,
+          "source": "Popularity (diversified)"
         },
         {
-          "productId": "37750",
-          "name": "grubb platform bed",
+          "productId": "8215",
+          "name": "harden wood slat and metal platform bed frame",
           "productClass": "Bed Frames|Beds",
           "categoryHierarchy": null,
           "averageRating": 4.5,
-          "ratingCount": 853,
-          "score": -3.6089937686920166,
-          "source": "Neural Ranking"
+          "ratingCount": 624,
+          "score": 0.6086872864940711,
+          "source": "Popularity (diversified)"
+        },
+        {
+          "productId": "20347",
+          "name": "dildy platform bed frame",
+          "productClass": null,
+          "categoryHierarchy": "Furniture / Bedroom Furniture / Beds & Headboards / Beds",
+          "averageRating": 4.5,
+          "ratingCount": 10,
+          "score": 0.41192599605156,
+          "source": "Popularity (diversified)"
+        },
+        {
+          "productId": "37752",
+          "name": "guerra 38 '' platform bed",
+          "productClass": "Bed Frames|Beds",
+          "categoryHierarchy": null,
+          "averageRating": 4.5,
+          "ratingCount": 206,
+          "score": 0.5211319822857775,
+          "source": "Popularity (diversified)"
         }
       ]
     }

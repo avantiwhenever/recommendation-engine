@@ -16,3 +16,15 @@ search-service:
     index: ${PINECONE_INDEX:wands-products}
   models:
     embedding-dir: ${SEARCH_MODELS_EMBEDDING_DIR:models/bge-small-en-v1.5}
+  data:
+    # The lexical (BM25) index builds itself from this file once at startup —
+    # see TODO.md #6. Same file the ingestion CLI embeds into Pinecone.
+    product-csv: ${SEARCH_DATA_PRODUCT_CSV:data/product.csv}
+  hybrid:
+    # Each sub-retriever (dense, lexical) is queried for this many results
+    # regardless of the caller's requested topK, so RRF always fuses over a
+    # full pool rather than two already-truncated top-K lists.
+    candidate-pool-size: ${SEARCH_HYBRID_CANDIDATE_POOL_SIZE:50}
+    # Standard RRF constant (dampens the influence of very top ranks so one
+    # retriever's #1 pick doesn't automatically dominate fusion).
+    rrf-k: ${SEARCH_HYBRID_RRF_K:60}

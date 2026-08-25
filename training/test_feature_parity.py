@@ -3,9 +3,10 @@
 
 Loads feature_parity_fixtures.csv — the SAME file
 FeatureParityTest.java reads — and asserts train_neural_ranker.py's
-build_features() produces the expected values for the 4 features that are
+build_features() produces the expected values for the features that are
 supposed to be train/serve-identical (category_match, popularity_log,
-co_occurrence_log, avg_rating_over_5, rating_count_log). Feature 1
+co_occurrence_log, avg_rating_over_5, rating_count_log,
+session_category_overlap). Feature 1
 (base_score_proxy) is deliberately NOT cross-checked against Java's
 serve-time formula here — they're different formulas by design (documented
 train/serve skew, see NeuralRankingStrategy's Javadoc and TRAINING.md) — but
@@ -72,7 +73,10 @@ class FeatureParityTest(unittest.TestCase):
                 }
 
                 train_time_position = int(row["train_time_position"])
-                features = build_features(user_id, product_id, products, aggregates, train_time_position)
+                recent_categories_raw = row["recent_categories"]
+                recent_category_segments = recent_categories_raw.split(";") if recent_categories_raw else []
+                features = build_features(user_id, product_id, products, aggregates, train_time_position,
+                                           recent_category_segments)
 
                 self.assertAlmostEqual(features[0], float(row["expected_category_match"]), delta=TOLERANCE,
                                         msg="category_match")
@@ -94,7 +98,10 @@ class FeatureParityTest(unittest.TestCase):
                                         msg="base_score_proxy (train-time formula)")
                 self.assertTrue(0.0 < features[1] < 1.0, "base_score_proxy must be a valid sigmoid output")
 
-                self.assertEqual(len(features), 6)
+                self.assertAlmostEqual(features[6], float(row["expected_session_category_overlap"]), delta=TOLERANCE,
+                                        msg="session_category_overlap")
+
+                self.assertEqual(len(features), 7)
 
 
 if __name__ == "__main__":

@@ -65,6 +65,7 @@ empirical-distribution position proxy, 1:1 positive:negative ratio per user.
 | 3 | co_occurrence_log | `log1p(session co-occurrence with user's interaction history)` | Same formula, same clickstream source | None |
 | 4 | avg_rating / 5.0 | product.csv | product.csv (via search-service's candidate metadata) | None |
 | 5 | rating_count_log | `log1p(product.csv rating_count)` | Same | None |
+| 6 | session_category_overlap | fraction of the training pair's real same-session products (via `clickstream.csv`'s `session_id`; one session chosen per pair — see `build_dataset`) sharing the candidate's top-level category | fraction of `RecommendationContext.recentProductIds()` sharing the candidate's top-level category | None — both sides resolve real session-scoped product IDs to category segments the same way (`session_category_segments` / `sessionCategorySegments`) |
 
 **Feature-parity is now tested, not just documented.** `NeuralRankingStrategy.buildFeatures()`
 (Java) and this script's `build_features()` (Python) are two independently-
@@ -73,7 +74,7 @@ written "must exactly match" comment table nobody re-reads) is what caused
 the `base_score_proxy` skew bug above to go unnoticed. `feature_parity_fixtures.csv`
 is a shared golden-vector fixture both `test_feature_parity.py` (Python) and
 `recommender-service`'s `FeatureParityTest.java` (Java) read and assert
-against for the 4 features that must be train/serve-identical (feature 1 is
+against for the 6 features that must be train/serve-identical (feature 1 is
 intentionally excluded from cross-language equality, since its train-time
 and serve-time formulas are different by design — each side is checked
 against its *own* documented formula instead). A future edit that silently
@@ -118,31 +119,39 @@ total labeled pairs (138,142 positive / 138,142 negative).
 **Metric**: pairwise ranking accuracy — for each held-out user, the fraction
 of (positive, negative) product pairs the model scores in the correct order.
 
-**Final numbers, 5-seed mean ± std** (seeds 42–46, `--ci-seeds 5`):
+**Feature count changed after this section was first written** (TODO.md item
+#11): a 7th feature, `session_category_overlap`, was added — same-session
+recency-weighted category overlap, computed from real per-session grouping
+in `clickstream.csv`'s `session_id` column (see `build_aggregates`'s
+`sessions_by_user_product`/`sessions_by_user`), distinct from the existing
+all-time `co_occurrence_log` feature. All numbers below are from the current
+7-feature run; the original 6-feature numbers (0.7995 XGBoost / 0.8046
+linear / 0.8018 MLP) are kept in the paragraph after the table for
+comparison, not because they're still current.
+
+**Final numbers, 5-seed mean ± std** (seeds 42–46, `--ci-seeds 5`), 7 features:
 
 | Model | Held-out pairwise accuracy (mean ± std) |
 |---|---|
-| **Linear (logistic regression, all 6 features)** | **0.8046 ± 0.0035** |
-| Pointwise MLP (the old model, kept only as a comparison baseline) | 0.8018 ± 0.0040 |
-| **Pairwise XGBoost `rank:ndcg` (the model actually served)** | **0.7995 ± 0.0037** |
-| Popularity-only baseline | 0.7066 ± 0.0037 |
-| Category-match-only baseline | 0.6802 ± 0.0040 |
-| base_score_proxy-only baseline | 0.4649 ± 0.0021 (≈random — confirms the earlier leakage fix is holding) |
+| **Linear (logistic regression, all 7 features)** | **0.8751 ± 0.0025** |
+| Pointwise MLP (the old model, kept only as a comparison baseline) | 0.8700 ± 0.0035 |
+| **Pairwise XGBoost `rank:ndcg` (the model actually served)** | **0.8687 ± 0.0019** |
+| Popularity-only baseline | 0.7040 ± 0.0045 |
+| Category-match-only baseline | 0.6787 ± 0.0032 |
+| base_score_proxy-only baseline | 0.4649 ± 0.0022 (≈random — confirms the earlier leakage fix is holding) |
 | Random baseline | 0.5000 |
 
-**The honest headline finding, stated plainly**: a simple linear combination
-of all 6 features (0.8046) is consistently the best of the three real models
-across every one of the 5 seeds tested — it beats both the pairwise XGBoost
-ranker actually being served (0.7995) and the old pointwise MLP (0.8018).
-All three are close (within about one combined standard deviation of each
-other), but the ordering is consistent across seeds, not noise. This is a
-legitimate, useful result: on this particular 6-feature set, none of the
-tested models' extra capacity (MLP nonlinearity, gradient-boosted tree
-splits) is earning a real advantage over a linear decision boundary —
-consistent with the features themselves being simple, mostly-monotonic
-aggregates (log-popularity, log-co-occurrence, a 0/1 category match, a
-rating fraction) with little of the interaction structure a nonlinear model
-would actually exploit.
+**The honest headline finding is unchanged, just at a higher accuracy
+level**: a simple linear combination of all 7 features (0.8751) is still
+consistently the best of the three real models across every one of the 5
+seeds tested — it still beats both the pairwise XGBoost ranker actually
+being served (0.8687) and the old pointwise MLP (0.8700). Adding
+`session_category_overlap` raised every model's accuracy by roughly 6-7
+points versus the 6-feature numbers (a genuinely informative feature,
+available equally to every model), but did not change *which* model wins —
+none of the tested models' extra capacity (MLP nonlinearity, gradient-
+boosted tree splits) earns a real advantage over a linear decision boundary
+on this feature set, 6 or 7 features.
 
 **Why the served model is still the pairwise XGBoost ranker, not the linear
 model that scored higher**: this round of work was specifically about
@@ -151,7 +160,7 @@ pairwise metric) — the linear baseline was trained *pointwise* too (logistic
 regression on `label > 0`), so switching to it would reintroduce the same
 category of mismatch this fix was for, even though it happens to score well
 under the pairwise metric anyway. The honest takeaway isn't "ship the linear
-model" — it's "these 6 features don't currently justify a complex model,
+model" — it's "these 7 features don't currently justify a complex model,
 and a properly pairwise-trained linear model (e.g. a linear model under a
 RankNet-style pairwise loss) would be a reasonable next experiment before
 either shipping the plain logistic-regression baseline or investing further
@@ -176,11 +185,11 @@ in tree/network capacity." Left as a follow-up, not resolved here.
   synthetic data, not necessarily about real user behavior**: real implicit
   feedback typically has more nonlinear interaction structure (e.g.,
   category preference interacting with price sensitivity) than this
-  project's 6 hand-picked, largely-independent aggregate features capture —
+  project's 7 hand-picked, largely-independent aggregate features capture —
   a more expressive feature set on real data might show a different,
   more favorable result for the nonlinear models tested here.
 - No semantic-similarity feature exists at all (see `TODO.md` item #3's
-  broader context) — none of the 6 features capture query-product relevance
+  broader context) — none of the 7 features capture query-product relevance
   beyond the `base_score_proxy`/category-match proxies, which is likely a
   bigger lever on real ranking quality than the choice between linear/MLP/
   tree-based models tested here.
