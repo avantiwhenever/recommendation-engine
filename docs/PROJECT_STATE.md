@@ -361,6 +361,63 @@ One open loose end from P0: the IPS/counterfactual estimator described in
 TODO.md item #4 was explicitly skipped (not attempted-and-hidden) rather
 than risk shipping a subtly-wrong estimator under time pressure.
 
+**P0 work is committed, pushed, and CI-green** (commit `94dc10f`, "Fix P0
+findings: eval circularity/leakage, vacuous bandit, fake CF, mislabeled
+neural model"). The GitHub Pages demo (`docs/app.js`/`docs/index.html`) was
+also updated to describe the corrected strategies and show the independent
+WANDS-eval numbers instead of the overturned ones, and `docs/data/*.json`
+was re-captured against the live, rebuilt stack. One CI leg
+(`docker-image-scan (search-service)`) failed on its first run from a
+transient Maven Central 429 rate-limit while fetching BOMs — unrelated to
+any code change; `gh run rerun --failed` made it green.
+
+### Post-P0 local verification session — a real build-arg caching footgun
+
+While bringing the stack back up to test after the P0 push, hit and fixed
+two more real issues, both worth remembering:
+
+- **Recapturing demo snapshots with the wrong `userId`**: the first
+  `capture_demo_snapshots.py` run used an ad-hoc override user ID
+  (`demo-user-1`) that doesn't exist in the clickstream, so Collaborative
+  Filtering and Bandit both silently degraded to passthrough (no history to
+  personalize from). Re-ran with the script's real default (`u00001`, who
+  does exist in the 4,718-user clickstream) — fixed. Separately confirmed
+  that CF/Bandit *still* matching baseline for several of the 6 demo queries
+  is legitimate, not a bug: many query result sets share a single top-level
+  category (Bandit's arms collapse to one, so there's nothing to reorder
+  against) or this particular user has no interaction-history overlap with
+  those specific candidates (CF's similarity boost is genuinely zero).
+- **`docker compose up -d` without the port-override env vars silently
+  reset the gateway/web ports to their conflicting defaults.** Since this
+  machine has other projects already bound to `8080` and `5173` (see M5's
+  port-conflict bullet above), running plain `docker compose up -d` (no env
+  vars) after rebuilding recreated `graphql-gateway` and `web` on the
+  default ports, and `web`'s bind failed outright (`port is already
+  allocated`, another project's container held 5173). Fixed by always
+  passing `GATEWAY_HOST_PORT=18080 WEB_HOST_PORT=15173` on every `up`, not
+  just the first one — **this has to be supplied on every invocation**,
+  it's not sticky across `docker compose` calls without a `.env` file (none
+  exists in this repo; consider adding one if this bites again).
+- **A `docker compose build web` with the correct `GATEWAY_HOST_PORT` still
+  reused a stale cached layer with the wrong baked-in URL.** The Dockerfile
+  declares `ARG VITE_GRAPHQL_URL` immediately before the `RUN npm run
+  build` step, which should invalidate cache on any ARG value change — but
+  a plain `docker compose build web` reused the previous build's cached
+  layer anyway (same image hash) despite `docker compose config` correctly
+  resolving the new value. Root cause not fully isolated (classic-builder
+  cache-key behavior on ARG changes proved unreliable here); the reliable
+  fix was `docker compose build --no-cache web`. **If a Vite build-arg
+  change doesn't seem to take effect after a normal rebuild, don't trust
+  the cache — use `--no-cache`,** and verify by grepping the actual served
+  bundle (`docker exec <container> grep -o 'http://localhost:[0-9]*/graphql'
+  /usr/share/nginx/html/assets/*.js`) rather than trusting the build log.
+- End result, confirmed working: full stack up via
+  `GATEWAY_HOST_PORT=18080 WEB_HOST_PORT=15173 docker compose up -d`, gRPC/
+  GraphQL round-trips confirmed via `curl` (including a real CORS preflight
+  from `Origin: http://localhost:15173`), and the user confirmed the UI at
+  `http://localhost:15173` works after a hard refresh (the browser had the
+  old, wrong-port JS bundle cached from before the `--no-cache` rebuild).
+
 ## Known simplifications / deliberate scope cuts (be upfront about these, don't silently "fix")
 
 - Proto stubs are generated independently in all three consuming modules
