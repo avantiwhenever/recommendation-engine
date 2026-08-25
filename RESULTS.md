@@ -11,8 +11,8 @@ Ground truth: each session's strongest observed event per product (view=0, click
 | None | 0.5048 | 0.5796 | 0.6120 | 0.2301 | 0 |
 | Popularity | 0.4765 | 0.5646 | 0.5770 | 0.2129 | 2 |
 | Collaborative Filtering | 0.4883 | 0.5671 | 0.5943 | 0.2206 | 0 |
-| Bandit Exploration | 0.4552 | 0.5176 | 0.5830 | 0.2197 | 0 |
-| Neural Ranking | 0.3343 | 0.4057 | 0.4403 | 0.1657 | 0 |
+| Bandit Exploration | 0.4546 | 0.5155 | 0.5818 | 0.2194 | 0 |
+| Neural Ranking | 0.3337 | 0.4054 | 0.4396 | 0.1655 | 0 |
 | Diverse Popularity | 0.4567 | 0.5598 | 0.5399 | 0.1994 | 0 |
 
 ## Independent WANDS relevance eval
@@ -24,8 +24,8 @@ Ground truth: Wayfair's original human relevance annotation (`label.csv`: Exact=
 | None | 0.9673 | 0.9981 | 0.0608 | 0.9967 | 0 |
 | Popularity | 0.9721 | 0.9981 | 0.0610 | 0.9900 | 2 |
 | Collaborative Filtering | 0.9689 | 0.9981 | 0.0609 | 0.9905 | 0 |
-| Bandit Exploration | 0.9447 | 0.9945 | 0.0589 | 0.9939 | 0 |
-| Neural Ranking | 0.9615 | 0.9975 | 0.0607 | 0.9966 | 0 |
+| Bandit Exploration | 0.9448 | 0.9939 | 0.0589 | 0.9939 | 0 |
+| Neural Ranking | 0.9616 | 0.9975 | 0.0607 | 0.9965 | 0 |
 | Diverse Popularity | 0.9061 | 0.9981 | 0.0555 | 0.8916 | 0 |
 
 _Independent-eval Recall@5 is tiny (~0.06) compared to the clickstream eval's Recall@5 (~0.6) — not a bug, a scale mismatch: Recall's denominator is "all relevant items," and under WANDS' judgments that's every Exact/Partial product for the query (often 100+), while under the clickstream eval it's only the 8-15 products the synthetic generator ever showed in that session. Similarly, independent-eval Precision@5 is near-ceiling (~0.99) for nearly every strategy uniformly — expected, since the synthetic generator only ever samples session candidates from WANDS-judged (mostly Exact/Partial) products in the first place, so almost everything shown is already relevant by WANDS' standard regardless of ranking. nDCG@5/MRR (rank-order-sensitive, not just presence) are the metrics actually worth comparing between strategies in this table._
@@ -40,15 +40,15 @@ _All p95 latencies round to 0ms — every strategy here is in-memory arithmetic 
 
 ## Off-policy (IPS) evaluation
 
-The two tables above score each strategy's reranking as a static list against a grade — neither can estimate the *reward* (click/cart/purchase) users would actually have generated had a strategy's ranking been the one shown, since no user was ever shown it; only the clickstream's original logging-policy ranking was. This table closes that gap using Inverse Propensity Scoring (IPS), reweighting each *already-observed* outcome by the inverse probability the known cascade logging policy (`WANDS/CLICKSTREAM.md`'s exact click/cart/purchase model — not estimated) would have produced that outcome at the position it actually showed the item. This is unusually implementable here because, unlike almost every real production system, this project's synthetic clickstream has a fully known, documented logging policy. See Criteo's ["Offline A/B Testing for Recommender Systems"](https://arxiv.org/pdf/1801.07030) and Spotify Research's [counterfactual-evaluation work](https://research.atspotify.com/publications/towards-a-fair-marketplace-counterfactual-evaluation-of-the-trade-off-between-relevance-fairness-satisfaction-in-recommendation-systems). Simplifying assumption, stated honestly: this is an *item-level* IPS estimator (each item's presence in the top-5 treated as an independent action), not a full listwise estimator — see `IpsEvaluator`'s class Javadoc.
+The two tables above score each strategy's reranking as a static list against a grade — neither can estimate the *reward* (click/cart/purchase) users would actually have generated had a strategy's ranking been the one shown, since no user was ever shown it; only the clickstream's original logging-policy ranking was. This table closes that gap using Inverse Propensity Scoring (IPS), reweighting each *already-observed* outcome by the inverse probability the known cascade logging policy (`WANDS/CLICKSTREAM.md`'s exact click/cart/purchase model — not estimated) would have produced that outcome at the position it actually showed the item. This is unusually implementable here because, unlike almost every real production system, this project's synthetic clickstream has a fully known, documented logging policy. See Criteo's ["Offline A/B Testing for Recommender Systems"](https://arxiv.org/pdf/1801.07030) and Spotify Research's [counterfactual-evaluation work](https://research.atspotify.com/publications/towards-a-fair-marketplace-counterfactual-evaluation-of-the-trade-off-between-relevance-fairness-satisfaction-in-recommendation-systems), Simplifying assumption, stated honestly: this is an *item-level* IPS estimator (each item's presence in the top-5 treated as an independent action), not a full listwise estimator — see `IpsEvaluator`'s class Javadoc.
 
 | Strategy | Raw IPS estimate | Clipped IPS estimate (floor 1e-3) | Effective sample size | Scored items |
 |---|---|---|---|---|
 | None | 13.1409 | 13.1409 | 492.4 | 12719 |
 | Popularity | 11.8597 | 11.8597 | 653.8 | 12719 |
 | Collaborative Filtering | 12.6702 | 12.6702 | 541.1 | 12719 |
-| Bandit Exploration | 14.4213 | 12.7886 | 464.1 | 12719 |
-| Neural Ranking | 12.3425 | 12.0623 | 478.5 | 12719 |
+| Bandit Exploration | 14.3883 | 12.7555 | 463.6 | 12719 |
+| Neural Ranking | 12.3158 | 12.0356 | 477.0 | 12719 |
 | Diverse Popularity | 12.1502 | 10.5174 | 581.0 | 11481 |
 
 _**Read the effective sample size (ESS) before trusting either estimate.** IPS's known failure mode is variance: a rare high-reward outcome (a purchase) logged for an item the policy was unlikely to produce that outcome for gets a tiny propensity and an enormous inverse weight, and can dominate the whole sum. ESS (Hájek/Kish: (Σw)²/Σw² over the clipped weights) estimates how many *effectively independent* samples the clipped estimate is really resting on — a value close to "scored items" means weights are fairly uniform and the estimate is stable; a value far below it means a handful of extreme-weight events are carrying the number, and it should be read as noisy/directional at best, not a precise point estimate. If the raw and clipped columns differ substantially, that's the clipping visibly doing its job, not a discrepancy to reconcile — the clipped number is the one to trust in that case._

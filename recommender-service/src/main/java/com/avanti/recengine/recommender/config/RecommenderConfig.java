@@ -83,7 +83,7 @@ public class RecommenderConfig {
 
     @Bean
     public Map<Strategy, RecommendationStrategy> strategiesByType(
-            ClickstreamRepositoryPort clickstream, RankingModelPort rankingModel) {
+            ClickstreamRepositoryPort clickstream, RankingModelPort rankingModel, VectorSimilarityPort vectorSimilarityPort) {
         // Shared instance: also CollaborativeFilteringStrategy's named
         // cold-start fallback — one popularity blend implementation, not
         // two independently-constructed copies.
@@ -98,7 +98,12 @@ public class RecommenderConfig {
                 // from-scratch strategy — wraps the same popularity
                 // instance above with an MMR re-rank pass rather than
                 // constructing a second, independent PopularityBoostStrategy.
-                Strategy.DIVERSE_POPULARITY, new DiversityAwareStrategy(popularityBoost)
+                // vectorSimilarityPort gives its diversity metric real
+                // embedding similarity, blended with the category proxy —
+                // see DiversityAwareStrategy's class Javadoc for why blended,
+                // not substituted, and why "one lookup per candidate, not
+                // per pairwise comparison" is what keeps this affordable.
+                Strategy.DIVERSE_POPULARITY, new DiversityAwareStrategy(popularityBoost, vectorSimilarityPort)
         );
     }
 

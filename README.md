@@ -226,12 +226,17 @@ Recommendation strategies (`recommender-service`), each a
    including same-session category overlap.
 6. **Diverse popularity** — Popularity, then an MMR (maximal marginal
    relevance) re-rank pass on top, trading some ranking quality for
-   category spread; a decorator that can wrap any strategy's output.
+   category spread; a decorator that can wrap any strategy's output. Its
+   diversity metric blends real Pinecone embedding similarity (via
+   `VectorSimilarityPort`, reusing `search-service`'s embedding index) with
+   a cheap category/product-class proxy, rather than the category proxy
+   alone — see `DiversityAwareStrategy`'s class Javadoc for why blended,
+   not substituted, and why one embedding lookup per candidate, not one per
+   pairwise comparison.
 
-`recommender-service` also has a `VectorSimilarityPort` (Pinecone-backed
-"find similar products," reusing `search-service`'s embedding index) that
-isn't yet consumed by any strategy — see [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md)'s
-"Known simplifications" section for this and other open gaps.
+See [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md)'s "Known simplifications"
+section for open gaps, including where `VectorSimilarityPort` still isn't
+used (`NeuralRankingStrategy`'s zero-footprint-item fallback).
 
 ## Offline evaluation
 

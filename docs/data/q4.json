@@ -200,6 +200,16 @@
       "strategyLabel": "BANDIT",
       "products": [
         {
+          "productId": "35553",
+          "name": "outdoor protective wicker water resistant patio table cover",
+          "productClass": "Furniture Covers",
+          "categoryHierarchy": "Storage & Organization / Garage & Outdoor Storage & Organization / Outdoor Covers / Patio Furniture Covers / Table Patio Furniture Covers",
+          "averageRating": 4.5,
+          "ratingCount": 17,
+          "score": 0.013888888888888888,
+          "source": "Bandit Exploration"
+        },
+        {
           "productId": "27537",
           "name": "cregan outdoor garden patio sectional with cushions",
           "productClass": "Patio Sofas",
@@ -227,16 +237,6 @@
           "averageRating": 4.5,
           "ratingCount": 10,
           "score": 0.02105496453900709,
-          "source": "Bandit Exploration"
-        },
-        {
-          "productId": "35553",
-          "name": "outdoor protective wicker water resistant patio table cover",
-          "productClass": "Furniture Covers",
-          "categoryHierarchy": "Storage & Organization / Garage & Outdoor Storage & Organization / Outdoor Covers / Patio Furniture Covers / Table Patio Furniture Covers",
-          "averageRating": 4.5,
-          "ratingCount": 17,
-          "score": 0.013888888888888888,
           "source": "Bandit Exploration"
         },
         {

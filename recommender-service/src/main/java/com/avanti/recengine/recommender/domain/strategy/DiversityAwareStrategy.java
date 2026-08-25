@@ -3,9 +3,12 @@ package com.avanti.recengine.recommender.domain.strategy;
 import com.avanti.recengine.recommender.domain.RecommendationContext;
 import com.avanti.recengine.recommender.domain.RecommendationStrategy;
 import com.avanti.recengine.recommender.domain.ScoredProduct;
+import com.avanti.recengine.recommender.port.out.VectorSimilarityPort;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A decorator, not a standalone strategy: wraps another {@link
@@ -26,18 +29,47 @@ import java.util.List;
  * {@code maxSimilarity} is its highest pairwise similarity to any item
  * already selected.
  *
- * <p><b>Similarity signal, and an honest limitation</b>: similarity here is
- * a category proxy — 1.0 if two products share the same top-level category
- * segment (same convention as {@link BanditExploreStrategy}'s arm
- * grouping), plus an extra 0.5 if they also share the exact {@code
- * productClass}, capped at 1.0. This is cheap and has no external
- * dependency, but it's coarse: two products in the same top-level category
- * that are genuinely dissimilar (e.g. a floor lamp and a dining table,
- * both under "Furniture") are still scored as fully similar. This service
- * also has a {@code VectorSimilarityPort} backed by search-service's
- * Pinecone embeddings; swapping in real embedding cosine distance as the
- * similarity signal here would be a natural, low-risk follow-on — not
- * implemented here, which uses only the category/productClass proxy.
+ * <p><b>Similarity signal: embedding-based when available, category proxy
+ * otherwise</b>. The category/{@code productClass} proxy — 1.0 if two
+ * products share the same top-level category segment (same convention as
+ * {@link BanditExploreStrategy}'s arm grouping), plus an extra 0.5 if they
+ * also share the exact {@code productClass}, capped at 1.0 — is cheap and
+ * has no external dependency, but it's coarse: two products in the same
+ * top-level category that are genuinely dissimilar (e.g. a floor lamp and
+ * a dining table, both under "Furniture") score as fully similar. When a
+ * {@link VectorSimilarityPort} is supplied, its real Pinecone embedding
+ * distance is blended in via {@code max(embeddingSimilarity,
+ * categoryProxySimilarity)} rather than replacing the proxy outright — see
+ * {@link #similarity} for why.
+ *
+ * <p><b>Why "max," not a straight swap</b>: {@link VectorSimilarityPort}
+ * only exposes "the top-K nearest neighbors of product X," not "the
+ * similarity score between two specific products A and B" — there's no
+ * pairwise-distance call to make directly. This class approximates the
+ * pairwise score from the neighbor list instead: at the start of {@link
+ * #apply}, for every candidate it makes <em>one</em> {@code
+ * similarProductIds} call requesting as many neighbors as there are
+ * candidates, so every other candidate has a chance to appear somewhere in
+ * the ranked result. A pair's embedding similarity is then {@code 1.0 -
+ * (rank / candidateCount)} if one appears in the other's neighbor list
+ * (whichever direction found it first), or {@code 0.0} if neither
+ * direction found it — which happens either because the pair is
+ * genuinely dissimilar, or because one product has no embedding in the
+ * index at all (e.g. it was never ingested). Those two cases are
+ * indistinguishable from this port alone, so treating an absent-from-both-
+ * lists pair as "no embedding signal" and falling back to {@code
+ * max(...)} with the category proxy — rather than trusting a bare 0.0 as
+ * "confirmed dissimilar" — avoids a missing-embedding candidate silently
+ * losing all diversity credit it would otherwise get from sharing a
+ * category with an already-selected item.
+ *
+ * <p><b>Cost, stated honestly</b>: one {@code similarProductIds} call per
+ * candidate per {@link #apply} invocation (bounded by the caller's
+ * candidate-pool size — 50 in {@code SearchOrchestrationUseCase}'s
+ * multi-stage pipeline, so at most 50 Pinecone lookups per request), done
+ * once up front and cached in {@link #neighborRanksByProductId} for the
+ * rest of the MMR loop — not one call per pairwise comparison, which would
+ * be quadratic in the pool size and far too slow for a live request.
  */
 public final class DiversityAwareStrategy implements RecommendationStrategy {
 
@@ -51,9 +83,11 @@ public final class DiversityAwareStrategy implements RecommendationStrategy {
 
     private final RecommendationStrategy delegate;
     private final double lambda;
+    /** Null means "no embedding signal available" — falls back to the category/productClass proxy only. */
+    private final VectorSimilarityPort vectorSimilarityPort;
 
     public DiversityAwareStrategy(RecommendationStrategy delegate) {
-        this(delegate, DEFAULT_LAMBDA);
+        this(delegate, DEFAULT_LAMBDA, null);
     }
 
     /**
@@ -61,11 +95,28 @@ public final class DiversityAwareStrategy implements RecommendationStrategy {
      *               the delegate's own ranking unchanged, lower values weight diversity more.
      */
     public DiversityAwareStrategy(RecommendationStrategy delegate, double lambda) {
+        this(delegate, lambda, null);
+    }
+
+    /** Same as {@link #DiversityAwareStrategy(RecommendationStrategy)}, plus real embedding similarity. */
+    public DiversityAwareStrategy(RecommendationStrategy delegate, VectorSimilarityPort vectorSimilarityPort) {
+        this(delegate, DEFAULT_LAMBDA, vectorSimilarityPort);
+    }
+
+    /**
+     * @param lambda relevance/diversity tradeoff in {@code [0, 1]}; {@code 1.0} degenerates to
+     *               the delegate's own ranking unchanged, lower values weight diversity more.
+     * @param vectorSimilarityPort real embedding similarity, blended with the category proxy — see
+     *                             this class's Javadoc for why it's blended rather than substituted.
+     *                             {@code null} uses the category/productClass proxy alone.
+     */
+    public DiversityAwareStrategy(RecommendationStrategy delegate, double lambda, VectorSimilarityPort vectorSimilarityPort) {
         if (lambda < 0.0 || lambda > 1.0) {
             throw new IllegalArgumentException("lambda must be in [0, 1], got " + lambda);
         }
         this.delegate = delegate;
         this.lambda = lambda;
+        this.vectorSimilarityPort = vectorSimilarityPort;
     }
 
     @Override
@@ -78,6 +129,11 @@ public final class DiversityAwareStrategy implements RecommendationStrategy {
         double minScore = ranked.stream().mapToDouble(ScoredProduct::score).min().orElse(0.0);
         double maxScore = ranked.stream().mapToDouble(ScoredProduct::score).max().orElse(0.0);
         double range = maxScore - minScore;
+
+        // One similarProductIds call per candidate, up front — see the class
+        // Javadoc's "Cost, stated honestly" section for why this is done once
+        // per apply(), not once per pairwise comparison.
+        Map<String, List<String>> neighborRanksByProductId = precomputeEmbeddingNeighbors(ranked);
 
         List<ScoredProduct> remaining = new ArrayList<>(ranked);
         List<ScoredProduct> selected = new ArrayList<>(ranked.size());
@@ -92,7 +148,7 @@ public final class DiversityAwareStrategy implements RecommendationStrategy {
                 double relevance = range > 0.0 ? (candidate.score() - minScore) / range : 1.0;
                 double maxSimilarity = 0.0;
                 for (ScoredProduct alreadySelected : selected) {
-                    maxSimilarity = Math.max(maxSimilarity, similarity(candidate, alreadySelected));
+                    maxSimilarity = Math.max(maxSimilarity, similarity(candidate, alreadySelected, neighborRanksByProductId));
                 }
                 double mmr = lambda * relevance - (1.0 - lambda) * maxSimilarity;
                 if (mmr > bestMmr) {
@@ -107,15 +163,53 @@ public final class DiversityAwareStrategy implements RecommendationStrategy {
         return selected;
     }
 
-    private static double similarity(ScoredProduct a, ScoredProduct b) {
-        double similarity = 0.0;
+    /**
+     * One embedding-neighbor lookup per candidate, requesting as many
+     * neighbors as there are candidates so every other candidate has a
+     * chance to appear in the ranked result — see the class Javadoc. Empty
+     * map (no lookups) when no {@link VectorSimilarityPort} was supplied.
+     */
+    private Map<String, List<String>> precomputeEmbeddingNeighbors(List<ScoredProduct> ranked) {
+        if (vectorSimilarityPort == null) {
+            return Map.of();
+        }
+        Map<String, List<String>> neighbors = new HashMap<>();
+        for (ScoredProduct product : ranked) {
+            neighbors.put(product.productId(), vectorSimilarityPort.similarProductIds(product.productId(), ranked.size()));
+        }
+        return neighbors;
+    }
+
+    private static double similarity(ScoredProduct a, ScoredProduct b, Map<String, List<String>> neighborRanksByProductId) {
+        double categorySimilarity = 0.0;
         if (topLevelSegment(a.categoryHierarchy()).equalsIgnoreCase(topLevelSegment(b.categoryHierarchy()))) {
-            similarity += CATEGORY_MATCH_SIMILARITY;
+            categorySimilarity += CATEGORY_MATCH_SIMILARITY;
             if (sameProductClass(a.productClass(), b.productClass())) {
-                similarity += PRODUCT_CLASS_MATCH_SIMILARITY;
+                categorySimilarity += PRODUCT_CLASS_MATCH_SIMILARITY;
             }
         }
-        return Math.min(1.0, similarity);
+        categorySimilarity = Math.min(1.0, categorySimilarity);
+
+        double embeddingSimilarity = embeddingSimilarity(a, b, neighborRanksByProductId);
+        return Math.max(categorySimilarity, embeddingSimilarity);
+    }
+
+    /** {@code 1.0 - (rank / candidateCount)} from whichever direction (a→b or b→a) finds the other first; 0.0 if neither does. */
+    private static double embeddingSimilarity(ScoredProduct a, ScoredProduct b, Map<String, List<String>> neighborRanksByProductId) {
+        double fromA = rankBasedSimilarity(b.productId(), neighborRanksByProductId.get(a.productId()));
+        double fromB = rankBasedSimilarity(a.productId(), neighborRanksByProductId.get(b.productId()));
+        return Math.max(fromA, fromB);
+    }
+
+    private static double rankBasedSimilarity(String targetProductId, List<String> neighborIds) {
+        if (neighborIds == null || neighborIds.isEmpty()) {
+            return 0.0;
+        }
+        int rank = neighborIds.indexOf(targetProductId);
+        if (rank < 0) {
+            return 0.0;
+        }
+        return 1.0 - ((double) rank / neighborIds.size());
     }
 
     private static boolean sameProductClass(String a, String b) {

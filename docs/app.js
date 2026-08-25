@@ -88,9 +88,9 @@ const STRATEGY_INFO = {
   DIVERSE_POPULARITY: {
     label: "Diverse Popularity",
     tagline: "Popularity, then deliberately spread across categories so the top 5 isn't 5 near-duplicates.",
-    how: "Runs Popularity first, then a greedy MMR (maximal marginal relevance) re-rank pass on top: each next pick maximizes relevance minus a penalty for how similar (by category and product class) it is to items already selected higher up. A decorator, not a from-scratch strategy — it can wrap any strategy's output, Popularity is just the one wired up here.",
+    how: "Runs Popularity first, then a greedy MMR (maximal marginal relevance) re-rank pass on top: each next pick maximizes relevance minus a penalty for how similar it is to items already selected higher up. A decorator, not a from-scratch strategy — it can wrap any strategy's output, Popularity is just the one wired up here.",
     differs: "The only strategy that explicitly trades some ranking quality for result variety, on purpose — same honest tradeoff spirit as Bandit Exploration, but optimizing for a different thing (category spread instead of exploration). Lower nDCG than plain Popularity in both eval tables is the expected cost of that tradeoff, not a bug.",
-    grounding: "Netflix's “Recommendations: Beyond the 5 stars” Part 1/Part 2 on why optimizing a single relevance score per item, with no diversity term, can produce a top-N that's technically high-scoring but redundant. Similarity here is a category/product-class proxy; swapping in real embedding similarity (via recommender-service's VectorSimilarityPort) is a documented next step, not implemented yet.",
+    grounding: "Netflix's “Recommendations: Beyond the 5 stars” Part 1/Part 2 on why optimizing a single relevance score per item, with no diversity term, can produce a top-N that's technically high-scoring but redundant. Similarity is real Pinecone embedding distance blended with a category/product-class proxy (max of the two, one embedding lookup per candidate — see recommender-service's DiversityAwareStrategy Javadoc), not the category proxy alone.",
     metrics: { ndcg: 0.9061, mrr: 0.9981, recall: 0.0555, precision: 0.8916 },
   },
 };
