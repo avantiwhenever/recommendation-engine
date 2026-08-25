@@ -49,6 +49,17 @@ import java.util.List;
  * social proof"), not a personalization decision, so it applies uniformly
  * rather than being one more thing that changes when the strategy dropdown
  * changes.
+ *
+ * <p><b>Undocumented-elsewhere edge case, noted honestly here</b>: a
+ * caller requesting {@code topK > }{@link #ELIGIBLE_POOL_SIZE} gets fewer
+ * results than requested, silently — the selection stage caps the pool
+ * every strategy works with at {@link #ELIGIBLE_POOL_SIZE} regardless of
+ * how large {@code topK} is, and nothing downstream backfills past that
+ * cap. Not a bug (a fixed-size candidate pool is the whole point of the
+ * cheap-cut design), but worth knowing before assuming a large {@code
+ * topK} request always returns that many results — today's callers
+ * ({@code web}'s UI, the demo capture script) all request well under this
+ * cap, so it hasn't surfaced in practice.
  */
 public final class SearchOrchestrationUseCase {
 

@@ -34,6 +34,11 @@ type Query {
     # scoring, distinct from the widen-then-select multi-stage pipeline
     # (TODO.md item #9) and from any strategy's own reranking (TODO.md item
     # #12). Both optional; omitting either means "no filter".
+    #
+    # topK is capped by the multi-stage pipeline's internal candidate-pool
+    # size (see SearchOrchestrationUseCase#ELIGIBLE_POOL_SIZE, currently
+    # 50) — requesting more than that silently returns fewer results, not
+    # an error.
     search(query: String!, topK: Int = 10, strategy: RecommenderStrategy = COLLABORATIVE, userId: String,
            recentProductIds: [ID!] = [], categoryFilter: String, minRating: Float): SearchResult!
 }
