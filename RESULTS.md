@@ -9,10 +9,10 @@ Ground truth: each session's strongest observed event per product (view=0, click
 | Strategy | nDCG@5 | MRR | Recall@5 | Precision@5 | p95 latency (ms) |
 |---|---|---|---|---|---|
 | None | 0.5048 | 0.5796 | 0.6120 | 0.2301 | 0 |
-| Popularity | 0.4765 | 0.5646 | 0.5770 | 0.2129 | 2 |
+| Popularity | 0.4765 | 0.5646 | 0.5770 | 0.2129 | 3 |
 | Collaborative Filtering | 0.4883 | 0.5671 | 0.5943 | 0.2206 | 0 |
-| Bandit Exploration | 0.4546 | 0.5155 | 0.5818 | 0.2194 | 0 |
-| Neural Ranking | 0.3337 | 0.4054 | 0.4396 | 0.1655 | 0 |
+| Bandit Exploration | 0.4571 | 0.5184 | 0.5829 | 0.2191 | 0 |
+| Neural Ranking | 0.3338 | 0.4053 | 0.4401 | 0.1655 | 0 |
 | Diverse Popularity | 0.4567 | 0.5598 | 0.5399 | 0.1994 | 0 |
 
 ## Independent WANDS relevance eval
@@ -22,9 +22,9 @@ Ground truth: Wayfair's original human relevance annotation (`label.csv`: Exact=
 | Strategy | nDCG@5 | MRR | Recall@5 | Precision@5 | p95 latency (ms) |
 |---|---|---|---|---|---|
 | None | 0.9673 | 0.9981 | 0.0608 | 0.9967 | 0 |
-| Popularity | 0.9721 | 0.9981 | 0.0610 | 0.9900 | 2 |
+| Popularity | 0.9721 | 0.9981 | 0.0610 | 0.9900 | 3 |
 | Collaborative Filtering | 0.9689 | 0.9981 | 0.0609 | 0.9905 | 0 |
-| Bandit Exploration | 0.9448 | 0.9939 | 0.0589 | 0.9939 | 0 |
+| Bandit Exploration | 0.9458 | 0.9944 | 0.0588 | 0.9938 | 0 |
 | Neural Ranking | 0.9616 | 0.9975 | 0.0607 | 0.9965 | 0 |
 | Diverse Popularity | 0.9061 | 0.9981 | 0.0555 | 0.8916 | 0 |
 
@@ -47,8 +47,8 @@ The two tables above score each strategy's reranking as a static list against a 
 | None | 13.1409 | 13.1409 | 492.4 | 12719 |
 | Popularity | 11.8597 | 11.8597 | 653.8 | 12719 |
 | Collaborative Filtering | 12.6702 | 12.6702 | 541.1 | 12719 |
-| Bandit Exploration | 14.3883 | 12.7555 | 463.6 | 12719 |
-| Neural Ranking | 12.3158 | 12.0356 | 477.0 | 12719 |
+| Bandit Exploration | 14.4314 | 12.7987 | 464.3 | 12719 |
+| Neural Ranking | 12.3179 | 12.0377 | 477.2 | 12719 |
 | Diverse Popularity | 12.1502 | 10.5174 | 581.0 | 11481 |
 
 _**Read the effective sample size (ESS) before trusting either estimate.** IPS's known failure mode is variance: a rare high-reward outcome (a purchase) logged for an item the policy was unlikely to produce that outcome for gets a tiny propensity and an enormous inverse weight, and can dominate the whole sum. ESS (Hájek/Kish: (Σw)²/Σw² over the clipped weights) estimates how many *effectively independent* samples the clipped estimate is really resting on — a value close to "scored items" means weights are fairly uniform and the estimate is stable; a value far below it means a handful of extreme-weight events are carrying the number, and it should be read as noisy/directional at best, not a precise point estimate. If the raw and clipped columns differ substantially, that's the clipping visibly doing its job, not a discrepancy to reconcile — the clipped number is the one to trust in that case._
