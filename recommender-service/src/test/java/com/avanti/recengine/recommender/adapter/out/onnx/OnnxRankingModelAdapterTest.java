@@ -25,9 +25,9 @@ class OnnxRankingModelAdapterTest {
     }
 
     @Test
-    void scoresAReal6FeatureVectorWithoutError() {
+    void scoresAReal7FeatureVectorWithoutError() {
         try (OnnxRankingModelAdapter adapter = new OnnxRankingModelAdapter(MODEL_PATH)) {
-            double score = adapter.score(new float[]{1.0f, 0.6f, 2.0f, 1.5f, 0.9f, 3.0f});
+            double score = adapter.score(new float[]{1.0f, 0.6f, 2.0f, 1.5f, 0.9f, 3.0f, 0.5f});
             assertThat(score).isFinite();
         }
     }
@@ -35,10 +35,10 @@ class OnnxRankingModelAdapterTest {
     @Test
     void higherSignalFeaturesScoreHigherOnAverage() {
         try (OnnxRankingModelAdapter adapter = new OnnxRankingModelAdapter(MODEL_PATH)) {
-            // Strong signal: category match, popular, co-occurring, well-rated.
-            double strong = adapter.score(new float[]{1.0f, 0.6f, 4.0f, 3.0f, 1.0f, 5.0f});
-            // Weak signal: no category match, unpopular, no co-occurrence, poorly rated.
-            double weak = adapter.score(new float[]{0.0f, 0.5f, 0.0f, 0.0f, 0.2f, 0.0f});
+            // Strong signal: category match, popular, co-occurring, well-rated, session-category overlap.
+            double strong = adapter.score(new float[]{1.0f, 0.6f, 4.0f, 3.0f, 1.0f, 5.0f, 1.0f});
+            // Weak signal: no category match, unpopular, no co-occurrence, poorly rated, no session overlap.
+            double weak = adapter.score(new float[]{0.0f, 0.5f, 0.0f, 0.0f, 0.2f, 0.0f, 0.0f});
 
             assertThat(strong).isGreaterThan(weak);
         }

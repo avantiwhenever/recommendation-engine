@@ -14,3 +14,13 @@ recommender-service:
     product-catalog-path: ${PRODUCT_CATALOG_PATH:/data/product.csv}
   neural-ranker:
     model-path: ${NEURAL_RANKER_MODEL_PATH:/models/neural-ranker/model.onnx}
+  pinecone:
+    # Reuses the exact wands-products index search-service populates — a
+    # second retrieval source via VectorSimilarityPort, not a second index.
+    # Same three env vars as search-service's own Pinecone config, so
+    # pointing both services at a real hosted Pinecone index later is one
+    # consistent config change.
+    control-plane-host: ${PINECONE_HOST:http://pinecone-local:5080}
+    api-key: ${PINECONE_API_KEY:pclocal}
+    tls-enabled: ${PINECONE_TLS_ENABLED:false}
+    index: ${PINECONE_INDEX:wands-products}

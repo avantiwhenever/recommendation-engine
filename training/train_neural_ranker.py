@@ -2,7 +2,7 @@
 """Trains the neural ranking model used by NeuralRankingStrategy (recommender-service).
 
 Builds implicit-feedback (user, product) pairs from data/clickstream.csv,
-computes the 6 features documented in NeuralRankingStrategy's Javadoc (and
+computes the 7 features documented in NeuralRankingStrategy's Javadoc (and
 duplicated below — the two MUST stay in sync; see
 feature_parity_fixtures.csv / test_feature_parity.py / FeatureParityTest.java
 for the golden-vector test that now catches drift automatically instead of
@@ -16,7 +16,7 @@ been pairwise ranking accuracy; training pointwise (as an earlier version of
 this script did, via sklearn's MLPRegressor) optimized a different objective
 than the one being measured. See TRAINING.md's "Training objective" section
 for the actual numbers this change produced, including an honest comparison
-against the old pointwise model and a linear-combination-of-all-6-features
+against the old pointwise model and a linear-combination-of-all-7-features
 baseline that the single-feature ablations alone didn't previously rule out.
 
 See TRAINING.md for the full methodology, the actual held-out numbers this
@@ -54,6 +54,7 @@ INTERACTION_EVENTS = {"click", "add_to_cart", "purchase"}
 FEATURE_NAMES = [
     "category_match", "base_score_proxy", "popularity_log",
     "co_occurrence_log", "avg_rating_over_5", "rating_count_log",
+    "session_category_overlap",
 ]
 
 
@@ -94,6 +95,14 @@ def build_aggregates(rows, products):
     interacted_by_user = defaultdict(set)
     category_counts_by_user = defaultdict(lambda: defaultdict(int))
     best_position = defaultdict(lambda: math.inf)  # (user, product) -> min position ever shown at
+    # FEATURE 7 support: which session(s) each (user, product) interaction
+    # pair actually occurred in, and which sessions belong to each user —
+    # lets training reconstruct a real "recent products this session"
+    # context per training pair, the same real signal RecommendRequest's
+    # recent_product_ids field carries at serving time (see
+    # NeuralRankingStrategy's Javadoc, feature 7).
+    sessions_by_user_product = defaultdict(set)
+    sessions_by_user = defaultdict(set)
 
     for row in rows:
         user_id, session_id, product_id, event_type = (
@@ -108,6 +117,8 @@ def build_aggregates(rows, products):
         user_of_session[session_id] = user_id
         interacted_by_session[session_id].add(product_id)
         interacted_by_user[user_id].add(product_id)
+        sessions_by_user_product[(user_id, product_id)].add(session_id)
+        sessions_by_user[user_id].add(session_id)
         category = top_level_category(products.get(product_id, {}).get("category"))
         if category:
             category_counts_by_user[user_id][category] += 1
@@ -128,10 +139,26 @@ def build_aggregates(rows, products):
         "co_occurrence": co_occurrence,
         "best_position": best_position,
         "all_positions": all_positions,
+        "interacted_by_session": interacted_by_session,
+        "sessions_by_user_product": sessions_by_user_product,
+        "sessions_by_user": sessions_by_user,
     }
 
 
-def build_features(user_id, product_id, products, aggregates, position_for_pair):
+def session_category_segments(recent_product_ids, products):
+    """Resolves a session's product IDs to their top-level category segments
+    — mirrors NeuralRankingStrategy.sessionCategorySegments (Java): one
+    entry per resolvable ID, unresolvable/uncategorized IDs are skipped, not
+    padded with a placeholder."""
+    segments = []
+    for pid in recent_product_ids:
+        category = top_level_category(products.get(pid, {}).get("category"))
+        if category:
+            segments.append(category)
+    return segments
+
+
+def build_features(user_id, product_id, products, aggregates, position_for_pair, recent_category_segments=None):
     product = products.get(product_id, {"category": None, "avg_rating": 0.0, "rating_count": 0})
     user_categories = aggregates["category_counts_by_user"].get(user_id, {})
     top_category = max(user_categories, key=user_categories.get) if user_categories else None
@@ -159,7 +186,20 @@ def build_features(user_id, product_id, products, aggregates, position_for_pair)
     avg_rating_over_5 = product["avg_rating"] / 5.0
     rating_count_log = math.log1p(product["rating_count"])
 
-    return [category_match, base_score_proxy, popularity_log, co_occurrence_log, avg_rating_over_5, rating_count_log]
+    # FEATURE 7 (session_category_overlap) — same-session recency-weighted
+    # category overlap (TODO.md item #11), distinct from feature 4's
+    # all-time co_occurrence_log. "Recency-weighted" means "derived from
+    # the session-scoped list," not an actual time-decay curve — see
+    # NeuralRankingStrategy's Javadoc.
+    candidate_category = top_level_category(product["category"])
+    segments = recent_category_segments or []
+    if candidate_category and segments:
+        session_category_overlap = sum(1 for c in segments if c == candidate_category) / len(segments)
+    else:
+        session_category_overlap = 0.0
+
+    return [category_match, base_score_proxy, popularity_log, co_occurrence_log, avg_rating_over_5,
+            rating_count_log, session_category_overlap]
 
 
 def sigmoid(x):
@@ -189,10 +229,21 @@ def build_dataset(rows, products, aggregates, rng):
     X, y, groups = [], [], []
     for user_id in users:
         user_positive_products = [p for (u, p) in pair_weight if u == user_id]
+        user_sessions = sorted(aggregates["sessions_by_user"].get(user_id, set()))
         for product_id in user_positive_products:
             position = aggregates["best_position"].get((user_id, product_id))
             position = position if position and math.isfinite(position) else None
-            X.append(build_features(user_id, product_id, products, aggregates, position))
+            # FEATURE 7 context: the real session(s) this pair actually
+            # occurred in — deterministic choice of the lowest session_id
+            # when a pair spans more than one, "other products in that same
+            # session" (excluding the target itself, which isn't "recent" to
+            # itself).
+            pair_sessions = sorted(aggregates["sessions_by_user_product"].get((user_id, product_id), set()))
+            recent_ids = set()
+            if pair_sessions:
+                recent_ids = aggregates["interacted_by_session"].get(pair_sessions[0], set()) - {product_id}
+            recent_segments = session_category_segments(recent_ids, products)
+            X.append(build_features(user_id, product_id, products, aggregates, position, recent_segments))
             y.append(pair_weight[(user_id, product_id)])
             groups.append(user_id)
 
@@ -213,7 +264,17 @@ def build_dataset(rows, products, aggregates, rng):
             # separator between positives and negatives, not a meaningful
             # signal. See TRAINING.md.
             negative_position = rng.choice(aggregates["all_positions"])
-            X.append(build_features(user_id, candidate, products, aggregates, negative_position))
+            # FEATURE 7 context for a negative: this candidate never
+            # actually appeared in any of this user's sessions, so there's
+            # no real "the session it occurred in" to draw from. Sample one
+            # of the user's actual sessions instead, simulating "if this
+            # candidate had been shown during a real browsing session of
+            # theirs" — same spirit as sampling negative_position from the
+            # empirical position distribution just above, rather than a
+            # fixed sentinel.
+            recent_ids = aggregates["interacted_by_session"].get(rng.choice(user_sessions), set()) if user_sessions else set()
+            recent_segments = session_category_segments(recent_ids, products)
+            X.append(build_features(user_id, candidate, products, aggregates, negative_position, recent_segments))
             y.append(0.0)
             groups.append(user_id)
             sampled += 1
@@ -305,7 +366,7 @@ def train_pointwise_mlp(X_train, y_train, seed):
 
 
 def train_linear_baseline(X_train, y_train, seed):
-    """The missing baseline: a linear combination of all 6 features, not
+    """The missing baseline: a linear combination of all 7 features, not
     just any ONE feature alone. Beating every single-feature baseline (as
     both models above already do) is a low bar; beating this is the real
     test of whether nonlinearity/tree-splits are earning their complexity."""
@@ -336,7 +397,7 @@ def export_xgb_ranker_to_onnx(model):
     .predict() before relying on it."""
     wrapped = WrappedBooster(model.get_booster())
     wrapped.operator_name = "XGBRegressor"
-    onx = convert_xgboost(wrapped, initial_types=[("features", MTFloatTensorType([None, 6]))])
+    onx = convert_xgboost(wrapped, initial_types=[("features", MTFloatTensorType([None, len(FEATURE_NAMES)]))])
     rename_onnx_output(onx, "score")
     return onx
 
@@ -367,7 +428,7 @@ def run_one_seed(rows, products, aggregates, seed, train_pointwise_too=False):
 
     linear_model = train_linear_baseline(X[train_mask], y[train_mask], seed)
     pred_linear = linear_model.decision_function(X[holdout_mask])
-    results["linear_all_6_features"] = pairwise_ranking_accuracy(y[holdout_mask], pred_linear, groups[holdout_mask])
+    results["linear_all_7_features"] = pairwise_ranking_accuracy(y[holdout_mask], pred_linear, groups[holdout_mask])
 
     popularity_only = X[holdout_mask][:, 2]
     results["popularity_only"] = pairwise_ranking_accuracy(y[holdout_mask], popularity_only, groups[holdout_mask])
@@ -410,13 +471,13 @@ def main():
         all_results.append(result)
         if seed == args.seed:
             primary_result = result
-        for key in ["pairwise_xgb_ndcg", "pointwise_mlp_OLD", "linear_all_6_features",
+        for key in ["pairwise_xgb_ndcg", "pointwise_mlp_OLD", "linear_all_7_features",
                     "popularity_only", "category_only", "base_score_only"]:
             print(f"  {key}: {result[key]:.4f}")
 
     if len(seeds) > 1:
         print(f"\n=== summary across {len(seeds)} seeds ({seeds}) ===")
-        for key in ["pairwise_xgb_ndcg", "pointwise_mlp_OLD", "linear_all_6_features",
+        for key in ["pairwise_xgb_ndcg", "pointwise_mlp_OLD", "linear_all_7_features",
                     "popularity_only", "category_only", "base_score_only"]:
             values = [r[key] for r in all_results]
             mean = statistics.mean(values)

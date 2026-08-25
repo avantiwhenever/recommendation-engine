@@ -35,7 +35,8 @@ class SearchGraphqlControllerTest {
         SearchResult result = new SearchResult("chair", RecommenderStrategy.COLLABORATIVE, List.of(product));
         when(searchOrchestrationUseCase.search(
                 ArgumentMatchers.eq("chair"), ArgumentMatchers.eq(5),
-                ArgumentMatchers.eq(RecommenderStrategy.COLLABORATIVE), ArgumentMatchers.isNull()))
+                ArgumentMatchers.eq(RecommenderStrategy.COLLABORATIVE), ArgumentMatchers.isNull(),
+                ArgumentMatchers.eq(List.of()), ArgumentMatchers.isNull(), ArgumentMatchers.eq(0.0)))
                 .thenReturn(result);
 
         graphQlTester.document("""
@@ -64,12 +65,51 @@ class SearchGraphqlControllerTest {
     void strategyDefaultsToCollaborativeWhenOmitted() {
         when(searchOrchestrationUseCase.search(
                 ArgumentMatchers.eq("lamp"), ArgumentMatchers.eq(10),
-                ArgumentMatchers.eq(RecommenderStrategy.COLLABORATIVE), ArgumentMatchers.isNull()))
+                ArgumentMatchers.eq(RecommenderStrategy.COLLABORATIVE), ArgumentMatchers.isNull(),
+                ArgumentMatchers.eq(List.of()), ArgumentMatchers.isNull(), ArgumentMatchers.eq(0.0)))
                 .thenReturn(new SearchResult("lamp", RecommenderStrategy.COLLABORATIVE, List.of()));
 
         graphQlTester.document("""
                         query {
                           search(query: "lamp") {
+                            strategy
+                          }
+                        }
+                        """)
+                .execute()
+                .path("search.strategy").entity(String.class).isEqualTo("COLLABORATIVE");
+    }
+
+    @Test
+    void recentProductIdsArgumentIsPassedThroughToTheUseCase() {
+        when(searchOrchestrationUseCase.search(
+                ArgumentMatchers.eq("chair"), ArgumentMatchers.eq(10),
+                ArgumentMatchers.eq(RecommenderStrategy.COLLABORATIVE), ArgumentMatchers.isNull(),
+                ArgumentMatchers.eq(List.of("p1", "p2")), ArgumentMatchers.isNull(), ArgumentMatchers.eq(0.0)))
+                .thenReturn(new SearchResult("chair", RecommenderStrategy.COLLABORATIVE, List.of()));
+
+        graphQlTester.document("""
+                        query {
+                          search(query: "chair", recentProductIds: ["p1", "p2"]) {
+                            strategy
+                          }
+                        }
+                        """)
+                .execute()
+                .path("search.strategy").entity(String.class).isEqualTo("COLLABORATIVE");
+    }
+
+    @Test
+    void categoryFilterAndMinRatingArgumentsArePassedThroughToTheUseCase() {
+        when(searchOrchestrationUseCase.search(
+                ArgumentMatchers.eq("chair"), ArgumentMatchers.eq(10),
+                ArgumentMatchers.eq(RecommenderStrategy.COLLABORATIVE), ArgumentMatchers.isNull(),
+                ArgumentMatchers.eq(List.of()), ArgumentMatchers.eq("Furniture"), ArgumentMatchers.eq(4.0)))
+                .thenReturn(new SearchResult("chair", RecommenderStrategy.COLLABORATIVE, List.of()));
+
+        graphQlTester.document("""
+                        query {
+                          search(query: "chair", categoryFilter: "Furniture", minRating: 4.0) {
                             strategy
                           }
                         }

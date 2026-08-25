@@ -5,33 +5,33 @@
       "strategyLabel": "NONE",
       "products": [
         {
-          "productId": "35740",
-          "name": "aljo 26.7 '' wide armchair",
+          "productId": "24275",
+          "name": "sirmans 31 '' wide polyester wingback chair",
           "productClass": "Accent Chairs",
           "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.8313445448875427,
+          "averageRating": 4.5,
+          "ratingCount": 1432,
+          "score": 0.020387700534759357,
           "source": "search"
         },
         {
-          "productId": "30382",
-          "name": "accent chair living room/bed room , modern leisure chair teal",
-          "productClass": "Accent Chairs",
+          "productId": "20891",
+          "name": "cronk 26 '' wide wingback chair",
+          "productClass": "Reception Seating Chairs|Accent Chairs",
           "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.8310989737510681,
+          "averageRating": 5.0,
+          "ratingCount": 1,
+          "score": 0.019265232974910396,
           "source": "search"
         },
         {
-          "productId": "36060",
-          "name": "tate 26 '' wide armchair",
-          "productClass": null,
+          "productId": "1589",
+          "name": "modern soft velvet material ergonomics tufted armless chair upholstered accent chair , living room chair bedroom chair home chair with gold legs , set of 2",
+          "productClass": "Accent Chairs",
           "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.8266451954841614,
+          "averageRating": 4.5,
+          "ratingCount": 6,
+          "score": 0.015873015873015872,
           "source": "search"
         },
         {
@@ -41,7 +41,7 @@
           "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
           "averageRating": 4.0,
           "ratingCount": 11,
-          "score": 0.8261808156967163,
+          "score": 0.015625,
           "source": "search"
         },
         {
@@ -51,7 +51,7 @@
           "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
           "averageRating": 5.0,
           "ratingCount": 12,
-          "score": 0.8259901404380798,
+          "score": 0.015384615384615385,
           "source": "search"
         },
         {
@@ -61,7 +61,7 @@
           "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
           "averageRating": 4.5,
           "ratingCount": 15,
-          "score": 0.8259655237197876,
+          "score": 0.015151515151515152,
           "source": "search"
         }
       ]
@@ -70,33 +70,53 @@
       "strategyLabel": "POPULARITY",
       "products": [
         {
-          "productId": "30382",
-          "name": "accent chair living room/bed room , modern leisure chair teal",
+          "productId": "24275",
+          "name": "sirmans 31 '' wide polyester wingback chair",
           "productClass": "Accent Chairs",
           "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.972607900714721,
+          "averageRating": 4.5,
+          "ratingCount": 1432,
+          "score": 0.7924050632911392,
           "source": "Popularity"
         },
         {
-          "productId": "35740",
-          "name": "aljo 26.7 '' wide armchair",
-          "productClass": "Accent Chairs",
+          "productId": "20891",
+          "name": "cronk 26 '' wide wingback chair",
+          "productClass": "Reception Seating Chairs|Accent Chairs",
           "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.8222222222222222,
+          "averageRating": 5.0,
+          "ratingCount": 1,
+          "score": 0.5325117526415863,
           "source": "Popularity"
         },
         {
-          "productId": "36060",
-          "name": "tate 26 '' wide armchair",
-          "productClass": null,
+          "productId": "42808",
+          "name": "barrel chair",
+          "productClass": "Accent Chairs",
           "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.2980358407052407,
+          "averageRating": 4.5,
+          "ratingCount": 1605,
+          "score": 0.5257528111987834,
+          "source": "Popularity"
+        },
+        {
+          "productId": "35808",
+          "name": "melina 26.77 '' wide armchair",
+          "productClass": "Accent Chairs",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
+          "averageRating": 4.5,
+          "ratingCount": 46,
+          "score": 0.4359737072438104,
+          "source": "Popularity"
+        },
+        {
+          "productId": "1589",
+          "name": "modern soft velvet material ergonomics tufted armless chair upholstered accent chair , living room chair bedroom chair home chair with gold legs , set of 2",
+          "productClass": "Accent Chairs",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
+          "averageRating": 4.5,
+          "ratingCount": 6,
+          "score": 0.3893145396287584,
           "source": "Popularity"
         },
         {
@@ -106,47 +126,7 @@
           "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
           "averageRating": 4.0,
           "ratingCount": 11,
-          "score": 0.11290351573802182,
-          "source": "Popularity"
-        },
-        {
-          "productId": "20865",
-          "name": "penobscot 28.5 '' wide polyester wingback chair",
-          "productClass": "Accent Chairs",
-          "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
-          "averageRating": 4.5,
-          "ratingCount": 15,
-          "score": 0.0888888888888889,
-          "source": "Popularity"
-        },
-        {
-          "productId": "37941",
-          "name": "hubert 28 '' wide armchair",
-          "productClass": null,
-          "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
-          "averageRating": 5.0,
-          "ratingCount": 12,
-          "score": 0.002745858496315585,
-          "source": "Popularity"
-        },
-        {
-          "productId": "29636",
-          "name": "aurora task chair",
-          "productClass": "Office Chairs",
-          "categoryHierarchy": "Furniture / Office Furniture / Office Chairs",
-          "averageRating": 4.5,
-          "ratingCount": 1168,
-          "score": 0.0,
-          "source": "Popularity"
-        },
-        {
-          "productId": "13712",
-          "name": "jennie solid wood tufted upholstered low profile platform bed",
-          "productClass": "Teen Beds|Beds",
-          "categoryHierarchy": "Furniture / Bedroom Furniture / Beds & Headboards / Beds",
-          "averageRating": 4.5,
-          "ratingCount": 9895,
-          "score": 0.0,
+          "score": 0.33389628148843076,
           "source": "Popularity"
         }
       ]
@@ -155,33 +135,33 @@
       "strategyLabel": "COLLABORATIVE",
       "products": [
         {
-          "productId": "35740",
-          "name": "aljo 26.7 '' wide armchair",
+          "productId": "24275",
+          "name": "sirmans 31 '' wide polyester wingback chair",
           "productClass": "Accent Chairs",
           "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.8313445448875427,
+          "averageRating": 4.5,
+          "ratingCount": 1432,
+          "score": 0.020387700534759357,
           "source": "Collaborative Filtering"
         },
         {
-          "productId": "30382",
-          "name": "accent chair living room/bed room , modern leisure chair teal",
-          "productClass": "Accent Chairs",
+          "productId": "20891",
+          "name": "cronk 26 '' wide wingback chair",
+          "productClass": "Reception Seating Chairs|Accent Chairs",
           "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.8310989737510681,
+          "averageRating": 5.0,
+          "ratingCount": 1,
+          "score": 0.019265232974910396,
           "source": "Collaborative Filtering"
         },
         {
-          "productId": "36060",
-          "name": "tate 26 '' wide armchair",
-          "productClass": null,
+          "productId": "1589",
+          "name": "modern soft velvet material ergonomics tufted armless chair upholstered accent chair , living room chair bedroom chair home chair with gold legs , set of 2",
+          "productClass": "Accent Chairs",
           "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.8266451954841614,
+          "averageRating": 4.5,
+          "ratingCount": 6,
+          "score": 0.015873015873015872,
           "source": "Collaborative Filtering"
         },
         {
@@ -191,7 +171,7 @@
           "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
           "averageRating": 4.0,
           "ratingCount": 11,
-          "score": 0.8261808156967163,
+          "score": 0.015625,
           "source": "Collaborative Filtering"
         },
         {
@@ -201,7 +181,7 @@
           "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
           "averageRating": 5.0,
           "ratingCount": 12,
-          "score": 0.8259901404380798,
+          "score": 0.015384615384615385,
           "source": "Collaborative Filtering"
         },
         {
@@ -211,27 +191,7 @@
           "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
           "averageRating": 4.5,
           "ratingCount": 15,
-          "score": 0.8259655237197876,
-          "source": "Collaborative Filtering"
-        },
-        {
-          "productId": "24095",
-          "name": "blue dinosaur jumboz plush floor pillow",
-          "productClass": "Accent Pillows",
-          "categoryHierarchy": "D\u00e9cor & Pillows / Decorative Pillows & Blankets / Throw Pillows / Blue Throw Pillows",
-          "averageRating": 5.0,
-          "ratingCount": 88,
-          "score": 0.0,
-          "source": "Collaborative Filtering"
-        },
-        {
-          "productId": "39496",
-          "name": "dinosaur land area rug",
-          "productClass": "Area Rugs",
-          "categoryHierarchy": "Rugs / Area Rugs / 4' x 6' Area Rugs",
-          "averageRating": 5.0,
-          "ratingCount": 34,
-          "score": 0.0,
+          "score": 0.015151515151515152,
           "source": "Collaborative Filtering"
         }
       ]
@@ -240,33 +200,43 @@
       "strategyLabel": "BANDIT",
       "products": [
         {
-          "productId": "35740",
-          "name": "aljo 26.7 '' wide armchair",
+          "productId": "24275",
+          "name": "sirmans 31 '' wide polyester wingback chair",
           "productClass": "Accent Chairs",
           "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.8313445448875427,
+          "averageRating": 4.5,
+          "ratingCount": 1432,
+          "score": 0.020387700534759357,
           "source": "Bandit Exploration"
         },
         {
-          "productId": "30382",
-          "name": "accent chair living room/bed room , modern leisure chair teal",
-          "productClass": "Accent Chairs",
+          "productId": "20891",
+          "name": "cronk 26 '' wide wingback chair",
+          "productClass": "Reception Seating Chairs|Accent Chairs",
           "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.8310989737510681,
+          "averageRating": 5.0,
+          "ratingCount": 1,
+          "score": 0.019265232974910396,
           "source": "Bandit Exploration"
         },
         {
-          "productId": "36060",
-          "name": "tate 26 '' wide armchair",
-          "productClass": null,
+          "productId": "1589",
+          "name": "modern soft velvet material ergonomics tufted armless chair upholstered accent chair , living room chair bedroom chair home chair with gold legs , set of 2",
+          "productClass": "Accent Chairs",
           "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.8266451954841614,
+          "averageRating": 4.5,
+          "ratingCount": 6,
+          "score": 0.015873015873015872,
+          "source": "Bandit Exploration"
+        },
+        {
+          "productId": "26834",
+          "name": "luna acrylic bubble accent swing chair with stand",
+          "productClass": "Hammocks|Porch Swings",
+          "categoryHierarchy": "Outdoor / Outdoor & Patio Furniture / Outdoor Seating & Patio Chairs / Porch Swings",
+          "averageRating": 4.5,
+          "ratingCount": 77,
+          "score": 0.010638297872340425,
           "source": "Bandit Exploration"
         },
         {
@@ -276,7 +246,7 @@
           "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
           "averageRating": 4.0,
           "ratingCount": 11,
-          "score": 0.8261808156967163,
+          "score": 0.015625,
           "source": "Bandit Exploration"
         },
         {
@@ -286,17 +256,7 @@
           "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
           "averageRating": 5.0,
           "ratingCount": 12,
-          "score": 0.8259901404380798,
-          "source": "Bandit Exploration"
-        },
-        {
-          "productId": "20865",
-          "name": "penobscot 28.5 '' wide polyester wingback chair",
-          "productClass": "Accent Chairs",
-          "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
-          "averageRating": 4.5,
-          "ratingCount": 15,
-          "score": 0.8259655237197876,
+          "score": 0.015384615384615385,
           "source": "Bandit Exploration"
         }
       ]
@@ -305,54 +265,99 @@
       "strategyLabel": "NEURAL",
       "products": [
         {
-          "productId": "30382",
-          "name": "accent chair living room/bed room , modern leisure chair teal",
-          "productClass": "Accent Chairs",
-          "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": -1.7266792058944702,
-          "source": "Neural Ranking"
-        },
-        {
-          "productId": "35740",
-          "name": "aljo 26.7 '' wide armchair",
-          "productClass": "Accent Chairs",
-          "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": -2.278136730194092,
-          "source": "Neural Ranking"
-        },
-        {
-          "productId": "36060",
-          "name": "tate 26 '' wide armchair",
-          "productClass": null,
-          "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": -2.278136730194092,
-          "source": "Neural Ranking"
-        },
-        {
-          "productId": "8169",
-          "name": "maddock 25.5 '' wide armchair",
-          "productClass": "Accent Chairs",
-          "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
-          "averageRating": 4.0,
-          "ratingCount": 11,
-          "score": -3.0049026012420654,
-          "source": "Neural Ranking"
-        },
-        {
-          "productId": "20865",
-          "name": "penobscot 28.5 '' wide polyester wingback chair",
+          "productId": "42808",
+          "name": "barrel chair",
           "productClass": "Accent Chairs",
           "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
           "averageRating": 4.5,
-          "ratingCount": 15,
-          "score": -3.0049026012420654,
+          "ratingCount": 1605,
+          "score": -1.5081232786178589,
           "source": "Neural Ranking"
+        },
+        {
+          "productId": "35808",
+          "name": "melina 26.77 '' wide armchair",
+          "productClass": "Accent Chairs",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
+          "averageRating": 4.5,
+          "ratingCount": 46,
+          "score": -1.6705262660980225,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "24275",
+          "name": "sirmans 31 '' wide polyester wingback chair",
+          "productClass": "Accent Chairs",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
+          "averageRating": 4.5,
+          "ratingCount": 1432,
+          "score": -1.8680707216262817,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "6519",
+          "name": "straus 27.6 '' wide velvet side chair",
+          "productClass": "Accent Chairs",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
+          "averageRating": 5.0,
+          "ratingCount": 5,
+          "score": -1.8680707216262817,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "20860",
+          "name": "hiorulf 33 '' wide tufted polyester armchair",
+          "productClass": "Accent Chairs",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
+          "averageRating": 5.0,
+          "ratingCount": 4,
+          "score": -1.8680707216262817,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "29178",
+          "name": "roseanna 29 '' wide armchair",
+          "productClass": "Accent Chairs",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
+          "averageRating": 4.5,
+          "ratingCount": 278,
+          "score": -1.883003830909729,
+          "source": "Neural Ranking"
+        }
+      ]
+    },
+    "DIVERSE_POPULARITY": {
+      "strategyLabel": "DIVERSE_POPULARITY",
+      "products": [
+        {
+          "productId": "24275",
+          "name": "sirmans 31 '' wide polyester wingback chair",
+          "productClass": "Accent Chairs",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
+          "averageRating": 4.5,
+          "ratingCount": 1432,
+          "score": 0.7924050632911392,
+          "source": "Popularity (diversified)"
+        },
+        {
+          "productId": "20891",
+          "name": "cronk 26 '' wide wingback chair",
+          "productClass": "Reception Seating Chairs|Accent Chairs",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
+          "averageRating": 5.0,
+          "ratingCount": 1,
+          "score": 0.5325117526415863,
+          "source": "Popularity (diversified)"
+        },
+        {
+          "productId": "42808",
+          "name": "barrel chair",
+          "productClass": "Accent Chairs",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
+          "averageRating": 4.5,
+          "ratingCount": 1605,
+          "score": 0.5257528111987834,
+          "source": "Popularity (diversified)"
         },
         {
           "productId": "37941",
@@ -361,8 +366,28 @@
           "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
           "averageRating": 5.0,
           "ratingCount": 12,
-          "score": -3.6089937686920166,
-          "source": "Neural Ranking"
+          "score": 0.299190016490493,
+          "source": "Popularity (diversified)"
+        },
+        {
+          "productId": "35808",
+          "name": "melina 26.77 '' wide armchair",
+          "productClass": "Accent Chairs",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
+          "averageRating": 4.5,
+          "ratingCount": 46,
+          "score": 0.4359737072438104,
+          "source": "Popularity (diversified)"
+        },
+        {
+          "productId": "1589",
+          "name": "modern soft velvet material ergonomics tufted armless chair upholstered accent chair , living room chair bedroom chair home chair with gold legs , set of 2",
+          "productClass": "Accent Chairs",
+          "categoryHierarchy": "Furniture / Living Room Furniture / Chairs & Seating / Accent Chairs",
+          "averageRating": 4.5,
+          "ratingCount": 6,
+          "score": 0.3893145396287584,
+          "source": "Popularity (diversified)"
         }
       ]
     }

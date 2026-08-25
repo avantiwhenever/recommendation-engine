@@ -5,7 +5,7 @@
 // in this file or in index.html, so re-capturing never requires hand-editing
 // any JS/HTML.
 
-const STRATEGY_ORDER = ["NONE", "POPULARITY", "COLLABORATIVE", "BANDIT", "NEURAL"];
+const STRATEGY_ORDER = ["NONE", "POPULARITY", "COLLABORATIVE", "BANDIT", "NEURAL", "DIVERSE_POPULARITY"];
 
 // Kept in sync with web/src/utils/humanizeSource.ts's mapping — same badge
 // language in both the live React app and this static demo.
@@ -16,6 +16,7 @@ const SOURCE_LABELS = {
   "collaborative filtering": "Boosted — shoppers like you also viewed this",
   "bandit exploration": "Surfaced for exploration",
   "neural ranking": "Ranked by the neural model",
+  "popularity (diversified)": "Boosted for popularity, then spread across categories",
 };
 
 function humanizeSource(source) {
@@ -23,7 +24,7 @@ function humanizeSource(source) {
 }
 
 // Offline evaluation numbers from RESULTS.md, regenerated via
-// scripts/run-recommender-eval.sh. RESULTS.md reports TWO tables:
+// scripts/run-recommender-eval.sh. RESULTS.md reports THREE sections:
 //   - "Implicit clickstream eval" — relevance grades derived from the same
 //     synthetic clickstream the strategies themselves read from. An earlier
 //     version of this eval leaked future clickstream events into feature
@@ -34,6 +35,17 @@ function humanizeSource(source) {
 //     table scored against WANDS's own human relevance grades (label.csv),
 //     which no strategy was trained or tuned against. This is the more
 //     trustworthy of the two, and is what's shown below.
+//   - "Off-policy (IPS) evaluation" — an inverse-propensity-weighted estimate
+//     of each strategy's real reward, not shown per-card here (single-number
+//     IPS estimates need the effective-sample-size caveat alongside them to
+//     be honest — see RESULTS.md's own table and read-me-first paragraph
+//     rather than a stripped-down version here).
+// Also note: every query below is now served by a widen-then-select pipeline
+// (TODO.md item #9) — search-service is asked for a much wider candidate
+// pool than what's displayed, a hard eligibility filter drops zero-social-
+// proof candidates, and only the survivors are handed to whichever strategy
+// runs — so results (including None's) reflect that selection stage, not
+// just search-service's raw top-K.
 // Update these four fields per strategy if RESULTS.md's numbers change.
 const STRATEGY_INFO = {
   NONE: {
@@ -55,10 +67,10 @@ const STRATEGY_INFO = {
   COLLABORATIVE: {
     label: "Collaborative Filtering",
     tagline: "Personalized to this user's real interaction history — not the top scorer, but not a coin flip either.",
-    how: "Classic item-item collaborative filtering: boosts candidates by their adjusted-cosine similarity, computed from real clickstream sessions, to products this specific user already interacted with, and injects related items the search didn't surface.",
+    how: "Classic item-item collaborative filtering: boosts candidates by their adjusted-cosine similarity, computed from real clickstream sessions, to products this specific user already interacted with (weighted more heavily for the current browsing session than all-time history), and injects related items the search didn't surface. Falls back to a named, explicit popularity blend for users with no history at all — a deliberate cold-start policy, not a silent no-op.",
     differs: "The only strategy personalized to the requesting user via real interaction history, not just a global signal. An earlier version of this project's eval mistakenly credited this strategy as the outright winner — that result turned out to be an artifact of circular ground truth (clickstream-derived labels scoring a clickstream-driven strategy) plus a temporal leak. Once fixed, it lands in the same tight band as the other strategies on the independent eval.",
-    grounding: "Item-item collaborative filtering with adjusted-cosine normalization — Sarwar, Karypis, Konstan & Riedl, “Item-Based Collaborative Filtering Recommendation Algorithms,” WWW 2001.",
-    metrics: { ndcg: 0.9675, mrr: 0.9981, recall: 0.0608, precision: 0.9928 },
+    grounding: "Item-item collaborative filtering with adjusted-cosine normalization — Sarwar, Karypis, Konstan & Riedl, “Item-Based Collaborative Filtering Recommendation Algorithms,” WWW 2001. Cold-start fallback and session-recency weighting follow Netflix's “Beyond the 5 stars” and Pinterest's real-time user-signal-serving writeups.",
+    metrics: { ndcg: 0.9689, mrr: 0.9981, recall: 0.0609, precision: 0.9905 },
   },
   BANDIT: {
     label: "Bandit Exploration",
@@ -66,15 +78,23 @@ const STRATEGY_INFO = {
     how: "Thompson Sampling over per-category arms: a Beta(α,β) posterior per category, warm-started from historical clickstream engagement rates and conditioned on the requesting user's top category, with a windowed cap on how much any one exploration draw can reorder the list.",
     differs: "The only strategy that intentionally sacrifices measured ranking quality. Every other strategy tries to rank the best result first; this one spends some of that precision on surfacing under-exposed products, on the bet that it pays off over time in ways a single offline snapshot can't measure. Honesty note: the priors are fixed at construction time from historical data — there's no live reward loop feeding results back into the arms yet.",
     grounding: "Thompson Sampling for explore/exploit tradeoffs in ranked recommendations — see Etsy's OPAR (Optimizely-style Personalization) engineering blog and Spotify Research's contextual-bandit writeups on recommendation ranking. Scoring below the None baseline in offline evaluation is expected: exploration's real value — surfacing under-exposed products over time — isn't something a single held-out snapshot can credit; see RESULTS.md.",
-    metrics: { ndcg: 0.9458, mrr: 0.9944, recall: 0.0588, precision: 0.9938 },
+    metrics: { ndcg: 0.9447, mrr: 0.9945, recall: 0.0589, precision: 0.9939 },
   },
   NEURAL: {
     label: "Neural Ranking",
     tagline: "A learning-to-rank model, trained from scratch on this project's own data.",
-    how: "Scores each candidate with an XGBoost pairwise ranking model (trained by training/train_neural_ranker.py on this project's synthetic clickstream with a rank:ndcg objective, exported to ONNX) over 6 features: category match, base search score, popularity, co-occurrence with the user's history, average rating, and review count.",
-    differs: "The only strategy that learned its ranking function from data rather than having it hand-specified. Reported honestly: a simple logistic-regression baseline trained on the same features scored marginally higher than the XGBoost model on the held-out split (0.8046 vs 0.7995). XGBoost was kept anyway for its ability to model feature interactions, but the gap is a real finding, not rounding noise — see training/TRAINING.md.",
+    how: "Scores each candidate with an XGBoost pairwise ranking model (trained by training/train_neural_ranker.py on this project's synthetic clickstream with a rank:ndcg objective, exported to ONNX) over 7 features: category match, base search score, popularity, co-occurrence with the user's all-time history, average rating, review count, and same-session category overlap (distinct from the all-time co-occurrence signal).",
+    differs: "The only strategy that learned its ranking function from data rather than having it hand-specified. Reported honestly: a simple logistic-regression baseline trained on the same features scored marginally higher than the XGBoost model on the held-out split (0.8751 vs 0.8687, both up ~6-7 points after adding the 7th feature). XGBoost was kept anyway for its ability to model feature interactions, but the gap is a real finding, not rounding noise — see training/TRAINING.md.",
     grounding: "Pairwise learning-to-rank (LambdaRank-style, via XGBoost's rank:ndcg objective) over cheap, mostly-cached features and one small inference pass — same “cheap features, no transformer” philosophy as the sibling `search` project's NeuralRerankStrategy/RerankFeatureBuilder pattern. The training run initially produced a suspiciously perfect result — traced to two real data-leakage bugs and fixed before trusting these numbers.",
-    metrics: { ndcg: 0.9638, mrr: 0.9977, recall: 0.0608, precision: 0.9967 },
+    metrics: { ndcg: 0.9615, mrr: 0.9975, recall: 0.0607, precision: 0.9966 },
+  },
+  DIVERSE_POPULARITY: {
+    label: "Diverse Popularity",
+    tagline: "Popularity, then deliberately spread across categories so the top 5 isn't 5 near-duplicates.",
+    how: "Runs Popularity first, then a greedy MMR (maximal marginal relevance) re-rank pass on top: each next pick maximizes relevance minus a penalty for how similar (by category and product class) it is to items already selected higher up. A decorator, not a from-scratch strategy — it can wrap any strategy's output, Popularity is just the one wired up here.",
+    differs: "The only strategy that explicitly trades some ranking quality for result variety, on purpose — same honest tradeoff spirit as Bandit Exploration, but optimizing for a different thing (category spread instead of exploration). Lower nDCG than plain Popularity in both eval tables is the expected cost of that tradeoff, not a bug.",
+    grounding: "Netflix's “Recommendations: Beyond the 5 stars” Part 1/Part 2 on why optimizing a single relevance score per item, with no diversity term, can produce a top-N that's technically high-scoring but redundant. Similarity here is a category/product-class proxy; swapping in real embedding similarity (via recommender-service's new VectorSimilarityPort) is a documented next step, not implemented yet.",
+    metrics: { ndcg: 0.9061, mrr: 0.9981, recall: 0.0555, precision: 0.8916 },
   },
 };
 

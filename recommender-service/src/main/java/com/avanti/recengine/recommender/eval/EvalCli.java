@@ -7,6 +7,7 @@ import com.avanti.recengine.recommender.domain.ScoredProduct;
 import com.avanti.recengine.recommender.domain.Strategy;
 import com.avanti.recengine.recommender.domain.strategy.BanditExploreStrategy;
 import com.avanti.recengine.recommender.domain.strategy.CollaborativeFilteringStrategy;
+import com.avanti.recengine.recommender.domain.strategy.DiversityAwareStrategy;
 import com.avanti.recengine.recommender.domain.strategy.NeuralRankingStrategy;
 import com.avanti.recengine.recommender.domain.strategy.PassthroughStrategy;
 import com.avanti.recengine.recommender.domain.strategy.PopularityBoostStrategy;
@@ -93,6 +94,16 @@ import java.util.stream.Collectors;
  * evaluation (see arXiv:2509.06002's discussion of this exact tension).
  * Take the injecting strategies' numbers here as a lower bound on their
  * real value, not the full picture.
+ *
+ * <p><b>A third table, off-policy (IPS) reward estimation</b>: both tables
+ * above score a strategy's ranking as a static list against a grade, not
+ * against what users would actually have <i>done</i> had that ranking been
+ * shown. {@link IpsEvaluator} closes that gap by reweighting each session's
+ * already-observed clickstream outcome by the known cascade logging
+ * policy's propensity for that outcome — see that class's Javadoc for the
+ * full methodology, including its honest handling of IPS's known
+ * high-variance failure mode via propensity clipping and an effective
+ * sample size diagnostic.
  */
 @Command(name = "recommender-eval", mixinStandardHelpOptions = true,
         description = "Evaluates all recommendation strategies against held-out clickstream sessions.")
@@ -137,19 +148,23 @@ public class EvalCli implements Callable<Integer> {
         Map<Strategy, List<QueryMetrics>> clickstreamMetrics = new LinkedHashMap<>();
         Map<Strategy, List<QueryMetrics>> independentMetrics = new LinkedHashMap<>();
         Map<Strategy, List<Long>> latenciesMs = new LinkedHashMap<>();
+        Map<Strategy, IpsEvaluator.Accumulator> ipsAccumulators = new LinkedHashMap<>();
         for (Strategy type : Strategy.values()) {
             clickstreamMetrics.put(type, new ArrayList<>());
             independentMetrics.put(type, new ArrayList<>());
             latenciesMs.put(type, new ArrayList<>());
+            ipsAccumulators.put(type, new IpsEvaluator.Accumulator());
         }
 
         try (OnnxRankingModelAdapter rankingModel = new OnnxRankingModelAdapter(neuralModelPath)) {
+            PopularityBoostStrategy popularityBoost = new PopularityBoostStrategy(index);
             Map<Strategy, RecommendationStrategy> strategies = Map.of(
                     Strategy.NONE, new PassthroughStrategy(),
-                    Strategy.POPULARITY, new PopularityBoostStrategy(index),
+                    Strategy.POPULARITY, popularityBoost,
                     Strategy.COLLABORATIVE, new CollaborativeFilteringStrategy(index),
                     Strategy.BANDIT, new BanditExploreStrategy(index, new Random(SEED)),
-                    Strategy.NEURAL, new NeuralRankingStrategy(index, rankingModel)
+                    Strategy.NEURAL, new NeuralRankingStrategy(index, rankingModel),
+                    Strategy.DIVERSE_POPULARITY, new DiversityAwareStrategy(popularityBoost)
             );
 
             // Single time-ordered replay, shared by every strategy: for each
@@ -170,6 +185,7 @@ public class EvalCli implements Callable<Integer> {
                         List<String> rankedIds = reranked.stream().map(ScoredProduct::productId).toList();
                         clickstreamMetrics.get(type).add(toMetrics(session.sessionId(), rankedIds, session.relevanceGrades()));
                         independentMetrics.get(type).add(toMetrics(session.sessionId(), rankedIds, session.independentRelevanceGrades()));
+                        ipsAccumulators.get(type).recordSession(session, rankedIds, K);
                     }
                 }
                 index.advance(sessionId);
@@ -179,8 +195,12 @@ public class EvalCli implements Callable<Integer> {
         int evaluatedSessions = clickstreamMetrics.get(Strategy.NONE).size();
         List<StrategySummary> clickstreamSummaries = summarize(clickstreamMetrics, latenciesMs);
         List<StrategySummary> independentSummaries = summarize(independentMetrics, latenciesMs);
+        Map<Strategy, IpsEvaluator.IpsResult> ipsResults = new LinkedHashMap<>();
+        for (Strategy type : Strategy.values()) {
+            ipsResults.put(type, ipsAccumulators.get(type).result());
+        }
 
-        writeResultsMarkdown(clickstreamSummaries, independentSummaries, evaluatedSessions);
+        writeResultsMarkdown(clickstreamSummaries, independentSummaries, ipsResults, evaluatedSessions);
         return 0;
     }
 
@@ -200,6 +220,7 @@ public class EvalCli implements Callable<Integer> {
             case COLLABORATIVE -> "Collaborative Filtering";
             case BANDIT -> "Bandit Exploration";
             case NEURAL -> "Neural Ranking";
+            case DIVERSE_POPULARITY -> "Diverse Popularity";
         };
     }
 
@@ -225,7 +246,8 @@ public class EvalCli implements Callable<Integer> {
         return new java.util.HashSet<>(users.subList(0, holdOutCount));
     }
 
-    private void writeResultsMarkdown(List<StrategySummary> clickstreamSummaries, List<StrategySummary> independentSummaries, int sessionCount) throws IOException {
+    private void writeResultsMarkdown(List<StrategySummary> clickstreamSummaries, List<StrategySummary> independentSummaries,
+                                       Map<Strategy, IpsEvaluator.IpsResult> ipsResults, int sessionCount) throws IOException {
         StringBuilder sb = new StringBuilder();
         sb.append("# Recommender Evaluation Results\n\n");
         sb.append("Offline evaluation of each recommendation strategy against ").append(sessionCount)
@@ -285,8 +307,58 @@ public class EvalCli implements Callable<Integer> {
         sb.append("candidate list (no ONNX/gRPC/disk I/O in the hot path even for `Neural Ranking`'s forward pass), ");
         sb.append("genuinely sub-millisecond rather than an unmeasured placeholder._\n");
 
+        appendIpsSection(sb, ipsResults);
+
         java.nio.file.Files.writeString(resultsMdPath, sb.toString());
         log.info("Wrote {}", resultsMdPath);
+    }
+
+    private void appendIpsSection(StringBuilder sb, Map<Strategy, IpsEvaluator.IpsResult> ipsResults) {
+        sb.append("\n## Off-policy (IPS) evaluation\n\n");
+        sb.append("The two tables above score each strategy's reranking as a static list against a grade — neither ");
+        sb.append("can estimate the *reward* (click/cart/purchase) users would actually have generated had a ");
+        sb.append("strategy's ranking been the one shown, since no user was ever shown it; only the clickstream's ");
+        sb.append("original logging-policy ranking was. This table closes that gap using Inverse Propensity Scoring ");
+        sb.append("(IPS), reweighting each *already-observed* outcome by the inverse probability the known cascade ");
+        sb.append("logging policy (`WANDS/CLICKSTREAM.md`'s exact click/cart/purchase model — not estimated) would ");
+        sb.append("have produced that outcome at the position it actually showed the item. This is unusually ");
+        sb.append("implementable here because, unlike almost every real production system, this project's synthetic ");
+        sb.append("clickstream has a fully known, documented logging policy. See Criteo's [\"Offline A/B Testing ");
+        sb.append("for Recommender Systems\"](https://arxiv.org/pdf/1801.07030) and Spotify Research's ");
+        sb.append("[counterfactual-evaluation work](https://research.atspotify.com/publications/towards-a-fair-marketplace-counterfactual-evaluation-of-the-trade-off-between-relevance-fairness-satisfaction-in-recommendation-systems), ");
+        sb.append("both cited in TODO.md item #4. Simplifying assumption, stated honestly: this is an *item-level* ");
+        sb.append("IPS estimator (each item's presence in the top-5 treated as an independent action), not a full ");
+        sb.append("listwise estimator — see `IpsEvaluator`'s class Javadoc.\n\n");
+
+        sb.append("| Strategy | Raw IPS estimate | Clipped IPS estimate (floor 1e-3) | Effective sample size | Scored items |\n");
+        sb.append("|---|---|---|---|---|\n");
+        for (Strategy type : Strategy.values()) {
+            IpsEvaluator.IpsResult r = ipsResults.get(type);
+            sb.append("| ").append(strategyDisplayName(type))
+                    .append(" | ").append(format(r.rawEstimate()))
+                    .append(" | ").append(format(r.clippedEstimate()))
+                    .append(" | ").append(String.format(Locale.ROOT, "%.1f", r.effectiveSampleSize()))
+                    .append(" | ").append(r.scoredItemCount())
+                    .append(" |\n");
+        }
+
+        sb.append("\n_**Read the effective sample size (ESS) before trusting either estimate.** IPS's known failure ");
+        sb.append("mode is variance: a rare high-reward outcome (a purchase) logged for an item the policy was ");
+        sb.append("unlikely to produce that outcome for gets a tiny propensity and an enormous inverse weight, and ");
+        sb.append("can dominate the whole sum. ESS (Hájek/Kish: (Σw)²/Σw² over the clipped weights) estimates how ");
+        sb.append("many *effectively independent* samples the clipped estimate is really resting on — a value close ");
+        sb.append("to \"scored items\" means weights are fairly uniform and the estimate is stable; a value far ");
+        sb.append("below it means a handful of extreme-weight events are carrying the number, and it should be read ");
+        sb.append("as noisy/directional at best, not a precise point estimate. If the raw and clipped columns differ ");
+        sb.append("substantially, that's the clipping visibly doing its job, not a discrepancy to reconcile — the ");
+        sb.append("clipped number is the one to trust in that case._\n");
+        sb.append("\n_Reward scale (0.2/0.5/0.8/1.0 for view/click/cart/purchase) matches `TemporalClickstreamIndex`'s ");
+        sb.append("popularity weighting elsewhere in this codebase, for consistency — these are relative weights, ");
+        sb.append("not a probability or a currency amount, so compare estimates *between strategies* in this table, ");
+        sb.append("not against the 0-1 metrics in the tables above, which are on an unrelated scale._\n");
+        sb.append("\n_Injected products (Popularity/Collaborative Filtering can add items absent from a session's ");
+        sb.append("original candidates) contribute nothing here — an injected item has no logged position or ");
+        sb.append("observed outcome to reweight, the same honest gap already noted for the other two tables above._\n");
     }
 
     private void appendTable(StringBuilder sb, List<StrategySummary> summaries) {

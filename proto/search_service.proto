@@ -15,6 +15,15 @@ service SearchService {
 message SearchRequest {
   string query = 1;
   int32 top_k = 2;
+  // TODO.md item #12: real, if partial, contract enrichment — a hard
+  // eligibility filter applied *before* scoring, distinct from
+  // SearchOrchestrationUseCase's own zero-social-proof selection stage
+  // (item #9). Both empty/unset (proto3 default) mean "no filter". A
+  // pagination cursor and a per-result debug/explain field were also
+  // scoped by this item but not implemented here — see TODO.md #12 for
+  // why, and to pick them up.
+  string category_filter = 3;
+  double min_rating = 4;
 }
 
 message SearchResponse {

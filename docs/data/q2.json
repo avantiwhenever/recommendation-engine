@@ -5,63 +5,63 @@
       "strategyLabel": "NONE",
       "products": [
         {
+          "productId": "28340",
+          "name": "adejah 35 '' dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 5.0,
+          "ratingCount": 63,
+          "score": 0.02202101497876146,
+          "source": "search"
+        },
+        {
+          "productId": "1065",
+          "name": "casimir regetta dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables / 6 Seat Kitchen & Dining Tables",
+          "averageRating": 5.0,
+          "ratingCount": 12,
+          "score": 0.02078544061302682,
+          "source": "search"
+        },
+        {
+          "productId": "40093",
+          "name": "nika dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables / 6 Seat Kitchen & Dining Tables",
+          "averageRating": 5.0,
+          "ratingCount": 9,
+          "score": 0.01748053786270347,
+          "source": "search"
+        },
+        {
+          "productId": "5991",
+          "name": "poirier dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 4.5,
+          "ratingCount": 295,
+          "score": 0.016950153555398063,
+          "source": "search"
+        },
+        {
           "productId": "29339",
           "name": "atami dining table",
           "productClass": null,
           "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
           "averageRating": 5.0,
           "ratingCount": 13,
-          "score": 0.8313280940055847,
+          "score": 0.01639344262295082,
           "source": "search"
         },
         {
-          "productId": "9882",
-          "name": "alcinia extendable dining table",
-          "productClass": "Dining Tables",
-          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.8304022550582886,
-          "source": "search"
-        },
-        {
-          "productId": "24405",
-          "name": "isadore dining table",
-          "productClass": "Dining Tables",
-          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables / 6 Seat Kitchen & Dining Tables",
-          "averageRating": 4.5,
-          "ratingCount": 5,
-          "score": 0.8296107053756714,
-          "source": "search"
-        },
-        {
-          "productId": "21122",
-          "name": "dining dining table",
+          "productId": "35694",
+          "name": "counter height dining table",
           "productClass": "Dining Tables",
           "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
           "averageRating": 4.5,
-          "ratingCount": 41,
-          "score": 0.8256925940513611,
-          "source": "search"
-        },
-        {
-          "productId": "34228",
-          "name": "mccrea 42 '' dining table",
-          "productClass": "Conference Tables|Dining Tables",
-          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.8240455985069275,
-          "source": "search"
-        },
-        {
-          "productId": "23826",
-          "name": "haleigh 48 '' pedestal dining table",
-          "productClass": "Dining Tables",
-          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
-          "averageRating": 5.0,
-          "ratingCount": 1142,
-          "score": 0.8219703435897827,
+          "ratingCount": 79,
+          "score": 0.016129032258064516,
           "source": "search"
         }
       ]
@@ -70,83 +70,63 @@
       "strategyLabel": "POPULARITY",
       "products": [
         {
-          "productId": "9882",
-          "name": "alcinia extendable dining table",
+          "productId": "28340",
+          "name": "adejah 35 '' dining table",
           "productClass": "Dining Tables",
           "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.9406370822372402,
-          "source": "Popularity"
-        },
-        {
-          "productId": "29339",
-          "name": "atami dining table",
-          "productClass": null,
-          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
           "averageRating": 5.0,
-          "ratingCount": 13,
-          "score": 0.6421052631578947,
+          "ratingCount": 63,
+          "score": 0.6493150684931507,
           "source": "Popularity"
         },
         {
-          "productId": "24405",
-          "name": "isadore dining table",
+          "productId": "35694",
+          "name": "counter height dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 4.5,
+          "ratingCount": 79,
+          "score": 0.640768116070617,
+          "source": "Popularity"
+        },
+        {
+          "productId": "1065",
+          "name": "casimir regetta dining table",
           "productClass": "Dining Tables",
           "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables / 6 Seat Kitchen & Dining Tables",
-          "averageRating": 4.5,
-          "ratingCount": 5,
-          "score": 0.48988452008637107,
-          "source": "Popularity"
-        },
-        {
-          "productId": "21122",
-          "name": "dining dining table",
-          "productClass": "Dining Tables",
-          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
-          "averageRating": 4.5,
-          "ratingCount": 41,
-          "score": 0.23866315916864653,
-          "source": "Popularity"
-        },
-        {
-          "productId": "34228",
-          "name": "mccrea 42 '' dining table",
-          "productClass": "Conference Tables|Dining Tables",
-          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.17516640445358828,
-          "source": "Popularity"
-        },
-        {
-          "productId": "23826",
-          "name": "haleigh 48 '' pedestal dining table",
-          "productClass": "Dining Tables",
-          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
           "averageRating": 5.0,
-          "ratingCount": 1142,
-          "score": 0.12631578947368424,
+          "ratingCount": 12,
+          "score": 0.5630236781597723,
           "source": "Popularity"
         },
         {
-          "productId": "29636",
-          "name": "aurora task chair",
-          "productClass": "Office Chairs",
-          "categoryHierarchy": "Furniture / Office Furniture / Office Chairs",
+          "productId": "5991",
+          "name": "poirier dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
           "averageRating": 4.5,
-          "ratingCount": 1168,
-          "score": 0.0,
+          "ratingCount": 295,
+          "score": 0.33466717711812133,
           "source": "Popularity"
         },
         {
-          "productId": "13712",
-          "name": "jennie solid wood tufted upholstered low profile platform bed",
-          "productClass": "Teen Beds|Beds",
-          "categoryHierarchy": "Furniture / Bedroom Furniture / Beds & Headboards / Beds",
+          "productId": "40093",
+          "name": "nika dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables / 6 Seat Kitchen & Dining Tables",
+          "averageRating": 5.0,
+          "ratingCount": 9,
+          "score": 0.32316888462516946,
+          "source": "Popularity"
+        },
+        {
+          "productId": "214",
+          "name": "guillot dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
           "averageRating": 4.5,
-          "ratingCount": 9895,
-          "score": 0.0,
+          "ratingCount": 323,
+          "score": 0.28674979503633025,
           "source": "Popularity"
         }
       ]
@@ -155,83 +135,63 @@
       "strategyLabel": "COLLABORATIVE",
       "products": [
         {
+          "productId": "28340",
+          "name": "adejah 35 '' dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 5.0,
+          "ratingCount": 63,
+          "score": 0.02202101497876146,
+          "source": "Collaborative Filtering"
+        },
+        {
+          "productId": "1065",
+          "name": "casimir regetta dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables / 6 Seat Kitchen & Dining Tables",
+          "averageRating": 5.0,
+          "ratingCount": 12,
+          "score": 0.02078544061302682,
+          "source": "Collaborative Filtering"
+        },
+        {
+          "productId": "40093",
+          "name": "nika dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables / 6 Seat Kitchen & Dining Tables",
+          "averageRating": 5.0,
+          "ratingCount": 9,
+          "score": 0.01748053786270347,
+          "source": "Collaborative Filtering"
+        },
+        {
+          "productId": "5991",
+          "name": "poirier dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 4.5,
+          "ratingCount": 295,
+          "score": 0.016950153555398063,
+          "source": "Collaborative Filtering"
+        },
+        {
           "productId": "29339",
           "name": "atami dining table",
           "productClass": null,
           "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
           "averageRating": 5.0,
           "ratingCount": 13,
-          "score": 0.8313280940055847,
+          "score": 0.01639344262295082,
           "source": "Collaborative Filtering"
         },
         {
-          "productId": "9882",
-          "name": "alcinia extendable dining table",
-          "productClass": "Dining Tables",
-          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.8304022550582886,
-          "source": "Collaborative Filtering"
-        },
-        {
-          "productId": "24405",
-          "name": "isadore dining table",
-          "productClass": "Dining Tables",
-          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables / 6 Seat Kitchen & Dining Tables",
-          "averageRating": 4.5,
-          "ratingCount": 5,
-          "score": 0.8296107053756714,
-          "source": "Collaborative Filtering"
-        },
-        {
-          "productId": "21122",
-          "name": "dining dining table",
+          "productId": "35694",
+          "name": "counter height dining table",
           "productClass": "Dining Tables",
           "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
           "averageRating": 4.5,
-          "ratingCount": 41,
-          "score": 0.8256925940513611,
-          "source": "Collaborative Filtering"
-        },
-        {
-          "productId": "34228",
-          "name": "mccrea 42 '' dining table",
-          "productClass": "Conference Tables|Dining Tables",
-          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.8240455985069275,
-          "source": "Collaborative Filtering"
-        },
-        {
-          "productId": "23826",
-          "name": "haleigh 48 '' pedestal dining table",
-          "productClass": "Dining Tables",
-          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
-          "averageRating": 5.0,
-          "ratingCount": 1142,
-          "score": 0.8219703435897827,
-          "source": "Collaborative Filtering"
-        },
-        {
-          "productId": "24095",
-          "name": "blue dinosaur jumboz plush floor pillow",
-          "productClass": "Accent Pillows",
-          "categoryHierarchy": "D\u00e9cor & Pillows / Decorative Pillows & Blankets / Throw Pillows / Blue Throw Pillows",
-          "averageRating": 5.0,
-          "ratingCount": 88,
-          "score": 0.0,
-          "source": "Collaborative Filtering"
-        },
-        {
-          "productId": "39496",
-          "name": "dinosaur land area rug",
-          "productClass": "Area Rugs",
-          "categoryHierarchy": "Rugs / Area Rugs / 4' x 6' Area Rugs",
-          "averageRating": 5.0,
-          "ratingCount": 34,
-          "score": 0.0,
+          "ratingCount": 79,
+          "score": 0.016129032258064516,
           "source": "Collaborative Filtering"
         }
       ]
@@ -240,63 +200,63 @@
       "strategyLabel": "BANDIT",
       "products": [
         {
+          "productId": "28340",
+          "name": "adejah 35 '' dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 5.0,
+          "ratingCount": 63,
+          "score": 0.02202101497876146,
+          "source": "Bandit Exploration"
+        },
+        {
+          "productId": "1065",
+          "name": "casimir regetta dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables / 6 Seat Kitchen & Dining Tables",
+          "averageRating": 5.0,
+          "ratingCount": 12,
+          "score": 0.02078544061302682,
+          "source": "Bandit Exploration"
+        },
+        {
+          "productId": "40093",
+          "name": "nika dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables / 6 Seat Kitchen & Dining Tables",
+          "averageRating": 5.0,
+          "ratingCount": 9,
+          "score": 0.01748053786270347,
+          "source": "Bandit Exploration"
+        },
+        {
+          "productId": "5991",
+          "name": "poirier dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 4.5,
+          "ratingCount": 295,
+          "score": 0.016950153555398063,
+          "source": "Bandit Exploration"
+        },
+        {
           "productId": "29339",
           "name": "atami dining table",
           "productClass": null,
           "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
           "averageRating": 5.0,
           "ratingCount": 13,
-          "score": 0.8313280940055847,
+          "score": 0.01639344262295082,
           "source": "Bandit Exploration"
         },
         {
-          "productId": "9882",
-          "name": "alcinia extendable dining table",
-          "productClass": "Dining Tables",
-          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.8304022550582886,
-          "source": "Bandit Exploration"
-        },
-        {
-          "productId": "24405",
-          "name": "isadore dining table",
-          "productClass": "Dining Tables",
-          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables / 6 Seat Kitchen & Dining Tables",
-          "averageRating": 4.5,
-          "ratingCount": 5,
-          "score": 0.8296107053756714,
-          "source": "Bandit Exploration"
-        },
-        {
-          "productId": "21122",
-          "name": "dining dining table",
+          "productId": "35694",
+          "name": "counter height dining table",
           "productClass": "Dining Tables",
           "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
           "averageRating": 4.5,
-          "ratingCount": 41,
-          "score": 0.8256925940513611,
-          "source": "Bandit Exploration"
-        },
-        {
-          "productId": "34228",
-          "name": "mccrea 42 '' dining table",
-          "productClass": "Conference Tables|Dining Tables",
-          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": 0.8240455985069275,
-          "source": "Bandit Exploration"
-        },
-        {
-          "productId": "23826",
-          "name": "haleigh 48 '' pedestal dining table",
-          "productClass": "Dining Tables",
-          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
-          "averageRating": 5.0,
-          "ratingCount": 1142,
-          "score": 0.8219703435897827,
+          "ratingCount": 79,
+          "score": 0.016129032258064516,
           "source": "Bandit Exploration"
         }
       ]
@@ -305,24 +265,99 @@
       "strategyLabel": "NEURAL",
       "products": [
         {
-          "productId": "9882",
-          "name": "alcinia extendable dining table",
+          "productId": "35694",
+          "name": "counter height dining table",
           "productClass": "Dining Tables",
           "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": -1.7266792058944702,
+          "averageRating": 4.5,
+          "ratingCount": 79,
+          "score": -1.5081232786178589,
           "source": "Neural Ranking"
         },
         {
-          "productId": "23826",
-          "name": "haleigh 48 '' pedestal dining table",
+          "productId": "29575",
+          "name": "westrick dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables / 6 Seat Kitchen & Dining Tables",
+          "averageRating": 4.5,
+          "ratingCount": 107,
+          "score": -1.883003830909729,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "214",
+          "name": "guillot dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 4.5,
+          "ratingCount": 323,
+          "score": -2.071957588195801,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "24299",
+          "name": "mangan extendable dining table",
           "productClass": "Dining Tables",
           "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
           "averageRating": 5.0,
-          "ratingCount": 1142,
-          "score": -2.6418023109436035,
+          "ratingCount": 10,
+          "score": -2.071957588195801,
           "source": "Neural Ranking"
+        },
+        {
+          "productId": "38646",
+          "name": "fusion walnut solid wood pedestal dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 4.5,
+          "ratingCount": 20,
+          "score": -2.281083345413208,
+          "source": "Neural Ranking"
+        },
+        {
+          "productId": "38991",
+          "name": "clausen dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables / 8 + Seat Kitchen & Dining Tables",
+          "averageRating": 4.0,
+          "ratingCount": 11,
+          "score": -2.281083345413208,
+          "source": "Neural Ranking"
+        }
+      ]
+    },
+    "DIVERSE_POPULARITY": {
+      "strategyLabel": "DIVERSE_POPULARITY",
+      "products": [
+        {
+          "productId": "28340",
+          "name": "adejah 35 '' dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 5.0,
+          "ratingCount": 63,
+          "score": 0.6493150684931507,
+          "source": "Popularity (diversified)"
+        },
+        {
+          "productId": "35694",
+          "name": "counter height dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 4.5,
+          "ratingCount": 79,
+          "score": 0.640768116070617,
+          "source": "Popularity (diversified)"
+        },
+        {
+          "productId": "1065",
+          "name": "casimir regetta dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables / 6 Seat Kitchen & Dining Tables",
+          "averageRating": 5.0,
+          "ratingCount": 12,
+          "score": 0.5630236781597723,
+          "source": "Popularity (diversified)"
         },
         {
           "productId": "29339",
@@ -331,38 +366,28 @@
           "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
           "averageRating": 5.0,
           "ratingCount": 13,
-          "score": -3.6089937686920166,
-          "source": "Neural Ranking"
+          "score": 0.26784801679733933,
+          "source": "Popularity (diversified)"
         },
         {
-          "productId": "24405",
-          "name": "isadore dining table",
+          "productId": "5991",
+          "name": "poirier dining table",
+          "productClass": "Dining Tables",
+          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
+          "averageRating": 4.5,
+          "ratingCount": 295,
+          "score": 0.33466717711812133,
+          "source": "Popularity (diversified)"
+        },
+        {
+          "productId": "40093",
+          "name": "nika dining table",
           "productClass": "Dining Tables",
           "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables / 6 Seat Kitchen & Dining Tables",
-          "averageRating": 4.5,
-          "ratingCount": 5,
-          "score": -3.6089937686920166,
-          "source": "Neural Ranking"
-        },
-        {
-          "productId": "21122",
-          "name": "dining dining table",
-          "productClass": "Dining Tables",
-          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
-          "averageRating": 4.5,
-          "ratingCount": 41,
-          "score": -3.6089937686920166,
-          "source": "Neural Ranking"
-        },
-        {
-          "productId": "34228",
-          "name": "mccrea 42 '' dining table",
-          "productClass": "Conference Tables|Dining Tables",
-          "categoryHierarchy": "Furniture / Kitchen & Dining Furniture / Dining Tables & Seating / Kitchen & Dining Tables",
-          "averageRating": 0.0,
-          "ratingCount": 0,
-          "score": -3.6089937686920166,
-          "source": "Neural Ranking"
+          "averageRating": 5.0,
+          "ratingCount": 9,
+          "score": 0.32316888462516946,
+          "source": "Popularity (diversified)"
         }
       ]
     }

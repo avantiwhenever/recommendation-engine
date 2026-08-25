@@ -27,7 +27,8 @@ public class RecommenderGrpcService extends RecommenderServiceGrpc.RecommenderSe
         RecommendationContext context = new RecommendationContext(
                 request.getQuery(),
                 request.getUserId(),
-                Strategy.valueOf(request.getStrategy().name())
+                Strategy.valueOf(request.getStrategy().name()),
+                List.copyOf(request.getRecentProductIdsList())
         );
         List<ScoredProduct> candidates = request.getCandidatesList().stream()
                 .map(this::toDomain)

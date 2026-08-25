@@ -18,6 +18,10 @@ enum Strategy {
   COLLABORATIVE = 2;
   BANDIT = 3;
   NEURAL = 4;
+  // TODO.md item #7: Popularity, then an MMR-style diversity re-rank on
+  // top (see recommender-service's DiversityAwareStrategy) — a decorator
+  // over an existing strategy, not a from-scratch retrieval technique.
+  DIVERSE_POPULARITY = 5;
 }
 
 message RecommendRequest {
@@ -27,6 +31,12 @@ message RecommendRequest {
   // Baseline candidates from search-service, reusing its message type
   // directly rather than re-declaring an equivalent one.
   repeated recengine.search.v1.ScoredProduct candidates = 4;
+  // Product IDs the user interacted with in the *current* browsing session,
+  // distinct from their all-time clickstream history (ClickstreamRepositoryPort).
+  // Optional — an empty list means "no session signal available," not "new
+  // user" (a genuinely new user also has an empty ClickstreamRepositoryPort
+  // profile; see CollaborativeFilteringStrategy's cold-start branch).
+  repeated string recent_product_ids = 5;
 }
 
 message RecommendResponse {

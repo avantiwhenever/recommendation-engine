@@ -29,7 +29,7 @@ QUERIES = [
     "kids bunk bed",
     "coffee table",
 ]
-STRATEGIES = ["NONE", "POPULARITY", "COLLABORATIVE", "BANDIT", "NEURAL"]
+STRATEGIES = ["NONE", "POPULARITY", "COLLABORATIVE", "BANDIT", "NEURAL", "DIVERSE_POPULARITY"]
 
 GQL = """
 query Search($q: String!, $s: RecommenderStrategy!, $u: String, $k: Int!) {

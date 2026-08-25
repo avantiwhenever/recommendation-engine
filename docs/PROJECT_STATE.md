@@ -418,6 +418,93 @@ two more real issues, both worth remembering:
   `http://localhost:15173` works after a hard refresh (the browser had the
   old, wrong-port JS bundle cached from before the `--no-cache` rebuild).
 
+## M8 — P1 capability gaps + P2 cleanups (DONE)
+
+Following M7's staff-engineer review and TODO.md's cited fix list, all 6 P1
+items (#6-#11) and both P2 items (#12-#13) are now done — see
+**[TODO.md](../TODO.md)** for the full, cited "Result" writeup per item.
+Executed as five parallel forks with disjoint file ownership (same pattern
+M7 validated for P0), plus one sequential follow-on and direct integration
+work by the coordinating session:
+
+1. **#6 — hybrid dense+lexical retrieval**: a hand-rolled, embedded BM25
+   index (no Elasticsearch/Lucene server — this project stays Pinecone-only
+   infra) fused with the existing Pinecone dense retrieval via RRF, in
+   `search-service`. Live-verified: exact brand-token queries now surface
+   the branded product at #1.
+2. **#7 — diversity decorator**: `DiversityAwareStrategy`, an MMR re-rank
+   pass wrapping any existing strategy, wired end-to-end as a new
+   selectable `Strategy.DIVERSE_POPULARITY` (proto/domain/GraphQL enum all
+   updated). Live-verified injecting real category variety into a
+   single-category candidate list.
+3. **#8 — `VectorSimilarityPort`**: a real Pinecone-backed "find similar
+   products" port in `recommender-service`, reusing the same
+   `wands-products` index `search-service` populates as a direct
+   infrastructure dependency (per the original architecture plan's own
+   carve-out). Live-tested against the real index. **Built but not yet
+   consumed by any strategy** — items #7 and #10 both name it as their
+   documented next step, not a hidden gap.
+4. **#10 + #11 — cold start + session recency** (bundled into one fork
+   since they share files): `CollaborativeFilteringStrategy` now has a
+   named, explicit popularity fallback for genuinely cold users (no
+   all-time history *and* no session signal); `RecommendRequest` gained a
+   `recentProductIds` field threaded all the way to an optional GraphQL
+   argument; `NeuralRankingStrategy` gained a 7th feature (session category
+   overlap) requiring a full retrain — real result: the new feature raised
+   every model's held-out accuracy ~6-7 points (XGBoost 0.7995→0.8687,
+   linear baseline 0.8046→0.8751) without changing which model wins (the
+   linear baseline still does, same honest finding as M7's item #3).
+5. **IPS/counterfactual estimator** (the one loose end M7 explicitly left
+   open): `IpsEvaluator.java`, using `WANDS/CLICKSTREAM.md`'s exact,
+   documented logging-policy constants — unusually implementable here since
+   the logging policy is fully known, unlike almost any real production
+   system. Reports raw and propensity-clipped estimates plus an effective-
+   sample-size diagnostic, so IPS's known instability is visible rather
+   than hidden behind one clean number. Real results in RESULTS.md's new
+   "Off-policy (IPS) evaluation" section.
+6. **#9 — multi-stage retrieval** (done as a sequential follow-on, not a
+   parallel fork, since it touches the same file — `SearchOrchestrationUseCase.java`
+   — as #12's filter plumbing): the gateway now asks `search-service` for a
+   200-candidate pool (not just the display `topK`), applies a hard
+   eligibility selection stage (drops zero-social-proof candidates, cuts to
+   50 by score) *before* any strategy runs — including `NONE`, which is now
+   the eligibility-filtered pool unmodified, not a byte-for-byte passthrough
+   of raw search results. Live-verified: this alone changed a
+   `COLLABORATIVE` query's top result to a product the old ~6-10-candidate
+   pool never had a chance to include.
+7. **#12 — proto contract filters** (deliberately partial): `category_filter`/
+   `min_rating` added to `SearchRequest` and threaded to optional GraphQL
+   arguments, live-verified (category mismatch → empty result; rating floor
+   → correctly narrowed results). A pagination cursor and a per-result
+   debug/explain field are explicitly still open, not implemented.
+8. **#13 — README honesty paragraph**: added, naming the hexagonal/gRPC/
+   four-service architecture as "more service boundary than the problem
+   needs," matching this project's existing honesty norms elsewhere.
+
+**Two real bugs found and fixed during integration, unrelated to the P1/P2
+items themselves**: (a) a stale `docker-compose.yml`/Vite build-arg mismatch
+from the P0-verification session recurred and was re-fixed the same way
+(`--no-cache` rebuild); (b) `web/src/utils/humanizeSource.ts`'s
+`SOURCE_LABELS` keys never actually matched the backend's real strategy
+names (`"collaborative"` vs. the real `"Collaborative Filtering"`) — a
+latent bug hidden by `App.test.tsx`'s mock data using the same wrong short
+form, so the mismatch never surfaced in tests. Fixed both the mapping and
+the test's mock data to use real backend strings; confirmed via
+`npm test`.
+
+**Full verification before considering this done**: `mvn clean test`
+(whole reactor, excluding the two Docker-network-dependent Pinecone smoke
+tests) green; those two smoke tests separately run and passed against the
+live network (`docker run --network container:pinecone-local-1 ...`); all
+five rebuilt Docker images (`search-service`, `recommender-service`,
+`graphql-gateway`, `web`) deployed and live-curl-verified end-to-end,
+including the new `DIVERSE_POPULARITY` strategy, hybrid retrieval, the
+widened multi-stage pipeline, and both new filter arguments; `RESULTS.md`
+regenerated with all 6 strategies plus the new IPS section;
+`docs/app.js`/`docs/index.html`/`docs/data/*.json` (GitHub Pages demo) and
+`web/src/graphql/types.ts` (live React app's strategy dropdown) both
+updated and re-captured/rebuilt to match.
+
 ## Known simplifications / deliberate scope cuts (be upfront about these, don't silently "fix")
 
 - Proto stubs are generated independently in all three consuming modules

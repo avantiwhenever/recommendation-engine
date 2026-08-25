@@ -15,6 +15,7 @@ enum RecommenderStrategy {
     COLLABORATIVE
     BANDIT
     NEURAL
+    DIVERSE_POPULARITY
 }
 
 type SearchResult {
@@ -24,5 +25,15 @@ type SearchResult {
 }
 
 type Query {
-    search(query: String!, topK: Int = 10, strategy: RecommenderStrategy = COLLABORATIVE, userId: String): SearchResult!
+    # recentProductIds: product IDs the user interacted with in the current
+    # browsing session (distinct from userId's all-time history) — feeds
+    # CollaborativeFilteringStrategy/NeuralRankingStrategy's session-recency
+    # weighting (TODO.md item #11). Optional; defaults to no session signal.
+    #
+    # categoryFilter/minRating: a hard eligibility filter applied before
+    # scoring, distinct from the widen-then-select multi-stage pipeline
+    # (TODO.md item #9) and from any strategy's own reranking (TODO.md item
+    # #12). Both optional; omitting either means "no filter".
+    search(query: String!, topK: Int = 10, strategy: RecommenderStrategy = COLLABORATIVE, userId: String,
+           recentProductIds: [ID!] = [], categoryFilter: String, minRating: Float): SearchResult!
 }

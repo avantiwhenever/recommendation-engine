@@ -26,7 +26,8 @@ public class GrpcRecommenderServiceClientAdapter implements RecommenderPort {
     }
 
     @Override
-    public RecommendResult recommend(String query, String userId, RecommenderStrategy strategy, List<Product> candidates) {
+    public RecommendResult recommend(String query, String userId, RecommenderStrategy strategy, List<Product> candidates,
+                                      List<String> recentProductIds) {
         RecommendRequest.Builder builder = RecommendRequest.newBuilder()
                 .setQuery(query)
                 .setStrategy(toProtoStrategy(strategy));
@@ -34,6 +35,9 @@ public class GrpcRecommenderServiceClientAdapter implements RecommenderPort {
             builder.setUserId(userId);
         }
         candidates.forEach(c -> builder.addCandidates(toProtoScoredProduct(c)));
+        if (recentProductIds != null) {
+            builder.addAllRecentProductIds(recentProductIds);
+        }
 
         RecommendResponse response = recommenderStub.recommend(builder.build());
         List<Product> results = response.getResultsList().stream()

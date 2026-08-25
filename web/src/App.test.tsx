@@ -34,7 +34,7 @@ const mockSearchResponse = {
             averageRating: 4.1,
             ratingCount: 58,
             score: 0.81,
-            source: "collaborative",
+            source: "Collaborative Filtering",
           },
           {
             productId: "3",
@@ -44,7 +44,7 @@ const mockSearchResponse = {
             averageRating: null,
             ratingCount: null,
             score: 0.4,
-            source: "popularity",
+            source: "Popularity",
           },
         ],
       },
