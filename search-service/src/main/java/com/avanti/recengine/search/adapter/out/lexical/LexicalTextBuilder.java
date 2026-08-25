@@ -6,7 +6,7 @@ import com.avanti.recengine.support.wands.WandsProductRow;
 /**
  * Builds the text BM25 indexes for a product. Starts from the same field
  * composition as {@link EmbeddingTextBuilder} (name, class, category,
- * description — see TODO.md #6) for consistency between the two retrieval
+ * description) for consistency between the two retrieval
  * paths, but repeats {@code product_name} so its terms get roughly 3x the
  * term-frequency weight of the rest of the document. Unlike a dense
  * embedding, BM25 has no learned sense that the title is the most

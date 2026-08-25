@@ -7,8 +7,8 @@ import java.util.Map;
 
 /**
  * A hand-rolled, in-memory BM25 inverted index — no Elasticsearch/Solr/Lucene
- * dependency. This project deliberately has no self-hosted search server (see
- * TODO.md #6); the WANDS catalog is small enough (~43K products) to hold a
+ * dependency. This project deliberately has no self-hosted search server;
+ * the WANDS catalog is small enough (~43K products) to hold a
  * full inverted index in heap memory, so a real server-grade engine buys
  * nothing here beyond what this class already provides for this project's
  * scale. Standard Okapi BM25 (Robertson &amp; Zaragoza's formulation, k1=1.2,

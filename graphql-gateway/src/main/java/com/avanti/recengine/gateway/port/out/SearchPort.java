@@ -8,6 +8,6 @@ import java.util.List;
 public interface SearchPort {
     List<Product> search(String query, int topK);
 
-    /** TODO.md item #12: {@code categoryFilter} blank/null and {@code minRating <= 0} both mean "no filter", matching search-service's own convention. */
+    /** {@code categoryFilter} blank/null and {@code minRating <= 0} both mean "no filter", matching search-service's own convention. */
     List<Product> search(String query, int topK, String categoryFilter, double minRating);
 }

@@ -127,7 +127,7 @@ them, and each result shows a "why was this shown" source badge.
 ./scripts/run-recommender-eval.sh
 ```
 
-Scores all 5 strategies against held-out clickstream sessions and writes
+Scores all 6 strategies against held-out clickstream sessions and writes
 `RESULTS.md` at the repo root — see `EvalCli`'s class Javadoc for the full
 methodology and honest caveats.
 
@@ -139,7 +139,7 @@ methodology and honest caveats.
 python3 scripts/capture_demo_snapshots.py
 ```
 
-Captures live results for a curated set of queries × all 5 strategies into
+Captures live results for a curated set of queries × all 6 strategies into
 `docs/data/*.json` — this is what `docs/index.html`'s static demo fetches.
 
 **Verify:** `docs/data/manifest.json` lists the captured files; open

@@ -13,7 +13,7 @@ import java.util.Map;
  * same fusion technique (same formula, same {@code k} role) as the sibling
  * {@code search} project's {@code search-retrieval/RrfFusionService}, ported
  * here as this project's own copy rather than a shared dependency between
- * two otherwise-independent repos. See TODO.md #6.
+ * two otherwise-independent repos.
  */
 public final class RrfFusion {
 

@@ -12,7 +12,7 @@ import java.util.Map;
 
 /**
  * Builds a full in-memory BM25 index over the WANDS catalog once at startup
- * — no second ingestion step, no external search server (see TODO.md #6 and
+ * — no second ingestion step, no external search server (see
  * {@link BM25Index}'s Javadoc for why). Constructed directly from the same
  * {@code product.csv} rows the ingestion CLI embeds into Pinecone, so the
  * lexical and dense retrieval paths always index the same catalog snapshot.

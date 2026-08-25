@@ -68,8 +68,8 @@ public class SearchServiceConfig {
 
     /**
      * Loads {@code product.csv} once at startup and builds a full in-memory
-     * BM25 index from it (see TODO.md #6 and {@link InMemoryLexicalIndexAdapter}'s
-     * Javadoc) — the served application now reads the raw catalog CSV
+     * BM25 index from it (see {@link InMemoryLexicalIndexAdapter}'s
+     * Javadoc) — the served application reads the raw catalog CSV
      * in-process, not just the ingestion CLI, so the {@code ./data} volume
      * mount in {@code docker-compose.yml} is a runtime dependency for this
      * bean, not only a batch-tool convenience.

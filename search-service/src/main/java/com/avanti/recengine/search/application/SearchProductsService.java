@@ -10,8 +10,8 @@ import com.avanti.recengine.search.port.out.VectorIndexPort;
 import java.util.List;
 
 /**
- * Hybrid dense + lexical retrieval, fused with Reciprocal Rank Fusion — see
- * TODO.md #6. Dense-only embedding search is known-worse on exact-match
+ * Hybrid dense + lexical retrieval, fused with Reciprocal Rank Fusion.
+ * Dense-only embedding search is known-worse on exact-match
  * queries (SKUs, model numbers, distinctive brand tokens): a sentence
  * embedding has no mechanism to guarantee an exact token match outranks a
  * merely-topical near-miss. Both sub-retrievers are queried for

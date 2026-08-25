@@ -22,7 +22,7 @@ import java.util.List;
  * this use case (not recommender-service) is the single place that decides
  * whether personalization happens at all.
  *
- * <p><b>Multi-stage retrieval (TODO.md item #9)</b>: rather than asking
+ * <p><b>Multi-stage retrieval</b>: rather than asking
  * search-service for exactly {@code topK} candidates and reranking that
  * fixed, narrow list, this use case widens the initial request to {@link
  * #WIDE_POOL_SIZE} (a real retrieval pool an expensive rerank strategy can
@@ -38,8 +38,7 @@ import java.util.List;
  * reordered, possibly item-added) output is truncated to the caller's
  * requested {@code topK} only at the very end. Grounded in LinkedIn's
  * "Making Your Feed More Relevant – Part I" (First Pass Ranker → Second
- * Pass Ranker) and DoorDash's selection/ranking separation, both cited in
- * TODO.md item #9.
+ * Pass Ranker) and DoorDash's selection/ranking separation.
  *
  * <p>One real behavior change from this: {@code NONE} is no longer a
  * byte-for-byte passthrough of whatever search-service returned — it's a
@@ -83,7 +82,7 @@ public final class SearchOrchestrationUseCase {
         return search(query, topK, strategy, userId, List.of());
     }
 
-    /** Convenience overload for callers with no filters (TODO.md item #12) to apply. */
+    /** Convenience overload for callers with no filters to apply. */
     public SearchResult search(String query, int topK, RecommenderStrategy strategy, String userId,
                                 List<String> recentProductIds) {
         return search(query, topK, strategy, userId, recentProductIds, null, 0.0);

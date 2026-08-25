@@ -18,9 +18,9 @@ enum Strategy {
   COLLABORATIVE = 2;
   BANDIT = 3;
   NEURAL = 4;
-  // TODO.md item #7: Popularity, then an MMR-style diversity re-rank on
-  // top (see recommender-service's DiversityAwareStrategy) — a decorator
-  // over an existing strategy, not a from-scratch retrieval technique.
+  // Popularity, then an MMR-style diversity re-rank on top (see
+  // recommender-service's DiversityAwareStrategy) — a decorator over an
+  // existing strategy, not a from-scratch retrieval technique.
   DIVERSE_POPULARITY = 5;
 }
 

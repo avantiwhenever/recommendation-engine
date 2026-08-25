@@ -14,35 +14,21 @@ import java.util.Set;
 
 /**
  * ML-based strategy using ONNX: scores each candidate with a gradient-
- * boosted pairwise ranking model (XGBoost, {@code rank:ndcg} objective —
- * not the MLP this class started as; see below) trained offline on
- * implicit clickstream feedback (see {@code training/train_neural_ranker.py}
- * and {@code training/TRAINING.md}), mirroring the sibling {@code search}
- * project's own {@code NeuralRerankStrategy}/{@code RerankFeatureBuilder}
- * pattern — cheap, mostly-cached features and one small forward pass, not a
- * transformer.
+ * boosted pairwise ranking model (XGBoost, {@code rank:ndcg} objective)
+ * trained offline on implicit clickstream feedback (see
+ * {@code training/train_neural_ranker.py} and {@code training/TRAINING.md}),
+ * mirroring the sibling {@code search} project's own
+ * {@code NeuralRerankStrategy}/{@code RerankFeatureBuilder} pattern — cheap,
+ * mostly-cached features and one small forward pass, not a transformer.
+ * Grounded in Airbnb's KDD 2019 "Applying Deep Learning to Airbnb Search"
+ * (arXiv:1810.09591) for the pairwise training objective.
  *
- * <p><b>Model history, reported honestly</b>: the original model was an
- * {@code sklearn.MLPRegressor} trained via pointwise regression, even
- * though this strategy's own held-out evaluation metric is pairwise ranking
- * accuracy — a real training/eval objective mismatch. Switching to a
- * genuinely pairwise objective (XGBoost {@code rank:ndcg}, matching the
- * technique in Airbnb's KDD 2019 "Applying Deep Learning to Airbnb Search",
- * arXiv:1810.09591) didn't produce a new best model: a plain logistic-
- * regression linear combination of the same features (0.8751 ± 0.0025 mean
- * held-out pairwise accuracy across 5 seeds) still beats both the pairwise
- * XGBoost model actually served here (0.8687 ± 0.0019) and the old pointwise
- * MLP it replaced (0.8700 ± 0.0035). This model is kept in service anyway
- * because its training objective is the one that actually matches what's
- * being measured — see {@code training/TRAINING.md} for the full account,
- * including why the linear model wasn't switched to instead (it was itself
- * trained pointwise, so it doesn't resolve the objective-mismatch problem
- * this change exists to fix, even though its raw number is higher). Adding
- * feature 7 (session category overlap, TODO.md item #11) raised all three
- * models' held-out accuracy by roughly 6-7 points versus the original
- * 6-feature numbers (0.7995/0.8046/0.8018) — a genuinely informative
- * feature, available equally to every model, not a change to which model
- * wins.
+ * <p><b>Reported honestly</b>: a plain logistic-regression linear
+ * combination of the same 7 features (0.8751 ± 0.0025 mean held-out
+ * pairwise accuracy across 5 seeds) scores higher on the held-out split
+ * than this XGBoost model (0.8687 ± 0.0019). This model is kept in service
+ * anyway because its training objective is the one that actually matches
+ * what's measured — see {@code training/TRAINING.md} for the full account.
  *
  * <p><b>Feature vector (order matters — must exactly match
  * {@code train_neural_ranker.py}'s feature builder; verified in sync by
@@ -64,31 +50,27 @@ import java.util.Set;
  *       but not identical; unifying them is a follow-up, not done here.</li>
  *   <li>average rating / 5.0 — same product.csv source both sides</li>
  *   <li>log1p(rating count) — same product.csv source both sides</li>
- *   <li><b>(TODO.md item #11)</b> same-session category overlap: the
- *       fraction of {@link RecommendationContext#recentProductIds()}
- *       (the current-session signal, distinct from feature 4's all-time
- *       co-occurrence) that share the candidate's top-level category
- *       segment. 0.0 when there's no session signal. "Recency-weighted" per
- *       the TODO item's wording means "derived from the session-scoped
- *       list," not an actual time-decay curve — the proto carries an
- *       unordered ID list, not per-event timestamps.</li>
+ *   <li>same-session category overlap: the fraction of {@link
+ *       RecommendationContext#recentProductIds()} (the current-session
+ *       signal, distinct from feature 4's all-time co-occurrence) that
+ *       share the candidate's top-level category segment. 0.0 when
+ *       there's no session signal. This is "recency-weighted" in the
+ *       sense of "derived from the session-scoped list," not an actual
+ *       time-decay curve — the proto carries an unordered ID list, not
+ *       per-event timestamps.</li>
  * </ol>
  *
- * <p><b>Cold-start items (TODO.md item #10)</b>: for a product with zero
- * clickstream footprint (features 3 and 4 both collapse to 0 — {@code
- * TRAINING.md} notes this is true for ~97% of the WANDS catalog), this
- * class does not substitute a Pinecone content-similarity score in their
- * place. That's the fix the TODO item actually asks for, and it depends on
- * a {@code VectorSimilarityPort} (TODO.md item #8) that doesn't exist yet
- * as of this change — a different, parallel workstream. What's implemented
- * here instead is the fallback available without it: feature 1 (category
- * match against the user's all-time top category) and the new feature 7
- * above (session category overlap) both still produce a real, non-zero
- * signal for a zero-footprint item, since they're derived from the
- * candidate's own {@code categoryHierarchy} metadata, not clickstream
- * history. This is a genuine but partial fix — swapping in real embedding
- * similarity via item #8's port, once wired, is the documented upgrade
- * path, not a hidden gap.
+ * <p><b>Cold-start items</b>: for a product with zero clickstream
+ * footprint (features 3 and 4 both collapse to 0 — {@code TRAINING.md}
+ * notes this is true for ~97% of the WANDS catalog), this class does not
+ * substitute a Pinecone content-similarity score in their place, even
+ * though a {@code VectorSimilarityPort} exists in this service. Feature 1
+ * (category match against the user's all-time top category) and feature 7
+ * (session category overlap) both still produce a real, non-zero signal
+ * for a zero-footprint item, since they're derived from the candidate's
+ * own {@code categoryHierarchy} metadata, not clickstream history —
+ * a partial fallback, not a full fix. Swapping in real embedding
+ * similarity via the port, once wired here, is a documented follow-on.
  */
 public final class NeuralRankingStrategy implements RecommendationStrategy {
 

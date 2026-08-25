@@ -18,7 +18,7 @@ class CollaborativeFilteringStrategyTest {
 
     @Test
     void coldStartUserWithNoHistoryAndNoSessionSignalFallsBackToPopularityBlend() {
-        // Genuine cold start (TODO.md item #10): no all-time profile AND no
+        // Genuine cold start: no all-time profile AND no
         // session signal. Policy is a named, explicit fallback to
         // PopularityBoostStrategy, not a silent unmodified passthrough —
         // assert the result matches calling that strategy directly, not
@@ -64,8 +64,8 @@ class CollaborativeFilteringStrategyTest {
         // single seed product — one via context.recentProductIds() (this
         // session), the other via the all-time ClickstreamRepositoryPort
         // profile. The resulting boost should be measurably larger for the
-        // session-sourced match (TODO.md item #11's "weighted more
-        // heavily" requirement).
+        // session-sourced match ("weighted more heavily" than an
+        // otherwise-equal all-time match).
         FakeClickstreamRepository repo = new FakeClickstreamRepository(List.of());
         repo.withCoOccurrence("candidate", "seed", 10);
         List<ScoredProduct> base = List.of(new ScoredProduct("candidate", 0.0, "a", "Chairs", "Furniture / Chairs", 4.0, 10));

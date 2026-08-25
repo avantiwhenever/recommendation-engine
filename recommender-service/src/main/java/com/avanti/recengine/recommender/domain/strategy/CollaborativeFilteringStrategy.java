@@ -24,19 +24,13 @@ import java.util.Set;
  * popular don't score as "similar" just from base rates the way raw
  * co-occurrence counting would. This is the standard normalization from
  * Sarwar, Karypis, Konstan &amp; Riedl, "Item-Based Collaborative Filtering
- * Recommendation Algorithms" (WWW 2001) — a static, offline technique, not
- * the online/bandit-flavored CF this project's arXiv:1708.03058
- * ("Online Interactive Collaborative Filtering Using Multi-Armed Bandit
- * with Dependent Arms") and arXiv:2106.10898 ("BanditMF") citations
- * describe; those papers assume per-arm reward updating this strategy
- * doesn't do. The actual relationship to bandit-flavored CF in this
- * codebase is architectural, not algorithmic: this strategy supplies a
- * static similarity signal, and {@link BanditExploreStrategy} is a
- * separate, independent exploration mechanism a production system could
- * compose with it — not an implementation of the online CF those papers
- * describe.
+ * Recommendation Algorithms" (WWW 2001) — a static, offline technique. The
+ * relationship to {@link BanditExploreStrategy} in this codebase is
+ * architectural, not algorithmic: this strategy supplies a static
+ * similarity signal, and bandit exploration is a separate, independent
+ * mechanism a production system could compose with it.
  *
- * <p><b>Session recency (TODO.md item #11)</b>: {@link RecommendationContext#recentProductIds()}
+ * <p><b>Session recency</b>: {@link RecommendationContext#recentProductIds()}
  * — products the user interacted with in the <em>current</em> session, as
  * opposed to {@link ClickstreamRepositoryPort}'s all-time history — gets a
  * separately, more heavily weighted similarity boost ({@link
@@ -56,12 +50,11 @@ import java.util.Set;
  * contains the current live session's events, so there's no double-counting
  * risk from the same interaction contributing to both terms.
  *
- * <p><b>Cold start (TODO.md item #10)</b>: a user with no all-time history
+ * <p><b>Cold start</b>: a user with no all-time history
  * <em>and</em> no session signal is a genuine cold start — this strategy
  * has nothing to collaboratively filter on, and explicitly, by name, falls
  * back to {@link PopularityBoostStrategy}'s output rather than silently
- * returning the unmodified base ranking (the previous, undocumented
- * behavior). A user with session signal but no persisted history is
+ * returning the unmodified base ranking. A user with session signal but no persisted history is
  * <em>not</em> treated as cold-start: {@link #apply} runs normally, and the
  * session-similarity term alone drives personalization until their history
  * is persisted. See Netflix's

@@ -5,10 +5,10 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Off-policy (Inverse Propensity Scoring) estimator for the "closing the
- * loose end" half of TODO.md item #4 — the two tables {@link EvalCli}
- * already reports (implicit clickstream, independent WANDS relevance) both
- * evaluate a strategy's reranking as if it were <i>presented</i> to users,
+ * Off-policy (Inverse Propensity Scoring) estimator — the two tables
+ * {@link EvalCli} already reports (implicit clickstream, independent
+ * WANDS relevance) both evaluate a strategy's reranking as if it were
+ * <i>presented</i> to users,
  * i.e. as a static list scored against a grade. They cannot estimate what
  * the observed <i>reward</i> (click/cart/purchase) would actually have been
  * had a strategy's ranking been the one shown, since no user was ever shown
@@ -38,7 +38,7 @@ import java.util.Locale;
  * Engines"; Criteo, <a href="https://arxiv.org/pdf/1801.07030">"Offline A/B
  * Testing for Recommender Systems"</a>; Spotify Research's
  * <a href="https://research.atspotify.com/publications/towards-a-fair-marketplace-counterfactual-evaluation-of-the-trade-off-between-relevance-fairness-satisfaction-in-recommendation-systems">
- * counterfactual-evaluation work</a> — all three cited in TODO.md item #4).
+ * counterfactual-evaluation work</a>).
  *
  * <p><b>Simplifying assumption, stated honestly</b>: this is an
  * <i>item-level</i> IPS estimator, not a full listwise/ranking IPS estimator
