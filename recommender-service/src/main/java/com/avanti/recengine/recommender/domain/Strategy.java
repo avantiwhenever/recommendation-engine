@@ -14,6 +14,6 @@ public enum Strategy {
     COLLABORATIVE,
     BANDIT,
     NEURAL,
-    /** {@link com.avanti.recengine.recommender.domain.strategy.PopularityBoostStrategy} wrapped by {@link com.avanti.recengine.recommender.domain.strategy.DiversityAwareStrategy} (TODO.md item #7). */
+    /** {@link com.avanti.recengine.recommender.domain.strategy.PopularityBoostStrategy} wrapped by {@link com.avanti.recengine.recommender.domain.strategy.DiversityAwareStrategy}. */
     DIVERSE_POPULARITY
 }

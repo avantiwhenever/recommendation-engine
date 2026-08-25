@@ -51,7 +51,7 @@ public class RecommenderConfig {
     }
 
     /**
-     * TODO.md item #8: connects to the same {@code wands-products} index
+     * Connects to the same {@code wands-products} index
      * {@code search-service} owns and populates — unlike search-service's
      * own bean, this one never calls {@code ensureServerlessIndex}; this
      * service is a read-only consumer of an index another service creates,
@@ -85,8 +85,8 @@ public class RecommenderConfig {
     public Map<Strategy, RecommendationStrategy> strategiesByType(
             ClickstreamRepositoryPort clickstream, RankingModelPort rankingModel) {
         // Shared instance: also CollaborativeFilteringStrategy's named
-        // cold-start fallback (TODO.md item #10) — one popularity blend
-        // implementation, not two independently-constructed copies.
+        // cold-start fallback — one popularity blend implementation, not
+        // two independently-constructed copies.
         PopularityBoostStrategy popularityBoost = new PopularityBoostStrategy(clickstream);
         return Map.of(
                 Strategy.NONE, new PassthroughStrategy(),
@@ -94,8 +94,8 @@ public class RecommenderConfig {
                 Strategy.COLLABORATIVE, new CollaborativeFilteringStrategy(clickstream, popularityBoost),
                 Strategy.BANDIT, new BanditExploreStrategy(clickstream),
                 Strategy.NEURAL, new NeuralRankingStrategy(clickstream, rankingModel),
-                // TODO.md item #7: DiversityAwareStrategy is a decorator,
-                // not a from-scratch strategy — wraps the same popularity
+                // DiversityAwareStrategy is a decorator, not a
+                // from-scratch strategy — wraps the same popularity
                 // instance above with an MMR re-rank pass rather than
                 // constructing a second, independent PopularityBoostStrategy.
                 Strategy.DIVERSE_POPULARITY, new DiversityAwareStrategy(popularityBoost)

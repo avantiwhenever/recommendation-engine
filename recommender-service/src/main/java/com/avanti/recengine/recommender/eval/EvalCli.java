@@ -67,15 +67,14 @@ import java.util.stream.Collectors;
  * co-occurrence, user profile) are computed by {@link TemporalClickstreamIndex},
  * which replays sessions in timestamp order and evaluates each held-out
  * session against only the aggregate state accumulated from events strictly
- * before that session — fixing a temporal leak the previous full-history-at-once
- * approach had (a held-out session's features could previously include
- * events from *after* that session). See that class's Javadoc.
+ * before that session — a held-out session's features never include events
+ * from *after* that session. See that class's Javadoc.
  *
  * <p><b>Held-out split</b>: a seeded 80/20 split by user id (same
  * philosophy as {@code training/train_neural_ranker.py}'s split, though a
  * different mechanism — Python's and Java's PRNGs don't produce the same
  * shuffle, so this is an independently-seeded, not byte-identical, split).
- * Applied uniformly to all 5 strategies for a fair comparison, even though
+ * Applied uniformly to all 6 strategies for a fair comparison, even though
  * only {@code NeuralRankingStrategy} has anything that could leak from
  * training in the ML sense — {@code PopularityBoostStrategy} and
  * {@code CollaborativeFilteringStrategy}'s aggregates are online-style
@@ -326,7 +325,7 @@ public class EvalCli implements Callable<Integer> {
         sb.append("clickstream has a fully known, documented logging policy. See Criteo's [\"Offline A/B Testing ");
         sb.append("for Recommender Systems\"](https://arxiv.org/pdf/1801.07030) and Spotify Research's ");
         sb.append("[counterfactual-evaluation work](https://research.atspotify.com/publications/towards-a-fair-marketplace-counterfactual-evaluation-of-the-trade-off-between-relevance-fairness-satisfaction-in-recommendation-systems), ");
-        sb.append("both cited in TODO.md item #4. Simplifying assumption, stated honestly: this is an *item-level* ");
+        sb.append("Simplifying assumption, stated honestly: this is an *item-level* ");
         sb.append("IPS estimator (each item's presence in the top-5 treated as an independent action), not a full ");
         sb.append("listwise estimator — see `IpsEvaluator`'s class Javadoc.\n\n");
 

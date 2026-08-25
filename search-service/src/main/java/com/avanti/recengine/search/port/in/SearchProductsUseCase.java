@@ -8,8 +8,8 @@ public interface SearchProductsUseCase {
     List<ScoredResult> search(String query, int topK);
 
     /**
-     * TODO.md item #12: a hard eligibility filter applied to the fused
-     * candidate pool before the result is truncated to {@code topK} —
+     * A hard eligibility filter applied to the fused candidate pool
+     * before the result is truncated to {@code topK} —
      * {@code categoryFilter} blank/null means "no category filter"
      * (otherwise a case-insensitive substring match against the
      * candidate's {@code categoryHierarchy}); {@code minRating <= 0} means

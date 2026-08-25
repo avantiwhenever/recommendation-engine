@@ -13,7 +13,7 @@ public record SearchServiceProperties(Pinecone pinecone, Models models, Data dat
     public record Models(Path embeddingDir) {
     }
 
-    /** Where the lexical (BM25) index loads its catalog text from at startup — see TODO.md #6. */
+    /** Where the lexical (BM25) index loads its catalog text from at startup. */
     public record Data(Path productCsv) {
     }
 

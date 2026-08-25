@@ -5,19 +5,15 @@ Builds implicit-feedback (user, product) pairs from data/clickstream.csv,
 computes the 7 features documented in NeuralRankingStrategy's Javadoc (and
 duplicated below — the two MUST stay in sync; see
 feature_parity_fixtures.csv / test_feature_parity.py / FeatureParityTest.java
-for the golden-vector test that now catches drift automatically instead of
-relying on someone re-reading a comment table), trains a ranking model, and
-exports it to ONNX at models/neural-ranker/model.onnx.
+for the golden-vector test that catches drift between them), trains a
+ranking model, and exports it to ONNX at models/neural-ranker/model.onnx.
 
 **Training objective**: pairwise (XGBoost `rank:ndcg`, i.e. LambdaMART-style
 — pairwise gradients weighted by the |NDCG delta| swapping each pair would
-cause), not pointwise regression. The held-out evaluation metric has always
-been pairwise ranking accuracy; training pointwise (as an earlier version of
-this script did, via sklearn's MLPRegressor) optimized a different objective
-than the one being measured. See TRAINING.md's "Training objective" section
-for the actual numbers this change produced, including an honest comparison
-against the old pointwise model and a linear-combination-of-all-7-features
-baseline that the single-feature ablations alone didn't previously rule out.
+cause), not pointwise regression, matching the held-out evaluation metric
+(pairwise ranking accuracy). See TRAINING.md's "Training objective" section
+for the actual numbers, including an honest comparison against a pointwise
+regression baseline and a linear-combination-of-all-7-features baseline.
 
 See TRAINING.md for the full methodology, the actual held-out numbers this
 run produced, and an honest account of where the training-time features are
@@ -187,7 +183,7 @@ def build_features(user_id, product_id, products, aggregates, position_for_pair,
     rating_count_log = math.log1p(product["rating_count"])
 
     # FEATURE 7 (session_category_overlap) — same-session recency-weighted
-    # category overlap (TODO.md item #11), distinct from feature 4's
+    # category overlap, distinct from feature 4's
     # all-time co_occurrence_log. "Recency-weighted" means "derived from
     # the session-scoped list," not an actual time-decay curve — see
     # NeuralRankingStrategy's Javadoc.
@@ -215,14 +211,13 @@ def build_dataset(rows, products, aggregates, rng):
 
     # Hard negatives: sample only from products that actually appear
     # somewhere in the clickstream (nonzero popularity), not the full ~43K
-    # catalog. An earlier version of this script sampled uniformly from the
-    # whole catalog, which made the task almost trivially separable — ~97%
-    # of WANDS products never appear in the synthetic clickstream at all
-    # (sessions only draw from label.csv's judged candidates per query), so
-    # a random negative was overwhelmingly "a product neither this user nor
-    # any user ever saw," collapsing the task to "does this product have any
-    # clickstream footprint" rather than genuine preference modeling — see
-    # TRAINING.md for the before/after numbers this produced.
+    # catalog. ~97% of WANDS products never appear in the synthetic
+    # clickstream at all (sessions only draw from label.csv's judged
+    # candidates per query), so sampling uniformly from the whole catalog
+    # would make a random negative overwhelmingly "a product neither this
+    # user nor any user ever saw," collapsing the task to "does this
+    # product have any clickstream footprint" rather than genuine
+    # preference modeling — see TRAINING.md for the numbers.
     candidate_pool = [pid for pid in aggregates["popularity"] if aggregates["popularity"][pid] > 0]
     users = sorted({u for (u, _p) in pair_weight.keys()})
 
@@ -258,11 +253,10 @@ def build_dataset(rows, products, aggregates, rng):
             if candidate in seen:
                 continue
             # Sample a position from the empirical distribution rather than
-            # using a fixed sentinel — an earlier version always used the
-            # same low constant for negatives, which (since real positions
-            # are 1-15) made base_score_proxy alone a near-perfect trivial
-            # separator between positives and negatives, not a meaningful
-            # signal. See TRAINING.md.
+            # a fixed sentinel — since real positions are 1-15, a constant
+            # sentinel for every negative would make base_score_proxy alone
+            # a near-perfect trivial separator between positives and
+            # negatives, not a meaningful signal. See TRAINING.md.
             negative_position = rng.choice(aggregates["all_positions"])
             # FEATURE 7 context for a negative: this candidate never
             # actually appeared in any of this user's sessions, so there's
@@ -356,9 +350,9 @@ def train_pairwise_ranker(X_train, y_train, groups_train, seed):
 
 
 def train_pointwise_mlp(X_train, y_train, seed):
-    """The OLD model this script used to train and export, kept here only
-    as an honest comparison baseline against the new pairwise objective —
-    no longer exported or served."""
+    """A pointwise-regression comparison baseline — not exported or served;
+    reported alongside the pairwise model and the linear baseline in
+    TRAINING.md."""
     from sklearn.neural_network import MLPRegressor
     model = MLPRegressor(hidden_layer_sizes=(16, 8), activation="relu", max_iter=500, random_state=seed)
     model.fit(X_train, y_train)

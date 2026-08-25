@@ -16,10 +16,8 @@ import java.util.Optional;
 import java.util.Random;
 
 /**
- * A real contextual multi-armed bandit — replaces a previous implementation
- * that called itself "epsilon-greedy" but had no arms, no value estimates,
- * and no reward signal (it was a randomized adjacent-position swap that
- * never read {@link RecommendationContext} at all). This one:
+ * A contextual multi-armed bandit, reading {@link RecommendationContext} to
+ * condition its exploration on the requesting user:
  *
  * <ul>
  *   <li><b>Arms are top-level product categories</b> (e.g. "Furniture"),

@@ -33,12 +33,11 @@ import java.util.List;
  * productClass}, capped at 1.0. This is cheap and has no external
  * dependency, but it's coarse: two products in the same top-level category
  * that are genuinely dissimilar (e.g. a floor lamp and a dining table,
- * both under "Furniture") are still scored as fully similar. TODO.md item
- * #8 describes adding a {@code VectorSimilarityPort} backed by
- * search-service's Pinecone embeddings to this service; once that lands,
- * swapping in real embedding cosine distance as the similarity signal here
- * would be a natural, low-risk follow-on — deliberately not attempted in
- * this change, which only implements the category/productClass proxy.
+ * both under "Furniture") are still scored as fully similar. This service
+ * also has a {@code VectorSimilarityPort} backed by search-service's
+ * Pinecone embeddings; swapping in real embedding cosine distance as the
+ * similarity signal here would be a natural, low-risk follow-on — not
+ * implemented here, which uses only the category/productClass proxy.
  */
 public final class DiversityAwareStrategy implements RecommendationStrategy {
 
