@@ -140,6 +140,28 @@ so a held-out session's features never see events from after that session.
   the port's contract promises. Retrying the same request immediately
   succeeds, consistent with a one-time cold-channel hiccup rather than a
   persistent connectivity problem.
+- **Pinecone Local has a real, measured concurrent-query capacity ceiling**
+  — a single-process, in-memory emulator, not built for concurrent-query
+  throughput. `DiversityAwareStrategy`'s embedding lookups (up to 50 per
+  request, one per candidate) run concurrently via a small fixed thread
+  pool for latency (a fully sequential version measured ~12.8s per live
+  request; parallelizing brought that to ~3-5s, but raising the pool from
+  10 to 25 threads made no further difference — the ceiling is Pinecone
+  Local's, not client-side thread count). At pool size 10, a tight
+  back-to-back burst of several `DIVERSE_POPULARITY` requests (e.g.
+  `scripts/capture_demo_snapshots.py` capturing every demo query in
+  sequence) transiently overloaded Pinecone Local badly enough to fail an
+  *unrelated* request — a plain `COLLABORATIVE` query failed too, since
+  `search-service`'s own baseline Pinecone query (needed by every strategy)
+  couldn't get through while this class's lookups were saturating it.
+  Pinecone Local recovered on its own within seconds, no restart needed.
+  Lowering the pool to 5 threads made the failure stop reproducing across
+  repeated full capture runs; `scripts/capture_demo_snapshots.py` also
+  gained its own retry-with-backoff as a second, independent safeguard,
+  since a one-off batch tool firing requests in a tighter, more uniform
+  burst than real user traffic ever would is reasonable to make resilient
+  on its own. See `DiversityAwareStrategy`'s class Javadoc for the full
+  account.
 - **Build order**: `rec-support` must be `mvn install`ed to `~/.m2` before
   other modules build against it via `mvn -pl <module> test` (not `-am`, to
   avoid racing on `rec-support`'s own `target/` directory when multiple

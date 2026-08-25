@@ -6,9 +6,12 @@ import com.avanti.recengine.recommender.domain.ScoredProduct;
 import com.avanti.recengine.recommender.port.out.VectorSimilarityPort;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * A decorator, not a standalone strategy: wraps another {@link
@@ -63,13 +66,55 @@ import java.util.Map;
  * losing all diversity credit it would otherwise get from sharing a
  * category with an already-selected item.
  *
- * <p><b>Cost, stated honestly</b>: one {@code similarProductIds} call per
- * candidate per {@link #apply} invocation (bounded by the caller's
- * candidate-pool size — 50 in {@code SearchOrchestrationUseCase}'s
- * multi-stage pipeline, so at most 50 Pinecone lookups per request), done
- * once up front and cached in {@link #neighborRanksByProductId} for the
- * rest of the MMR loop — not one call per pairwise comparison, which would
- * be quadratic in the pool size and far too slow for a live request.
+ * <p><b>Cost, stated honestly — and a real bug this cost caused</b>: one
+ * {@code similarProductIds} call per candidate per {@link #apply}
+ * invocation (bounded by the caller's candidate-pool size — 50 in {@code
+ * SearchOrchestrationUseCase}'s multi-stage pipeline), done once up front
+ * and cached for the rest of the MMR loop — not one call per pairwise
+ * comparison, which would be quadratic in the pool size. Even linear in
+ * the pool size was measured too slow when run <em>sequentially</em>: a
+ * live 8-result {@code DIVERSE_POPULARITY} request against Pinecone Local
+ * took ~12.8 seconds end to end (up to 50 blocking round trips, one after
+ * another). {@link #precomputeEmbeddingNeighbors} therefore issues all of
+ * a request's lookups concurrently instead, via {@link
+ * #EMBEDDING_LOOKUP_EXECUTOR} (a small fixed-size pool, {@value
+ * #EMBEDDING_LOOKUP_PARALLELISM} threads, shared across requests rather
+ * than created per call).
+ *
+ * <p><b>The honest result of parallelizing</b>: real, but partial —
+ * ~3-5 seconds measured after this change, not the near-linear {@code
+ * poolSize / parallelism} speedup a client-side bottleneck would predict.
+ * Raising {@link #EMBEDDING_LOOKUP_PARALLELISM} from 10 to 25 made no
+ * measurable difference to a single request's latency (both landed in the
+ * same 2.5-4.3 second range), which points at Pinecone Local's own
+ * request-handling capacity — a single-process, in-memory emulator, not
+ * built for concurrent-query throughput — as the real per-request ceiling,
+ * not this class's thread count.
+ *
+ * <p><b>A second, more serious cost this surfaced</b>: at parallelism 10,
+ * a tight back-to-back burst of several {@code DIVERSE_POPULARITY}
+ * requests (e.g. {@code scripts/capture_demo_snapshots.py} capturing every
+ * demo query in sequence) could transiently overload Pinecone Local badly
+ * enough to fail an <em>unrelated</em> request — observed live: a plain
+ * {@code COLLABORATIVE} query, which never calls {@link
+ * VectorSimilarityPort} at all, failed with a GraphQL {@code
+ * INTERNAL_ERROR} because {@code search-service}'s own baseline Pinecone
+ * query (needed by every strategy, not just this one) couldn't get a
+ * connection while this class's concurrent lookups from a prior request
+ * were still saturating Pinecone Local. Pinecone Local recovered on its
+ * own moments later with no restart needed — this is a transient capacity
+ * ceiling, not a crash. Lowering {@link #EMBEDDING_LOOKUP_PARALLELISM}
+ * from 10 to 5 made the failure stop reproducing across repeated full
+ * capture runs (each firing 36 requests, 6 of them {@code
+ * DIVERSE_POPULARITY}, with no pacing between them) — a real, measured
+ * fix, not a guess. {@code scripts/capture_demo_snapshots.py} also gained
+ * its own retry-with-backoff for exactly this scenario, since a one-off
+ * batch tool firing requests in a tighter, more uniform burst than real
+ * user traffic ever would is a reasonable thing to make resilient on its
+ * own, independent of the server-side parallelism tuning. See
+ * docs/PROJECT_STATE.md for the full account; a real fix beyond this point
+ * would mean changing what Pinecone Local itself can do, not this
+ * strategy's calling pattern.
  */
 public final class DiversityAwareStrategy implements RecommendationStrategy {
 
@@ -80,6 +125,19 @@ public final class DiversityAwareStrategy implements RecommendationStrategy {
     private static final double CATEGORY_MATCH_SIMILARITY = 0.5;
     /** Additional similarity contribution from sharing the exact product class, on top of category. */
     private static final double PRODUCT_CLASS_MATCH_SIMILARITY = 0.5;
+
+    /** How many embedding lookups run concurrently — see the class Javadoc's "Cost" section. */
+    private static final int EMBEDDING_LOOKUP_PARALLELISM = 5;
+    /**
+     * Shared across every {@link #apply} call on every {@code
+     * DiversityAwareStrategy} instance in this JVM (there's effectively one
+     * long-lived instance per strategy per process via {@code
+     * RecommenderConfig}) — a fixed-size pool created once, not spun up and
+     * torn down per request. Daemon threads so an idle pool never blocks
+     * JVM shutdown.
+     */
+    private static final ExecutorService EMBEDDING_LOOKUP_EXECUTOR = Executors.newFixedThreadPool(
+            EMBEDDING_LOOKUP_PARALLELISM, DiversityAwareStrategy::newDaemonThread);
 
     private final RecommendationStrategy delegate;
     private final double lambda;
@@ -166,18 +224,29 @@ public final class DiversityAwareStrategy implements RecommendationStrategy {
     /**
      * One embedding-neighbor lookup per candidate, requesting as many
      * neighbors as there are candidates so every other candidate has a
-     * chance to appear in the ranked result — see the class Javadoc. Empty
-     * map (no lookups) when no {@link VectorSimilarityPort} was supplied.
+     * chance to appear in the ranked result — see the class Javadoc for why
+     * these run concurrently rather than one after another. Empty map (no
+     * lookups) when no {@link VectorSimilarityPort} was supplied.
      */
     private Map<String, List<String>> precomputeEmbeddingNeighbors(List<ScoredProduct> ranked) {
         if (vectorSimilarityPort == null) {
             return Map.of();
         }
-        Map<String, List<String>> neighbors = new HashMap<>();
+        Map<String, List<String>> neighbors = new ConcurrentHashMap<>();
+        List<CompletableFuture<Void>> lookups = new ArrayList<>(ranked.size());
         for (ScoredProduct product : ranked) {
-            neighbors.put(product.productId(), vectorSimilarityPort.similarProductIds(product.productId(), ranked.size()));
+            lookups.add(CompletableFuture.runAsync(
+                    () -> neighbors.put(product.productId(), vectorSimilarityPort.similarProductIds(product.productId(), ranked.size())),
+                    EMBEDDING_LOOKUP_EXECUTOR));
         }
+        CompletableFuture.allOf(lookups.toArray(CompletableFuture[]::new)).join();
         return neighbors;
+    }
+
+    private static Thread newDaemonThread(Runnable task) {
+        Thread thread = new Thread(task, "diversity-embedding-lookup");
+        thread.setDaemon(true);
+        return thread;
     }
 
     private static double similarity(ScoredProduct a, ScoredProduct b, Map<String, List<String>> neighborRanksByProductId) {

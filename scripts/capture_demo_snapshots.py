@@ -13,6 +13,7 @@ Usage: python3 scripts/capture_demo_snapshots.py [gateway_url] [user_id]
 """
 import json
 import sys
+import time
 import urllib.parse
 import urllib.request
 from pathlib import Path
@@ -20,6 +21,17 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT_DIR / "docs" / "data"
 TOP_K = 6
+# DIVERSE_POPULARITY fans out to several concurrent Pinecone Local lookups
+# per request (see recommender-service's DiversityAwareStrategy); Pinecone
+# Local is a single-process in-memory emulator, not built for concurrent-
+# query throughput, and can transiently fail an unrelated request (even one
+# that never touches Pinecone directly, like COLLABORATIVE, since every
+# strategy's base candidates still come from search-service's own Pinecone
+# query) if this script fires requests back-to-back with no breathing room.
+# Retrying with backoff is the pragmatic fix for a one-off batch tool —
+# real user traffic doesn't arrive in this kind of tight, uniform burst.
+MAX_RETRIES = 3
+RETRY_BACKOFF_SECONDS = 2
 
 QUERIES = [
     "platform bed frame",
@@ -61,11 +73,17 @@ def run_query(gateway_url, query, strategy, user_id):
     # The rule is purely syntactic (any non-literal reaching urlopen trips
     # it) and can't see the scheme check above, which is the actual
     # mitigation the rule's own remediation text recommends.
-    with urllib.request.urlopen(request, timeout=30) as response:  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
-        body = json.loads(response.read())
-    if "errors" in body:
-        raise RuntimeError(f"GraphQL error for query={query!r} strategy={strategy}: {body['errors']}")
-    return body["data"]["search"]
+    last_error = None
+    for attempt in range(1, MAX_RETRIES + 1):
+        with urllib.request.urlopen(request, timeout=30) as response:  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
+            body = json.loads(response.read())
+        if "errors" not in body:
+            return body["data"]["search"]
+        last_error = body["errors"]
+        if attempt < MAX_RETRIES:
+            print(f'  (transient error for query={query!r} strategy={strategy}, retrying in {RETRY_BACKOFF_SECONDS}s: {last_error})')
+            time.sleep(RETRY_BACKOFF_SECONDS)
+    raise RuntimeError(f"GraphQL error for query={query!r} strategy={strategy} after {MAX_RETRIES} attempts: {last_error}")
 
 
 def main():
