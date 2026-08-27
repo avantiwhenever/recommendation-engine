@@ -13,5 +13,10 @@ RUN npm run build
 
 # Runtime stage: static file serving only.
 FROM nginx:alpine
+# CVE-2026-14456 (OpenSSL DoS via unbounded memory): the nginx:alpine base
+# image ships libcrypto3 3.5.7-r0, patched in 3.5.8-r0, which is already in
+# Alpine's package index but not yet rebuilt into the published base image.
+# Force the upgrade explicitly rather than waiting on an upstream rebuild.
+RUN apk update && apk upgrade --no-cache libcrypto3 libssl3
 COPY --from=build /app/dist /usr/share/nginx/html
 EXPOSE 80
