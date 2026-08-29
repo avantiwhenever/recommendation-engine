@@ -82,7 +82,7 @@ jobs:
           severity: CRITICAL,HIGH,MEDIUM
           format: sarif
           output: trivy-deps.sarif
-      - uses: github/codeql-action/upload-sarif@v3
+      - uses: github/codeql-action/upload-sarif@v4
         if: always()
         continue-on-error: true
         with:
@@ -102,7 +102,7 @@ jobs:
       - name: Re-run as SARIF for the Security tab
         if: always()
         run: semgrep scan --config p/java --config p/typescript --config p/react --config p/security-audit --config p/secrets --metrics=off --sarif --output semgrep.sarif
-      - uses: github/codeql-action/upload-sarif@v3
+      - uses: github/codeql-action/upload-sarif@v4
         if: always()
         continue-on-error: true
         with:
@@ -180,7 +180,7 @@ jobs:
           severity: CRITICAL,HIGH
           format: sarif
           output: trivy-image-${{ matrix.service }}.sarif
-      - uses: github/codeql-action/upload-sarif@v3
+      - uses: github/codeql-action/upload-sarif@v4
         if: always()
         continue-on-error: true
         with:
