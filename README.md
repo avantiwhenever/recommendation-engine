@@ -9,7 +9,7 @@ search over the same catalog) — this one explores a different backend stack
 quality), built with hexagonal architecture and gRPC-only inter-service
 communication throughout.
 
-> **[Live snapshot demo →](https://avantiwhenever.github.io/recommendation-engine/)** —
+> **[Live snapshot demo →](https://techbyavanti.github.io/recommendation-engine/)** —
 > real captured results comparing all 6 strategies side by side (static
 > GitHub Pages page, not a live backend — [run it yourself](HOWTO.md) for
 > the real thing).
