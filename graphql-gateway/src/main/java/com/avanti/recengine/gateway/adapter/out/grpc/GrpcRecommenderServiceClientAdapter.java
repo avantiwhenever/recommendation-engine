@@ -9,7 +9,6 @@ import com.avanti.recengine.grpc.recommender.RecommendResponse;
 import com.avanti.recengine.grpc.recommender.RecommenderServiceGrpc;
 import com.avanti.recengine.grpc.recommender.Strategy;
 import com.avanti.recengine.grpc.search.ScoredProduct;
-import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -20,8 +19,7 @@ public class GrpcRecommenderServiceClientAdapter implements RecommenderPort {
 
     private final RecommenderServiceGrpc.RecommenderServiceBlockingStub recommenderStub;
 
-    public GrpcRecommenderServiceClientAdapter(
-            @GrpcClient("recommender-service") RecommenderServiceGrpc.RecommenderServiceBlockingStub recommenderStub) {
+    public GrpcRecommenderServiceClientAdapter(RecommenderServiceGrpc.RecommenderServiceBlockingStub recommenderStub) {
         this.recommenderStub = recommenderStub;
     }
 

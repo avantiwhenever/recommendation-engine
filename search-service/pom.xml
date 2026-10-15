@@ -23,8 +23,8 @@
 
     <!-- gRPC inbound adapter -->
     <dependency>
-      <groupId>net.devh</groupId>
-      <artifactId>grpc-server-spring-boot-starter</artifactId>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-grpc-server</artifactId>
     </dependency>
     <dependency>
       <groupId>io.grpc</groupId>
@@ -51,6 +51,13 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <!-- In-process gRPC transport for adapter tests (previously pulled in
+           transitively by the net.devh starter). -->
+      <groupId>io.grpc</groupId>
+      <artifactId>grpc-inprocess</artifactId>
       <scope>test</scope>
     </dependency>
 

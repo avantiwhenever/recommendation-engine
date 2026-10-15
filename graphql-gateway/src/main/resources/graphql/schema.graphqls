@@ -39,6 +39,10 @@ type Query {
     # size (see SearchOrchestrationUseCase#ELIGIBLE_POOL_SIZE, currently
     # 50) — requesting more than that silently returns fewer results, not
     # an error.
-    search(query: String!, topK: Int = 10, strategy: RecommenderStrategy = COLLABORATIVE, userId: String,
+    #
+    # topK and strategy are non-null with defaults: omit either to get the
+    # default, but an explicit null is rejected at validation rather than
+    # failing inside the resolver.
+    search(query: String!, topK: Int! = 10, strategy: RecommenderStrategy! = COLLABORATIVE, userId: String,
            recentProductIds: [ID!] = [], categoryFilter: String, minRating: Float): SearchResult!
 }

@@ -1,7 +1,8 @@
 # recommender-service is a gRPC server only — no REST/HTTP inbound adapter.
-grpc:
-  server:
-    port: ${GRPC_PORT:9091}
+spring:
+  grpc:
+    server:
+      port: ${GRPC_PORT:9091}
 
 recommender-service:
   clickstream:
