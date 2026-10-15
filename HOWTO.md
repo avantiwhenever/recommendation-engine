@@ -7,7 +7,7 @@ This document tells you how to run the full system on your computer:
 - the GraphQL gateway
 - the React UI
 
-Each step has a check, so that you can make sure that the step worked before you continue. You do not need a cloud account or an API key.
+Each step has a check, so that you can make sure that the step worked before you continue.
 
 ## Prerequisites
 
