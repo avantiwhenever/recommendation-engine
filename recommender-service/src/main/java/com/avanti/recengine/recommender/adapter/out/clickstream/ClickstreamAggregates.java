@@ -5,9 +5,12 @@ import com.avanti.recengine.recommender.domain.CategoryHierarchy;
 import com.avanti.recengine.recommender.domain.UserProfile;
 import com.avanti.recengine.recommender.port.out.ClickstreamRepositoryPort;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -39,6 +42,7 @@ public abstract class ClickstreamAggregates implements ClickstreamRepositoryPort
      * interaction sets) consistently.
      */
     private final Map<String, Long> sessionInteractionCount = new HashMap<>();
+    /** Per-user sets and counts iterate in first-interaction order — see {@link UserProfile#topCategory()}. */
     private final Map<String, Set<String>> interactedProductsByUser = new HashMap<>();
     private final Map<String, Map<String, Long>> categoryCountsByUser = new HashMap<>();
     /** Lazily rebuilt; {@code null} whenever {@link #applySession} has changed popularity since the last build. */
@@ -63,11 +67,11 @@ public abstract class ClickstreamAggregates implements ClickstreamRepositoryPort
     }
 
     private void recordUserInteraction(String userId, String productId) {
-        interactedProductsByUser.computeIfAbsent(userId, k -> new HashSet<>()).add(productId);
+        interactedProductsByUser.computeIfAbsent(userId, k -> new LinkedHashSet<>()).add(productId);
         CatalogEntry entry = catalogByProduct.get(productId);
         if (entry != null && entry.categoryHierarchy() != null) {
             String topLevel = CategoryHierarchy.topLevelSegment(entry.categoryHierarchy());
-            categoryCountsByUser.computeIfAbsent(userId, k -> new HashMap<>()).merge(topLevel, 1L, Long::sum);
+            categoryCountsByUser.computeIfAbsent(userId, k -> new LinkedHashMap<>()).merge(topLevel, 1L, Long::sum);
         }
     }
 
@@ -96,7 +100,13 @@ public abstract class ClickstreamAggregates implements ClickstreamRepositoryPort
         if (interacted == null) {
             return UserProfile.empty(userId);
         }
-        return new UserProfile(userId, Set.copyOf(interacted), Map.copyOf(categoryCountsByUser.getOrDefault(userId, Map.of())));
+        // Order-preserving copies, not Set.copyOf/Map.copyOf: those iterate
+        // in an order randomized per JVM, which made topCategory()'s
+        // tie-break (and CollaborativeFilteringStrategy's injection seeds)
+        // differ from one run to the next.
+        return new UserProfile(userId,
+                Collections.unmodifiableSet(new LinkedHashSet<>(interacted)),
+                Collections.unmodifiableMap(new LinkedHashMap<>(categoryCountsByUser.getOrDefault(userId, Map.of()))));
     }
 
     @Override

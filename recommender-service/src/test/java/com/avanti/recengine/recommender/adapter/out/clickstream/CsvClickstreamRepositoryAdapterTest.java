@@ -37,6 +37,18 @@ class CsvClickstreamRepositoryAdapterTest {
     }
 
     @Test
+    void userProfileKeepsFirstInteractionOrderSoCategoryTiesAreDeterministic() throws URISyntaxException {
+        CsvClickstreamRepositoryAdapter adapter = new CsvClickstreamRepositoryAdapter(
+                resource("clickstream-fixture.csv"), resource("product-fixture.csv"));
+
+        // u1 clicks p1 (Furniture) before p2 (Home): one interaction each, a tie.
+        UserProfile u1 = adapter.userProfile("u1");
+        assertThat(u1.interactedProductIds()).containsExactly("p1", "p2");
+        assertThat(u1.categoryCounts().keySet()).containsExactly("Furniture", "Home");
+        assertThat(u1.topCategory()).contains("Furniture");
+    }
+
+    @Test
     void unknownUserGetsEmptyProfile() throws URISyntaxException {
         CsvClickstreamRepositoryAdapter adapter = new CsvClickstreamRepositoryAdapter(
                 resource("clickstream-fixture.csv"), resource("product-fixture.csv"));
