@@ -10,22 +10,21 @@ import com.avanti.recengine.search.port.out.LexicalIndexPort;
 import com.avanti.recengine.search.port.out.VectorIndexPort;
 import com.avanti.recengine.support.embedding.EmbeddingService;
 import com.avanti.recengine.support.pinecone.PineconeVectorStore;
+import com.avanti.recengine.support.retry.Retry;
 import com.avanti.recengine.support.wands.WandsProductCsvLoader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.IOException;
+import java.time.Duration;
 
 @Configuration
 @EnableConfigurationProperties(SearchServiceProperties.class)
 public class SearchServiceConfig {
 
-    private static final Logger log = LoggerFactory.getLogger(SearchServiceConfig.class);
     private static final int MAX_CONNECT_ATTEMPTS = 10;
-    private static final long RETRY_DELAY_MILLIS = 2000;
+    private static final Duration RETRY_DELAY = Duration.ofSeconds(2);
 
     @Bean
     public EmbeddingService embeddingService(SearchServiceProperties properties) throws IOException {
@@ -38,22 +37,13 @@ public class SearchServiceConfig {
 
         // Pinecone Local (docker-compose's pinecone-local service) takes a
         // few seconds to accept connections after container start; retry
-        // with backoff rather than requiring an explicit wait-for step.
-        RuntimeException lastFailure = null;
-        for (int attempt = 1; attempt <= MAX_CONNECT_ATTEMPTS; attempt++) {
-            try {
-                PineconeVectorStore.ensureServerlessIndex(
-                        config.controlPlaneHost(), config.apiKey(), config.tlsEnabled(),
-                        config.index(), EmbeddingService.DIMENSIONS);
-                return new PineconeVectorStore(config.controlPlaneHost(), config.apiKey(), config.tlsEnabled(), config.index());
-            } catch (RuntimeException e) {
-                lastFailure = e;
-                log.warn("Pinecone not ready yet (attempt {}/{}): {}", attempt, MAX_CONNECT_ATTEMPTS, e.getMessage());
-                sleep(RETRY_DELAY_MILLIS);
-            }
-        }
-        throw new IllegalStateException("Could not connect to Pinecone at " + config.controlPlaneHost()
-                + " after " + MAX_CONNECT_ATTEMPTS + " attempts", lastFailure);
+        // rather than requiring an explicit wait-for step.
+        return Retry.withFixedDelay("Pinecone at " + config.controlPlaneHost(), MAX_CONNECT_ATTEMPTS, RETRY_DELAY, () -> {
+            PineconeVectorStore.ensureServerlessIndex(
+                    config.controlPlaneHost(), config.apiKey(), config.tlsEnabled(),
+                    config.index(), EmbeddingService.DIMENSIONS);
+            return new PineconeVectorStore(config.controlPlaneHost(), config.apiKey(), config.tlsEnabled(), config.index());
+        });
     }
 
     @Bean
@@ -86,14 +76,5 @@ public class SearchServiceConfig {
         SearchServiceProperties.Hybrid hybrid = properties.hybrid();
         return new SearchProductsService(vectorIndexPort, embeddingPort, lexicalIndexPort,
                 hybrid.candidatePoolSize(), hybrid.rrfK());
-    }
-
-    private static void sleep(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("Interrupted while waiting to retry Pinecone connection", e);
-        }
     }
 }

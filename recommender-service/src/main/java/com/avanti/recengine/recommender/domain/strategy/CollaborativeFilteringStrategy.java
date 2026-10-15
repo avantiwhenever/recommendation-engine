@@ -119,7 +119,7 @@ public final class CollaborativeFilteringStrategy implements RecommendationStrat
             double boost = SESSION_SIMILARITY_WEIGHT * maxSessionSimilarity + SIMILARITY_WEIGHT * maxHistorySimilarity;
             reranked.add(product.withScore(product.score() + boost));
         }
-        reranked.sort((a, b) -> Double.compare(b.score(), a.score()));
+        reranked.sort(ScoredProduct.BY_SCORE_DESCENDING);
 
         Set<String> present = new LinkedHashSet<>();
         for (ScoredProduct p : reranked) {

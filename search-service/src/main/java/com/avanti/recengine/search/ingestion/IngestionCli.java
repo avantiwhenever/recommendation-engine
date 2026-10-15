@@ -1,5 +1,6 @@
 package com.avanti.recengine.search.ingestion;
 
+import com.avanti.recengine.search.adapter.out.pinecone.ProductMetadataKeys;
 import com.avanti.recengine.support.embedding.EmbeddingService;
 import com.avanti.recengine.support.pinecone.PineconeVectorStore;
 import com.avanti.recengine.support.pinecone.ProductVector;
@@ -88,12 +89,12 @@ public class IngestionCli implements Callable<Integer> {
 
     private static ProductVector toProductVector(WandsProductRow row, float[] embedding) {
         Map<String, Object> metadata = new HashMap<>();
-        putIfNotNull(metadata, "product_name", row.productName());
-        putIfNotNull(metadata, "product_class", row.productClass());
-        putIfNotNull(metadata, "category_hierarchy", row.categoryHierarchy());
-        putIfNotNull(metadata, "average_rating", row.averageRating());
-        putIfNotNull(metadata, "rating_count", row.ratingCount());
-        putIfNotNull(metadata, "review_count", row.reviewCount());
+        putIfNotNull(metadata, ProductMetadataKeys.PRODUCT_NAME, row.productName());
+        putIfNotNull(metadata, ProductMetadataKeys.PRODUCT_CLASS, row.productClass());
+        putIfNotNull(metadata, ProductMetadataKeys.CATEGORY_HIERARCHY, row.categoryHierarchy());
+        putIfNotNull(metadata, ProductMetadataKeys.AVERAGE_RATING, row.averageRating());
+        putIfNotNull(metadata, ProductMetadataKeys.RATING_COUNT, row.ratingCount());
+        putIfNotNull(metadata, ProductMetadataKeys.REVIEW_COUNT, row.reviewCount());
         return new ProductVector(row.productId(), embedding, metadata);
     }
 

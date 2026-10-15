@@ -5,6 +5,7 @@ import com.avanti.recengine.recommender.domain.UserProfile;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface ClickstreamRepositoryPort {
 
@@ -15,7 +16,7 @@ public interface ClickstreamRepositoryPort {
     double popularityScore(String productId);
 
     /** Raw co-occurrence count: how often productId was interacted with in the same session as anyOf. */
-    long coOccurrenceCount(String productId, java.util.Set<String> anyOf);
+    long coOccurrenceCount(String productId, Set<String> anyOf);
 
     /**
      * Normalized item-item similarity: raw co-occurrence divided by the

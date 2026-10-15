@@ -1,5 +1,7 @@
 package com.avanti.recengine.recommender.eval;
 
+import com.avanti.recengine.recommender.domain.EventType;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -74,9 +76,6 @@ public final class IpsEvaluator {
     private static final double[] CART_GIVEN_CLICK = {0.02, 0.12, 0.35};
     private static final double[] PURCHASE_GIVEN_CART = {0.05, 0.15, 0.40};
 
-    /** Matches {@link TemporalClickstreamIndex}'s EVENT_WEIGHT, indexed by observed event level 0=view..3=purchase. */
-    private static final double[] REWARD_BY_LEVEL = {0.2, 0.5, 0.8, 1.0};
-
     /**
      * Propensity floor for the clipped estimate. Chosen so that even a
      * worst-case Irrelevant-grade purchase at a deep position (propensity on
@@ -109,22 +108,19 @@ public final class IpsEvaluator {
      */
     public static double outcomePropensity(int wandsGrade, int position, int observedEventLevel) {
         double pClick = positionDecay(position) * CLICK_GIVEN_VIEW[wandsGrade];
-        if (observedEventLevel == 0) {
-            return 1.0 - pClick;
-        }
         double pCart = CART_GIVEN_CLICK[wandsGrade];
-        if (observedEventLevel == 1) {
-            return pClick * (1.0 - pCart);
-        }
         double pPurchase = PURCHASE_GIVEN_CART[wandsGrade];
-        if (observedEventLevel == 2) {
-            return pClick * pCart * (1.0 - pPurchase);
-        }
-        return pClick * pCart * pPurchase;
+        return switch (EventType.fromLevel(observedEventLevel)) {
+            case VIEW -> 1.0 - pClick;
+            case CLICK -> pClick * (1.0 - pCart);
+            case ADD_TO_CART -> pClick * pCart * (1.0 - pPurchase);
+            case PURCHASE -> pClick * pCart * pPurchase;
+        };
     }
 
+    /** The observed event's {@link EventType#weight()} — the same relative scale as clickstream popularity. */
     public static double reward(int observedEventLevel) {
-        return REWARD_BY_LEVEL[observedEventLevel];
+        return EventType.fromLevel(observedEventLevel).weight();
     }
 
     /** Accumulates one strategy's IPS terms across every held-out session it's evaluated against. */

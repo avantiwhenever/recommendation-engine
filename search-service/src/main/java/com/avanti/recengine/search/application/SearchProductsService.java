@@ -8,6 +8,7 @@ import com.avanti.recengine.search.port.out.LexicalIndexPort;
 import com.avanti.recengine.search.port.out.VectorIndexPort;
 
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Hybrid dense + lexical retrieval, fused with Reciprocal Rank Fusion.
@@ -66,7 +67,7 @@ public final class SearchProductsService implements SearchProductsUseCase {
             return true;
         }
         String hierarchy = result.product().categoryHierarchy();
-        return hierarchy != null && hierarchy.toLowerCase().contains(categoryFilter.toLowerCase());
+        return hierarchy != null && hierarchy.toLowerCase(Locale.ROOT).contains(categoryFilter.toLowerCase(Locale.ROOT));
     }
 
     private static boolean matchesMinRating(ScoredResult result, double minRating) {

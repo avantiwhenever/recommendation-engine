@@ -7,6 +7,7 @@ import com.avanti.recengine.support.pinecone.PineconeVectorStore;
 import com.avanti.recengine.support.pinecone.ProductVector;
 import com.avanti.recengine.support.pinecone.ScoredMatch;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,7 @@ public final class PineconeVectorIndexAdapter implements VectorIndexPort {
 
     @Override
     public void upsertProducts(List<Product> products, List<float[]> embeddings) {
-        List<ProductVector> vectors = new java.util.ArrayList<>(products.size());
+        List<ProductVector> vectors = new ArrayList<>(products.size());
         for (int i = 0; i < products.size(); i++) {
             vectors.add(toProductVector(products.get(i), embeddings.get(i)));
         }
@@ -42,11 +43,11 @@ public final class PineconeVectorIndexAdapter implements VectorIndexPort {
 
     private ProductVector toProductVector(Product product, float[] embedding) {
         Map<String, Object> metadata = new HashMap<>();
-        putIfNotNull(metadata, "product_name", product.productName());
-        putIfNotNull(metadata, "product_class", product.productClass());
-        putIfNotNull(metadata, "category_hierarchy", product.categoryHierarchy());
-        putIfNotNull(metadata, "average_rating", product.averageRating());
-        putIfNotNull(metadata, "rating_count", product.ratingCount());
+        putIfNotNull(metadata, ProductMetadataKeys.PRODUCT_NAME, product.productName());
+        putIfNotNull(metadata, ProductMetadataKeys.PRODUCT_CLASS, product.productClass());
+        putIfNotNull(metadata, ProductMetadataKeys.CATEGORY_HIERARCHY, product.categoryHierarchy());
+        putIfNotNull(metadata, ProductMetadataKeys.AVERAGE_RATING, product.averageRating());
+        putIfNotNull(metadata, ProductMetadataKeys.RATING_COUNT, product.ratingCount());
         return new ProductVector(product.productId(), embedding, metadata);
     }
 
@@ -54,11 +55,11 @@ public final class PineconeVectorIndexAdapter implements VectorIndexPort {
         Map<String, Object> metadata = match.metadata();
         Product product = new Product(
                 match.id(),
-                stringOrNull(metadata.get("product_name")),
-                stringOrNull(metadata.get("product_class")),
-                stringOrNull(metadata.get("category_hierarchy")),
-                doubleOrNull(metadata.get("average_rating")),
-                intOrNull(metadata.get("rating_count"))
+                stringOrNull(metadata.get(ProductMetadataKeys.PRODUCT_NAME)),
+                stringOrNull(metadata.get(ProductMetadataKeys.PRODUCT_CLASS)),
+                stringOrNull(metadata.get(ProductMetadataKeys.CATEGORY_HIERARCHY)),
+                doubleOrNull(metadata.get(ProductMetadataKeys.AVERAGE_RATING)),
+                intOrNull(metadata.get(ProductMetadataKeys.RATING_COUNT))
         );
         return new ScoredResult(product, match.score());
     }
