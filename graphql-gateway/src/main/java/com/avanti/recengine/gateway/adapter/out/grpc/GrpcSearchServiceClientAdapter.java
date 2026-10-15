@@ -6,7 +6,6 @@ import com.avanti.recengine.grpc.search.ScoredProduct;
 import com.avanti.recengine.grpc.search.SearchRequest;
 import com.avanti.recengine.grpc.search.SearchResponse;
 import com.avanti.recengine.grpc.search.SearchServiceGrpc;
-import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -19,7 +18,7 @@ public class GrpcSearchServiceClientAdapter implements SearchPort {
 
     private final SearchServiceGrpc.SearchServiceBlockingStub searchStub;
 
-    public GrpcSearchServiceClientAdapter(@GrpcClient("search-service") SearchServiceGrpc.SearchServiceBlockingStub searchStub) {
+    public GrpcSearchServiceClientAdapter(SearchServiceGrpc.SearchServiceBlockingStub searchStub) {
         this.searchStub = searchStub;
     }
 

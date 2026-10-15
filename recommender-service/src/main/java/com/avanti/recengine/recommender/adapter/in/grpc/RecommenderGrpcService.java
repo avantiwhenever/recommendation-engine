@@ -8,7 +8,7 @@ import com.avanti.recengine.recommender.domain.ScoredProduct;
 import com.avanti.recengine.recommender.domain.Strategy;
 import com.avanti.recengine.recommender.port.in.RecommendUseCase;
 import io.grpc.stub.StreamObserver;
-import net.devh.boot.grpc.server.service.GrpcService;
+import org.springframework.grpc.server.service.GrpcService;
 
 import java.util.List;
 import java.util.stream.Collectors;

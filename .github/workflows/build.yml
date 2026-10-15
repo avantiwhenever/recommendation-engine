@@ -112,11 +112,18 @@ jobs:
   # --- Secret detection: block committed credentials before they land in an image layer ---
   secret-scan:
     runs-on: ubuntu-latest
+    # On pull_request events gitleaks-action lists the PR's commits through
+    # the GitHub API, so it needs the token and read access to pull requests.
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: gitleaks/gitleaks-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # --- Dockerfile lint: catch misconfigurations (missing USER, unpinned base, etc.)
   #     across all four images in this polyglot repo ---
