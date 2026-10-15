@@ -16,7 +16,7 @@ It is a static page. To run the full system, see [HOWTO.md](HOWTO.md).
 | **Data** | The [WANDS](https://github.com/wayfair/WANDS) catalog from Wayfair: 42,994 real products, 480 queries, and 233,448 human relevance labels. |
 | **Scope** | 6 recommendation strategies, an offline evaluation harness, and a training pipeline for the ranking model. |
 | **Engineering** | Hexagonal architecture, gRPC between services, more than 100 Java tests, and a CI pipeline with 6 quality and security jobs. |
-| **Run it** | One `docker compose` stack on a laptop. You do not need a cloud account or an API key. |
+| **Run it** | One `docker compose` stack on a laptop. |
 
 ## Where to start
 
