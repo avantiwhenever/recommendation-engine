@@ -87,9 +87,10 @@ python train_neural_ranker.py
 cd ..
 ```
 
-Trains a small MLP on `data/clickstream.csv`'s implicit feedback and
-exports it to `models/neural-ranker/model.onnx`. See `training/TRAINING.md`
-for the actual held-out evaluation numbers and methodology.
+This step trains a pairwise XGBoost ranking model on the clickstream in
+`data/clickstream.csv`. It exports the model to
+`models/neural-ranker/model.onnx`. For the method and the results, see
+`training/TRAINING.md`.
 
 **Verify:** `models/neural-ranker/model.onnx` should exist.
 `recommender-service` needs a restart (`docker compose restart

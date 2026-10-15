@@ -202,7 +202,7 @@ so a held-out session's features never see events from after that session.
   downside since gRPC messages are wire-compatible regardless of which
   JVM/module produced the generated class.
 - Pinecone Local has no persistence and a 100K-vector cap — a documented
-  local-dev/demo choice, not a production claim (see README).
+  local-dev/demo choice, not a production claim (see DESIGN_DECISIONS.md).
 - The IPS estimator is item-level (each item's presence in the top-5 treated
   as an independent action), not a full listwise estimator.
 - The synthetic clickstream (`avantiwhenever/WANDS`'s `CLICKSTREAM.md`) is
