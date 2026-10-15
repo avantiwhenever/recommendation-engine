@@ -27,17 +27,17 @@
     <!-- gRPC / Protobuf: pinned to what grpc-protobuf itself depends on
          (protobuf-java) rather than the latest protobuf-java, so the protoc
          codegen and the runtime classpath agree with what grpc-java was
-         actually built and tested against. 1.83.1 (not the 1.73.0 this
+         actually built and tested against. Kept at 1.75.0+ (not the 1.73.0 this
          project started on) — CI's cve-scan and docker-image-scan jobs
          caught a real HIGH-severity CVE-2025-55163 (Netty HTTP/2 DDoS) in
          1.73.0's transitive netty-codec-http2, fixed upstream by 1.75.0+. -->
-    <grpc.version>1.83.1</grpc.version>
+    <grpc.version>1.84.0</grpc.version>
     <protobuf.version>3.25.9</protobuf.version>
     <protobuf-plugin.version>0.6.1</protobuf-plugin.version>
     <os-maven-plugin.version>1.7.1</os-maven-plugin.version>
 
-    <onnxruntime.version>1.20.0</onnxruntime.version>
-    <djl-tokenizers.version>0.31.1</djl-tokenizers.version>
+    <onnxruntime.version>1.30.0</onnxruntime.version>
+    <djl-tokenizers.version>0.38.0</djl-tokenizers.version>
     <!-- Pinecone Local (docs.pinecone.io) is a fixed emulator on API version
          2025-01 whose index-describe responses lack the `vector_type` field
          that pinecone-client 4.x+ requires and fails to deserialize without
@@ -45,7 +45,7 @@
          references `vector_type` starting at 4.0.0). 3.1.0 is the newest
          version that still works against Pinecone Local. -->
     <pinecone-client.version>3.1.0</pinecone-client.version>
-    <commons-csv.version>1.11.0</commons-csv.version>
+    <commons-csv.version>1.14.1</commons-csv.version>
 
     <!-- Spring Boot 4 / Spring Framework 7: Spring Framework 6.2.x has no
          open-source fix for CRITICAL CVE-2026-47884/-47890 in spring-webmvc
@@ -59,8 +59,8 @@
          by Spring Boot 4 itself. Both share jackson-annotations 2.21. -->
     <jackson2.version>2.21.7</jackson2.version>
     <jackson3.version>3.1.7</jackson3.version>
-    <picocli.version>4.7.6</picocli.version>
-    <slf4j.version>2.0.16</slf4j.version>
+    <picocli.version>4.7.7</picocli.version>
+    <slf4j.version>2.0.20</slf4j.version>
   </properties>
 
   <dependencyManagement>
@@ -85,7 +85,7 @@
            netty is relocated/isolated and unaffected), which resolves to a
            netty version with several real HIGH-severity CVEs
            (CVE-2026-59901, -55831, -55833, -56745, -56819 — DoS/infinite
-           loop in netty-codec/-http/-http2) that grpc 1.83.1 hasn't picked
+           loop in netty-codec/-http/-http2) that grpc-java hasn't picked
            up yet. Overriding via netty-bom to the newest patched release in
            the same 4.1.x line grpc/pinecone-client were built against,
            rather than jumping to the 4.2.x line, which is a real breaking
@@ -93,7 +93,7 @@
       <dependency>
         <groupId>io.netty</groupId>
         <artifactId>netty-bom</artifactId>
-        <version>4.1.137.Final</version>
+        <version>4.1.139.Final</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -241,7 +241,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.13.0</version>
+          <version>3.16.0</version>
           <configuration>
             <parameters>true</parameters>
           </configuration>
@@ -249,12 +249,12 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>3.5.1</version>
+          <version>3.6.0</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-shade-plugin</artifactId>
-          <version>3.6.0</version>
+          <version>3.6.2</version>
         </plugin>
         <plugin>
           <groupId>org.xolstice.maven.plugins</groupId>
