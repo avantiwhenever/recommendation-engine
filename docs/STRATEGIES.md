@@ -79,17 +79,17 @@ This strategy scores each candidate with a pairwise learning-to-rank model.
 
 - **Model.** XGBoost with the `rank:ndcg` objective, exported to ONNX. Java runs it with ONNX Runtime.
 - **Training.** The model trains on the clickstream in Python. See [training/TRAINING.md](../training/TRAINING.md).
-- **Features.** The model uses 7 features:
+- **Features.** The model uses 7 features. The numbers start at 0, the same as the feature array in the code.
 
 | # | Feature | Calculation |
 |---|---|---|
-| 1 | Category match | 1 if the product is in the user's top category, else 0 |
-| 2 | Base score | Sigmoid of the search score |
-| 3 | Popularity | `log(1 + popularity score)` |
-| 4 | Co-occurrence | `log(1 + co-occurrence with the user's products)` |
-| 5 | Average rating | Average rating divided by 5 |
-| 6 | Review count | `log(1 + rating count)` |
-| 7 | Session category overlap | Part of the session's products in the same category |
+| 0 | Category match | 1 if the product is in the user's top category, else 0 |
+| 1 | Base score | Sigmoid of the search score |
+| 2 | Popularity | `log(1 + popularity score)` |
+| 3 | Co-occurrence | `log(1 + co-occurrence with the user's products)` |
+| 4 | Average rating | Average rating divided by 5 |
+| 5 | Review count | `log(1 + rating count)` |
+| 6 | Session category overlap | Part of the session's products in the same category |
 
 `FeatureParityTest` makes sure that the Java features and the Python training features are identical. A difference between them is a common cause of errors in production ranking models.
 
