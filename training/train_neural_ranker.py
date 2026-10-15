@@ -219,7 +219,7 @@ def build_dataset(rows, products, aggregates, rng):
     # product have any clickstream footprint" rather than genuine
     # preference modeling — see TRAINING.md for the numbers.
     candidate_pool = [pid for pid in aggregates["popularity"] if aggregates["popularity"][pid] > 0]
-    users = sorted({u for (u, _p) in pair_weight.keys()})
+    users = sorted({u for (u, _p) in pair_weight})
 
     X, y, groups = [], [], []
     for user_id in users:

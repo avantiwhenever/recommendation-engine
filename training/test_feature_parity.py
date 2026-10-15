@@ -24,7 +24,6 @@ someone re-reading the comment table.
 Usage: python3 test_feature_parity.py
 """
 import csv
-import math
 import sys
 import unittest
 from pathlib import Path

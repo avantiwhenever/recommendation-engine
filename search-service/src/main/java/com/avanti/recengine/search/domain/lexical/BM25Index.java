@@ -2,6 +2,7 @@ package com.avanti.recengine.search.domain.lexical;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -59,7 +60,7 @@ public final class BM25Index {
         }
 
         Map<String, Double> scoreByProductId = new HashMap<>();
-        for (String term : new java.util.LinkedHashSet<>(queryTerms)) {
+        for (String term : new LinkedHashSet<>(queryTerms)) {
             List<Posting> postings = postingsByTerm.get(term);
             if (postings == null || postings.isEmpty()) {
                 continue;

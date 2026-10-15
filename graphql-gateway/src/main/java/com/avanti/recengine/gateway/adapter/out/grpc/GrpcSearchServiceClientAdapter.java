@@ -2,7 +2,6 @@ package com.avanti.recengine.gateway.adapter.out.grpc;
 
 import com.avanti.recengine.gateway.domain.Product;
 import com.avanti.recengine.gateway.port.out.SearchPort;
-import com.avanti.recengine.grpc.search.ScoredProduct;
 import com.avanti.recengine.grpc.search.SearchRequest;
 import com.avanti.recengine.grpc.search.SearchResponse;
 import com.avanti.recengine.grpc.search.SearchServiceGrpc;
@@ -37,23 +36,6 @@ public class GrpcSearchServiceClientAdapter implements SearchPort {
             builder.setCategoryFilter(categoryFilter);
         }
         SearchResponse response = searchStub.search(builder.build());
-        return response.getResultsList().stream().map(GrpcSearchServiceClientAdapter::toDomain).toList();
-    }
-
-    private static Product toDomain(ScoredProduct p) {
-        return new Product(
-                p.getProductId(),
-                p.getProductName(),
-                blankToNull(p.getProductClass()),
-                blankToNull(p.getCategoryHierarchy()),
-                p.getAverageRating(),
-                p.getRatingCount(),
-                p.getScore(),
-                SOURCE
-        );
-    }
-
-    private static String blankToNull(String value) {
-        return (value == null || value.isEmpty()) ? null : value;
+        return response.getResultsList().stream().map(p -> ScoredProductMapper.toDomain(p, SOURCE)).toList();
     }
 }

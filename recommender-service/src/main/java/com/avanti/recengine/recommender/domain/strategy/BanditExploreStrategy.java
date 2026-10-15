@@ -1,5 +1,6 @@
 package com.avanti.recengine.recommender.domain.strategy;
 
+import com.avanti.recengine.recommender.domain.CategoryHierarchy;
 import com.avanti.recengine.recommender.domain.RecommendationContext;
 import com.avanti.recengine.recommender.domain.RecommendationStrategy;
 import com.avanti.recengine.recommender.domain.ScoredProduct;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.function.Predicate;
 
 /**
  * A contextual multi-armed bandit, reading {@link RecommendationContext} to
@@ -92,11 +94,16 @@ public final class BanditExploreStrategy implements RecommendationStrategy {
     private static final double MAX_ARM_SHARE = 0.6;
     /** How many leading positions the calibration cap applies to — the "above the fold" visible slots. */
     private static final int CALIBRATION_WINDOW = 5;
-    private static final String UNCATEGORIZED_ARM = "Uncategorized";
+    /** Uninformative prior for an arm with no historical engagement. */
+    private static final BetaPrior UNIFORM_PRIOR = new BetaPrior(1.0, 1.0);
+
+    /** Beta(&alpha;, &beta;) pseudo-counts for one arm. */
+    private record BetaPrior(double alpha, double beta) {
+    }
 
     private final ClickstreamRepositoryPort clickstream;
     private final Random random;
-    private final Map<String, double[]> historicalPriorByCategory;
+    private final Map<String, BetaPrior> historicalPriorByCategory;
 
     public BanditExploreStrategy(ClickstreamRepositoryPort clickstream) {
         this(clickstream, new Random());
@@ -119,16 +126,16 @@ public final class BanditExploreStrategy implements RecommendationStrategy {
         // priority this request, but never reshuffles within an arm.
         Map<String, Deque<ScoredProduct>> queueByArm = new LinkedHashMap<>();
         for (ScoredProduct product : baseResults) {
-            queueByArm.computeIfAbsent(topLevelSegment(product.categoryHierarchy()), a -> new ArrayDeque<>())
+            queueByArm.computeIfAbsent(CategoryHierarchy.topLevelSegment(product.categoryHierarchy()), a -> new ArrayDeque<>())
                     .addLast(product);
         }
 
         Optional<String> contextArm = contextTopCategory(context);
         Map<String, Double> sampledValueByArm = new LinkedHashMap<>();
         for (String arm : queueByArm.keySet()) {
-            double[] prior = historicalPriorByCategory.getOrDefault(arm, new double[]{1.0, 1.0});
-            double alpha = prior[0];
-            double beta = prior[1];
+            BetaPrior prior = historicalPriorByCategory.getOrDefault(arm, UNIFORM_PRIOR);
+            double alpha = prior.alpha();
+            double beta = prior.beta();
             if (contextArm.isPresent() && contextArm.get().equalsIgnoreCase(arm)) {
                 alpha += CONTEXT_BOOST;
             }
@@ -166,7 +173,7 @@ public final class BanditExploreStrategy implements RecommendationStrategy {
 
     /** Highest sampled-value arm among those with items left and satisfying {@code eligible}; null if none. */
     private static String pickBestArm(Map<String, Deque<ScoredProduct>> queueByArm, Map<String, Double> sampledValueByArm,
-                                       java.util.function.Predicate<String> eligible) {
+                                       Predicate<String> eligible) {
         String best = null;
         double bestValue = Double.NEGATIVE_INFINITY;
         for (Map.Entry<String, Deque<ScoredProduct>> entry : queueByArm.entrySet()) {
@@ -188,7 +195,7 @@ public final class BanditExploreStrategy implements RecommendationStrategy {
             return Optional.empty();
         }
         UserProfile profile = clickstream.userProfile(context.userId());
-        return profile.topCategory().map(BanditExploreStrategy::topLevelSegment);
+        return profile.topCategory().map(CategoryHierarchy::topLevelSegment);
     }
 
     /**
@@ -200,11 +207,11 @@ public final class BanditExploreStrategy implements RecommendationStrategy {
      * numbers). Both parameters are always &gt;= 1, which the Gamma-based
      * Beta sampler below requires.
      */
-    private static Map<String, double[]> computeHistoricalPriors(ClickstreamRepositoryPort clickstream) {
+    private static Map<String, BetaPrior> computeHistoricalPriors(ClickstreamRepositoryPort clickstream) {
         Map<String, Double> engagementByCategory = new LinkedHashMap<>();
         for (String productId : clickstream.mostPopularProducts(PRIOR_SAMPLE_SIZE)) {
             clickstream.catalogEntry(productId).ifPresent(entry -> {
-                String arm = topLevelSegment(entry.categoryHierarchy());
+                String arm = CategoryHierarchy.topLevelSegment(entry.categoryHierarchy());
                 engagementByCategory.merge(arm, clickstream.popularityScore(productId), Double::sum);
             });
         }
@@ -213,22 +220,14 @@ public final class BanditExploreStrategy implements RecommendationStrategy {
             maxEngagement = 1.0;
         }
 
-        Map<String, double[]> priors = new LinkedHashMap<>();
+        Map<String, BetaPrior> priors = new LinkedHashMap<>();
         for (Map.Entry<String, Double> entry : engagementByCategory.entrySet()) {
             double normalized = Math.min(1.0, entry.getValue() / maxEngagement);
             double alpha = 1.0 + normalized * PRIOR_STRENGTH;
             double beta = 1.0 + (1.0 - normalized) * PRIOR_STRENGTH;
-            priors.put(entry.getKey(), new double[]{alpha, beta});
+            priors.put(entry.getKey(), new BetaPrior(alpha, beta));
         }
         return priors;
-    }
-
-    /** Same convention as {@link NeuralRankingStrategy}'s category parsing, null/blank-safe. */
-    private static String topLevelSegment(String categoryHierarchy) {
-        if (categoryHierarchy == null || categoryHierarchy.isBlank()) {
-            return UNCATEGORIZED_ARM;
-        }
-        return categoryHierarchy.split("/")[0].trim();
     }
 
     /** Beta(alpha, beta) via two independent Gamma draws — {@code X/(X+Y)}, {@code X~Gamma(alpha)}, {@code Y~Gamma(beta)}. */
