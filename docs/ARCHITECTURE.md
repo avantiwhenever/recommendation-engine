@@ -1,117 +1,80 @@
-# Architecture — a reviewer's tour
+# Architecture: a tour for reviewers
 
-This doc is for someone reviewing this codebase who wants to navigate it
-efficiently rather than read every file linearly. For *why* the big
-decisions were made, see the README's "Key decisions" table; for exactly
-what's verified-working vs. in-flight, see [PROJECT_STATE.md](PROJECT_STATE.md).
+This document helps you read the code in a useful order. You do not need to read each file.
 
-## Suggested reading order
+- For the reasons behind the main decisions, see [DESIGN_DECISIONS.md](DESIGN_DECISIONS.md).
+- For the verified operational facts and the known limitations, see [PROJECT_STATE.md](PROJECT_STATE.md).
 
-1. **`proto/search_service.proto` and `proto/recommender_service.proto`** —
-   these are the real contracts of the system. Every inter-service
-   interaction in this codebase reduces to one of these two RPCs. Read
-   these before anything else.
-2. **`rec-support/`** — the shared infrastructure layer. Three independent
-   pieces: WANDS CSV parsing (`support/wands/`), the ONNX embedding
-   pipeline (`support/embedding/`), and the Pinecone client wrapper
-   (`support/pinecone/`). None of them know about any service's domain
-   model — that's deliberate (see "Why `rec-support` has no domain model"
-   below).
-3. **One full vertical slice** — `search-service/` is the simplest service
-   (one use case, two outbound ports) and the best place to see the
-   hexagonal pattern end to end: `domain` → `port/in` → `application` →
-   `port/out` → `adapter/out/*` → `config` wiring it all together, plus
-   `adapter/in/grpc` receiving requests. Once this one makes sense, the
-   pattern repeats in `recommender-service` (more strategies, more
-   outbound ports) and `graphql-gateway` (GraphQL inbound instead of gRPC,
-   gRPC *clients* instead of a server).
-4. **`recommender-service/`** — the strategy layer. Start at
-   `domain/RecommendationStrategy.java` (the interface every strategy
-   implements) and `domain/strategy/Strategies.java` (how a strategy is
-   selected at request time — a manually-built enum-keyed `Map`, not
-   Spring's auto-populated bean map, so the exact same wiring is shared by
-   `config/RecommenderConfig.java` and the Spring-free offline eval CLI,
-   `eval/EvalCli.java`).
-5. **`training/`** — the Python side, independent of the JVM: builds
-   implicit-feedback labels from the clickstream CSV, trains a small model,
-   exports ONNX. Read `training/TRAINING.md` for the actual methodology
-   used and honest results, since Python training pipelines are exactly
-   where "the plan said X but Y turned out more practical" deviations are
-   most likely — that doc is where any such deviation is supposed to be
-   recorded truthfully.
-6. **`graphql-gateway/`** — thin by design. `adapter/in/graphql/` is the
-   only non-gRPC inbound adapter anywhere in the system;
-   `adapter/out/grpc/` is where the two backend services get called.
-7. **`web/`** — standard React/Apollo Client; no architectural pattern
-   beyond normal component structure, since hexagonal architecture is a
-   backend-service concept here, not applied to the frontend.
+## Recommended reading order
+
+1. **`proto/search_service.proto` and `proto/recommender_service.proto`.** These files are the contracts of the system. Each call between services uses one of these two RPCs. Read them first.
+2. **`rec-support/`.** This module is the shared infrastructure. It has three independent parts:
+   - `support/wands/`: the reader for the WANDS catalog files
+   - `support/embedding/`: the ONNX embedding pipeline
+   - `support/pinecone/`: the Pinecone client wrapper
+
+   No part knows the domain model of a service. This is intentional. See [Why `rec-support` has no domain model](#why-rec-support-has-no-domain-model).
+3. **One full vertical slice: `search-service/`.** This is the simplest service. It has one use case and three outbound ports. It shows the full hexagonal pattern:
+   - `domain` → `port/in` → `application` → `port/out` → `adapter/out/*`
+   - `config` connects the parts.
+   - `adapter/in/grpc` receives the requests.
+
+   The other services use the same pattern. `recommender-service` has more strategies and more outbound ports. `graphql-gateway` receives GraphQL requests instead of gRPC requests, and it is a gRPC client, not a gRPC server.
+4. **`recommender-service/`.** This module contains the strategies.
+   - Start at `domain/RecommendationStrategy.java`. Each strategy implements this interface.
+   - Then read `domain/strategy/Strategies.java`. It builds the map from each strategy name to its implementation.
+   - The map is plain Java, not a Spring bean map. Thus, `config/RecommenderConfig.java` and the offline evaluation tool (`eval/EvalCli.java`) use the same code. The evaluation tool does not use Spring.
+5. **`training/`.** This is the Python part. It does not use the JVM. It makes labels from the clickstream, trains the ranking model, and exports it to ONNX. Read [training/TRAINING.md](../training/TRAINING.md) for the method and the results. That document also records each change from the original plan.
+6. **`graphql-gateway/`.** This service is small by design.
+   - `adapter/in/graphql/` is the only inbound adapter in the system that does not use gRPC.
+   - `adapter/out/grpc/` calls the two backend services.
+7. **`web/`.** This is a standard React and Apollo Client application. The hexagonal pattern applies to the backend services only, not to the frontend.
 
 ## Why `rec-support` has no domain model
 
-Under strict hexagonal architecture, each service owns its own domain
-types — sharing a domain model across service boundaries is exactly the
-kind of coupling hexagonal architecture exists to prevent (a change to one
-service's concept of "Product" would ripple into every other service that
-imported the same shared type). `rec-support` therefore only holds
-technical building blocks with no business meaning of their own: CSV
-parsing output (`WandsProductRow` — a row shape, not a domain concept),
-an ONNX Runtime wrapper (`EmbeddingService`), and a Pinecone SDK wrapper
-(`PineconeVectorStore`). Every service maps these into its *own*
-domain type at its adapter boundary. If you see a service importing a
-`rec-support` type directly into its `domain` or `application` package
-instead of only in `adapter`, that's a hexagonal-boundary violation worth
-flagging in review.
+In hexagonal architecture, each service owns its domain types. A domain model that services share causes coupling. For example, a change to the "Product" type of one service would then change all other services.
 
-## Where the real integration risk was (and how it was retired)
+Thus, `rec-support` contains only technical parts with no business meaning:
 
-The riskiest unknowns in this codebase were external-library integration
-points where documentation and reality diverge — these were resolved by
-inspecting real artifacts (`javap` against downloaded jars, actual
-`docker run` against the real `pinecone-local` image) rather than trusting
-documentation or memory, and the discoveries are recorded in
-[PROJECT_STATE.md](PROJECT_STATE.md) under "Verified-working facts":
+| Type | Purpose |
+|---|---|
+| `WandsProductRow` | The shape of one row in the catalog file. It is not a domain concept. |
+| `EmbeddingService` | A wrapper for ONNX Runtime |
+| `PineconeVectorStore` | A wrapper for the Pinecone client |
 
-- The exact Pinecone Java client version compatible with Pinecone Local
-  (3.1.0, not the latest — newer versions fail on a missing `vector_type`
-  field Pinecone Local's fixed API version doesn't return).
-- `protoc-gen-grpc-java`'s macOS binaries needing Rosetta 2.
-- Pinecone Local's host/port model (one URL-scheme'd control-plane host;
-  data-plane host resolution is automatic, not something you construct).
-- `pinecone-local`'s image having no shell inside it, ruling out
-  CMD-based Docker healthchecks.
+Each service converts these types into its own domain types in its adapters.
+If a `domain` or `application` package imports a `rec-support` type, that is a violation of the hexagonal boundary. Report it in the review.
 
-If you're extending this project and hit an integration surprise, the
-working method that resolved all four of the above was: don't guess from
-memory or documentation prose — pull the real artifact and inspect it
-(`javap -public <class>`, `docker run --entrypoint sh ... -c "..."`, a
-throwaway Java `main()` hitting the real API) until you have ground truth,
-then write the code against that.
+## How the integration risks were removed
 
-## What's tested where
+The largest risks were the external libraries, where the documentation and the real behavior were different.
+The project removed these risks with tests on the real artifacts, not with the documentation. For example, it used `javap` on the downloaded jars and `docker run` on the real `pinecone-local` image.
+[PROJECT_STATE.md](PROJECT_STATE.md) records the results under "Verified-working operational facts":
 
-Every service follows the same testing shape:
+- **Pinecone client version.** Only version 3.1.0 works with Pinecone Local. Newer versions need a `vector_type` field that Pinecone Local does not return.
+- **gRPC code generation on macOS.** The `protoc-gen-grpc-java` binaries for macOS need Rosetta 2.
+- **Pinecone Local hosts.** You configure one control-plane URL with its scheme. The client finds the data-plane host automatically.
+- **No health check command.** The `pinecone-local` image has no shell. Thus, a Docker health check with a command cannot run in it.
 
-- **`application`-layer unit tests** — fake/hand-written `port/out`
-  implementations, no Spring context, no network, no Docker. This is
-  where most of the real logic (strategy behavior, ranking, orchestration)
-  should be covered, and where tests should run fastest.
-- **gRPC adapter tests** — grpc-java's `InProcessServerBuilder`/
-  `InProcessChannelBuilder` (`search-service`/`recommender-service`) or an
-  in-process fake service implementation (`graphql-gateway`, testing its
-  gRPC *client* adapters). Real wire (de)serialization, no real sockets.
-- **`rec-support` integration tests** — the one place with tests against
-  genuinely external systems: a live Pinecone Local container
-  (`PineconeVectorStoreSmokeTest`, skips gracefully if the container isn't
-  running) and the real downloaded ONNX model (`EmbeddingServiceTest`,
-  skips gracefully if `models/` hasn't been fetched). These are the tests
-  that would have caught the pinecone-client version issue above.
-- **End-to-end** — `docker-compose up` plus a real GraphQL query, per
-  HOWTO.md. Not run in CI (see the CI workflow's comments for why, mirroring
-  the sibling `search` project's own reasoning about not running expensive
-  full-catalog checks on every push).
+If you extend this project and an integration does not work as expected, use the same method:
 
-## Known simplifications
+1. Do not trust memory or documentation text.
+2. Get the real artifact and examine it. For example, use `javap -public <class>`, `docker run --entrypoint sh ... -c "..."`, or a short Java `main()` method that calls the real API.
+3. Write the code for the behavior that you saw.
 
-See [PROJECT_STATE.md](PROJECT_STATE.md)'s "Known simplifications" section
-— kept there rather than duplicated so there's one place that can't drift
-out of sync.
+## What each type of test covers
+
+All services use the same test structure:
+
+| Test type | What it uses | Purpose |
+|---|---|---|
+| Application-layer unit tests | Hand-written fake `port/out` implementations. No Spring context, no network, no Docker. | These tests cover most of the logic: strategies, ranking, and orchestration. They are the fastest tests. |
+| gRPC adapter tests | `InProcessServerBuilder` and `InProcessChannelBuilder` in `search-service` and `recommender-service`. A fake in-process service in `graphql-gateway`, to test its gRPC client adapters. | These tests use real message serialization, but no real sockets. |
+| Tests against external systems | A live Pinecone Local container (`PineconeVectorStoreSmokeTest`, `PineconeVectorSimilarityAdapterSmokeTest`) and the real ONNX model (`EmbeddingServiceTest`) | These tests skip when the container or the model is not available. They find problems such as the Pinecone client version problem above. |
+| Full system | `docker compose up` and a real GraphQL query, as [HOWTO.md](../HOWTO.md) describes | CI does not run this test, because it needs the full catalog and takes a long time. |
+
+For more about tests and CI, see [ENGINEERING_PRACTICES.md](ENGINEERING_PRACTICES.md).
+
+## Known limitations
+
+See "Known simplifications / deliberate scope cuts" in [PROJECT_STATE.md](PROJECT_STATE.md). The list is in one place only, so that it stays correct.

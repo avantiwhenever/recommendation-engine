@@ -1,163 +1,110 @@
-# Training the neural ranker
+# Training the ranking model
 
-`train_neural_ranker.py` trains the model served by `recommender-service`'s
-`NeuralRankingStrategy` (via `OnnxRankingModelAdapter` + ONNX Runtime). This
-doc covers what it does, the real held-out numbers it produces, and —
-honestly, per this project's culture (see the sibling `search` project's own
-`WRITEUP.md`) — its known limitations.
+`train_neural_ranker.py` trains the model that `NeuralRankingStrategy` in `recommender-service` uses. Java runs the model with `OnnxRankingModelAdapter` and ONNX Runtime.
 
-## Reproduce
+This document gives the method, the held-out results, and the known limitations.
+
+## Reproduce the results
 
 ```sh
 pip install -r requirements.txt
-python3 train_neural_ranker.py --seed 42                 # train + export the model
-python3 train_neural_ranker.py --seed 42 --ci-seeds 5     # also report a 5-seed confidence interval
-python3 test_feature_parity.py                            # golden-vector feature-parity test (Python side)
+python3 train_neural_ranker.py --seed 42                # Train and export the model.
+python3 train_neural_ranker.py --seed 42 --ci-seeds 5   # Also show the mean and spread over 5 seeds.
+python3 test_feature_parity.py                          # Run the Python feature parity test.
 ```
 
-Writes `../models/neural-ranker/model.onnx`. Deterministic given the same
-seed (Python's `random` and `numpy`'s RNG are both seeded).
+The script writes `../models/neural-ranker/model.onnx`. With the same seed, the script always gives the same model. It sets the seed for the Python `random` module and for the `numpy` random generator.
 
-## Data & labels
+## Data and labels
 
-From `data/clickstream.csv` (~171K events, ~5,000 users): for every
-`(user, product)` pair the user ever interacted with, take the max event
-weight across their events for that product (`view`=0.2, `click`=0.5,
-`add_to_cart`=0.8, `purchase`=1.0). That's the graded implicit label.
+The source is `data/clickstream.csv`, with approximately 171,000 events from 5,000 users.
 
-**Negative sampling**:
+- **Positive labels.** The script makes one pair for each user and each product that the user interacted with. The label is the highest event weight of the pair: `view` 0.2, `click` 0.5, `add_to_cart` 0.8, `purchase` 1.0.
+- **Negative labels.** For each user, the script selects an equal number of negative products (1 to 1).
 
-- Sampled only from products that actually appear somewhere in the
-  clickstream (nonzero popularity), not the full ~43K WANDS catalog. ~97% of
-  WANDS products never appear in the synthetic clickstream at all (sessions
-  only draw from `label.csv`'s judged candidates per query), so sampling
-  uniformly from the whole catalog would make a random negative
-  overwhelmingly "a product with zero clickstream footprint anywhere," which
-  `popularity_log` alone would trivially separate.
-- `base_score_proxy` (feature 1, `sigmoid(1/position)`) is computed from the
-  real observed position for positive pairs, and from a position sampled
-  from the *empirical distribution* of real positions in the dataset for
-  negatives — not a fixed sentinel. A fixed sentinel lower than any real
-  position could produce (real positions are 1-15) would make this feature
-  alone a near-perfect trivial separator between positive and negative
-  pairs, rather than a meaningful signal.
+### How the script selects negatives
 
-Current sampling: hard negatives (nonzero-popularity products only) +
-empirical-distribution position proxy, 1:1 positive:negative ratio per user.
+- **Only products that have clickstream history.** Approximately 97% of the WANDS products never occur in the synthetic clickstream. A session uses only the products that `label.csv` judged for its query. If the script selected negatives from the full catalog, almost all negatives would have no clickstream history. Then the popularity feature alone would separate positives from negatives, and the model would learn nothing useful.
+- **Random selection in that group.** The script selects the negatives at random from the products with clickstream history. It does not use "hard" negatives, for example products that the user saw but did not click. See [Known limitations](#known-limitations).
+- **Realistic positions.** The `base_score_proxy` feature uses the position of the product (see the table below). For a positive pair, the script uses the real position. For a negative pair, it selects a position from the real distribution of positions in the data. The script does not use a fixed value for negatives. A value worse than all real positions (1 to 15) would make this feature an almost perfect separator.
 
-## Features (order matters — enforced by a test, not just a comment)
+## Features
 
-| # | Feature | Train-time source | Serve-time source | Skew? |
+The order of the features is important. A test makes sure that it does not change. The numbers start at 0, the same as the feature array in the code.
+
+| # | Feature | Source in training | Source in serving | Difference |
 |---|---|---|---|---|
-| 0 | category match | product.csv category vs. user's most-frequent interacted top-level category, both from clickstream+product.csv | Same, from `ClickstreamRepositoryPort` + candidate's category | None |
-| 1 | base_score_proxy | `sigmoid(1/position)`, position from clickstream's own `position` column (real for positives, empirically-sampled for negatives) | `sigmoid(search-service's real relevance score)` | **Yes, real skew** — there's no actual search call behind a training pair, so this is a proxy for "how well-ranked was this originally," not the same quantity as a live cosine score. Documented, not hidden — see Known limitations. |
-| 2 | popularity_log | `log1p(weighted event sum)` from clickstream | Same formula, same clickstream source | None |
-| 3 | co_occurrence_log | `log1p(session co-occurrence with user's interaction history)` | Same formula, same clickstream source | None |
-| 4 | avg_rating / 5.0 | product.csv | product.csv (via search-service's candidate metadata) | None |
-| 5 | rating_count_log | `log1p(product.csv rating_count)` | Same | None |
-| 6 | session_category_overlap | fraction of the training pair's real same-session products (via `clickstream.csv`'s `session_id`; one session chosen per pair — see `build_dataset`) sharing the candidate's top-level category | fraction of `RecommendationContext.recentProductIds()` sharing the candidate's top-level category | None — both sides resolve real session-scoped product IDs to category segments the same way (`session_category_segments` / `sessionCategorySegments`) |
+| 0 | `category_match` | The product category against the user's most frequent top-level category, from the clickstream and `product.csv` | The same, from `ClickstreamRepositoryPort` and the candidate category | None |
+| 1 | `base_score_proxy` | `sigmoid(1 / position)`, with the position from the clickstream | `sigmoid(search score)`, with the real score from `search-service` | **Yes.** A training pair has no real search call. Thus, this feature measures "how high was the original position", not the same value as a live search score. See [Known limitations](#known-limitations). |
+| 2 | `popularity_log` | `log1p(weighted event sum)` from the clickstream | The same formula and source | None |
+| 3 | `co_occurrence_log` | `log1p(session co-occurrence with the user's products)` | The same formula and source | None |
+| 4 | `avg_rating / 5.0` | `product.csv` | `product.csv`, through the candidate data from `search-service` | None |
+| 5 | `rating_count_log` | `log1p(rating_count)` from `product.csv` | The same | None |
+| 6 | `session_category_overlap` | The part of the products in the same session (from `session_id`) that have the candidate's top-level category. The script uses one session for each pair (see `build_dataset`). | The part of `RecommendationContext.recentProductIds()` that has the candidate's top-level category | None. Both sides convert the session products to categories in the same way (`session_category_segments` and `sessionCategorySegments`). |
 
-**Feature parity is tested, not just documented.** `NeuralRankingStrategy.buildFeatures()`
-(Java) and this script's `build_features()` (Python) are two independently-
-maintained implementations of the same formulas. `feature_parity_fixtures.csv`
-is a shared golden-vector fixture both `test_feature_parity.py` (Python) and
-`recommender-service`'s `FeatureParityTest.java` (Java) read and assert
-against for the 6 features that must be train/serve-identical (feature 1 is
-intentionally excluded from cross-language equality, since its train-time
-and serve-time formulas are different by design — each side is checked
-against its *own* documented formula instead). An edit that breaks parity on
-either side fails a test, not just a stale comment.
+### A test makes sure that the features agree
 
-## Training objective: pairwise
+`NeuralRankingStrategy.buildFeatures()` in Java and `build_features()` in Python are two separate implementations of the same formulas.
 
-The held-out evaluation metric is pairwise ranking accuracy — does the model
-score the positive above the negative for each pair. The served model,
-`xgboost.XGBRanker` with `objective="rank:ndcg"`, trains on that same
-objective directly: LambdaMART-style, pairwise gradients weighted by the
-`|ΔNDCG|` that swapping each pair would cause — the same family of technique
-described in Airbnb's
-[Applying Deep Learning to Airbnb Search](https://medium.com/airbnb-engineering/applying-deep-learning-to-airbnb-search-7ebd7230891f)
-(KDD 2019, [arXiv:1810.09591](https://arxiv.org/pdf/1810.09591)). `rank:ndcg`
-requires integer relevance grades rather than the continuous 0.2/0.5/0.8/1.0
-weights — quantized to integer grades 0-4 (`LABEL_TO_GRADE` in the script),
-which preserves the same relative ordering the labeling scheme already had,
-just in the representation XGBoost's NDCG objective requires.
+- `feature_parity_fixtures.csv` is a shared fixture file with known inputs and expected outputs.
+- `test_feature_parity.py` (Python) and `FeatureParityTest.java` (Java) both read it. They check the 6 features that must be identical in training and serving.
+- Feature 1 is different in training and serving by design. Thus, each side checks it against its own formula only.
 
-**ONNX export note**: `onnxmltools` has no direct `XGBRanker` converter
-(only `XGBClassifier`/`XGBRegressor`/`XGBRFClassifier`/`XGBRFRegressor` are
-registered) — a ranker's underlying tree ensemble predicts identically to a
-regressor at inference time (same sum-of-leaf-values), only the *training*
-gradient differs, so `export_xgb_ranker_to_onnx()` wraps the trained
-booster and forces the regressor conversion path. Verified this produces
-output bit-identical to the sklearn API's own `.predict()` (see the script's
-own sanity check at the end of every run, and `OnnxRankingModelAdapterTest`'s
-real-model tests, which load this exact exported file through the actual
-Java serving path).
+If a change on one side breaks the agreement, a test fails.
 
-## Model & held-out evaluation
+## Training objective
 
-80/20 **user-level** split (not row-level, to avoid a user's pairs leaking
-across train/holdout) — 4,000 train users, 1,000 held-out users, 276,284
-total labeled pairs (138,142 positive / 138,142 negative).
+The evaluation metric is pairwise accuracy: does the model give the positive product a higher score than the negative product?
 
-**Metric**: pairwise ranking accuracy — for each held-out user, the fraction
-of (positive, negative) product pairs the model scores in the correct order.
+The model in use is `xgboost.XGBRanker` with `objective="rank:ndcg"`. It trains on the same pairwise objective:
 
-**Final numbers, 5-seed mean ± std** (seeds 42-46, `--ci-seeds 5`), 7 features:
+- It uses LambdaMART-style pairwise gradients.
+- The weight of each pair is the change in NDCG (`|ΔNDCG|`) that a swap of the pair causes.
+- Airbnb uses the same type of method. See [Applying Deep Learning to Airbnb Search](https://medium.com/airbnb-engineering/applying-deep-learning-to-airbnb-search-7ebd7230891f) (KDD 2019, [arXiv:1810.09591](https://arxiv.org/pdf/1810.09591)).
 
-| Model | Held-out pairwise accuracy (mean ± std) |
+`rank:ndcg` needs integer relevance grades. Thus, the script converts the weights 0.2, 0.5, 0.8, and 1.0 to the integer grades 0 to 4 (`LABEL_TO_GRADE` in the script). The order of the labels does not change.
+
+### ONNX export
+
+`onnxmltools` has no converter for `XGBRanker`. It has converters only for `XGBClassifier`, `XGBRegressor`, `XGBRFClassifier`, and `XGBRFRegressor`.
+
+- At prediction time, a ranker and a regressor calculate the same value: the sum of the leaf values of the trees. Only the training gradient is different.
+- Thus, `export_xgb_ranker_to_onnx()` exports the trained model with the regressor converter.
+- The output of the ONNX model is identical, bit for bit, to the output of the `.predict()` method of the scikit-learn API. The script checks this at the end of each run.
+- `OnnxRankingModelAdapterTest` also loads the exported file through the real Java serving code.
+
+## Held-out evaluation
+
+- **Split.** The script divides the data by user, not by row: 80% for training and 20% for evaluation. Thus, the pairs of one user cannot be in both sets. This gives 4,000 training users and 1,000 held-out users.
+- **Size.** There are 276,284 labeled pairs: 138,142 positive and 138,142 negative.
+- **Metric.** For each held-out user, the metric is the part of the pairs (positive, negative) that the model puts in the correct order.
+
+### Results
+
+The table shows the mean and the standard deviation over 5 seeds (42 to 46, `--ci-seeds 5`), with all 7 features.
+
+| Model | Held-out pairwise accuracy |
 |---|---|
 | **Linear (logistic regression, all 7 features)** | **0.8751 ± 0.0025** |
-| Pointwise regression (MLP) comparison baseline | 0.8700 ± 0.0035 |
-| **Pairwise XGBoost `rank:ndcg` (the model actually served)** | **0.8687 ± 0.0019** |
-| Popularity-only baseline | 0.7040 ± 0.0045 |
-| Category-match-only baseline | 0.6787 ± 0.0032 |
-| base_score_proxy-only baseline | 0.4649 ± 0.0022 (≈random, as expected for a proxy feature alone) |
-| Random baseline | 0.5000 |
+| Pointwise regression (MLP), for comparison | 0.8700 ± 0.0035 |
+| **Pairwise XGBoost `rank:ndcg` (the model in use)** | **0.8687 ± 0.0019** |
+| Popularity only | 0.7040 ± 0.0045 |
+| Category match only | 0.6787 ± 0.0032 |
+| `base_score_proxy` only | 0.4649 ± 0.0022 (approximately random, as expected for this feature alone) |
+| Random | 0.5000 |
 
-**Reported honestly**: a simple linear combination of all 7 features
-(0.8751) is consistently the best of the three real models across every one
-of the 5 seeds tested — it beats both the pairwise XGBoost ranker actually
-being served (0.8687) and the pointwise regression comparison baseline
-(0.8700). None of the tested models' extra capacity (MLP nonlinearity,
-gradient-boosted tree splits) earns a real advantage over a linear decision
-boundary on this feature set.
+**The linear model is the most accurate.** A linear combination of the 7 features (0.8751) is better than the other two real models on each of the 5 seeds. The more complex models (the MLP and the gradient-boosted trees) give no real advantage on these features.
 
-**Why the served model is the pairwise XGBoost ranker, not the linear model
-that scored higher**: the linear baseline is trained *pointwise* (logistic
-regression on `label > 0`), so serving it wouldn't give this strategy a
-training objective that matches its own held-out pairwise metric, even
-though it happens to score well under that metric anyway. The honest
-takeaway isn't "ship the linear model" — it's "these 7 features don't
-currently justify a complex model, and a properly pairwise-trained linear
-model (e.g. a linear model under a RankNet-style pairwise loss) would be a
-reasonable next experiment before either shipping the plain logistic-
-regression baseline or investing further in tree/network capacity." Left as
-a follow-up, not resolved here.
+**Why the project uses XGBoost and not the linear model:**
+
+- The linear model trains on a pointwise objective: logistic regression on `label > 0`. Its training objective does not agree with the pairwise metric, although its result on that metric is good.
+- Thus, the correct conclusion is not "use the linear model". The correct conclusion is: "these 7 features do not need a complex model."
+- The next useful test is a linear model with a pairwise loss, for example a RankNet-style loss. Do this test before you use the plain logistic regression model, or before you add more model capacity. This test is not done yet.
 
 ## Known limitations
 
-- `base_score_proxy`'s train/serve skew (above) is real and unresolved —
-  fixing it properly would mean generating training pairs from actual
-  `search-service` calls rather than clickstream-recorded positions, which
-  isn't in scope here.
-- The synthetic clickstream's category-preference generation (each user
-  drawing 70% of sessions from a preferred category — see the WANDS repo's
-  `CLICKSTREAM.md`) makes `category_match` a stronger-than-real-world signal;
-  a model trained here likely overweights category preference relative to
-  what it would learn on noisier real user behavior.
-- Negative sampling is uniform-random within the "has clickstream footprint"
-  pool, not true hard negatives (e.g., products shown on the same results
-  page but not clicked) — that would be a meaningfully harder and more
-  realistic task, left as a follow-up.
-- **The linear-vs-nonlinear finding above is itself a signal about the
-  synthetic data, not necessarily about real user behavior**: real implicit
-  feedback typically has more nonlinear interaction structure (e.g.,
-  category preference interacting with price sensitivity) than this
-  project's 7 hand-picked, largely-independent aggregate features capture —
-  a more expressive feature set on real data might show a different, more
-  favorable result for the nonlinear models tested here.
-- No semantic-similarity feature exists at all — none of the 7 features
-  capture query-product relevance beyond the `base_score_proxy`/
-  category-match proxies, which is likely a bigger lever on real ranking
-  quality than the choice between linear/MLP/tree-based models tested here.
+- **`base_score_proxy` is different in training and serving.** The difference is real and not solved. To solve it, the script must make training pairs from real `search-service` calls, not from the clickstream positions. This is not in the scope of the project.
+- **The category signal is too strong.** In the synthetic clickstream, each user takes 70% of their sessions from a preferred category (see `CLICKSTREAM.md` in the WANDS repository). Thus, `category_match` is a stronger signal than in real data. The model probably gives too much weight to category preference.
+- **The negatives are not hard negatives.** The script selects negatives at random from the products with clickstream history. Hard negatives, for example products on the same results page that the user did not click, would make a more difficult and more realistic task. This is a possible next step.
+- **The linear result can be a property of the synthetic data.** Real user behavior usually has more nonlinear interactions, for example between category preference and price sensitivity. The 7 features here are mostly independent aggregates. A larger feature set on real data can give a better result for the nonlinear models.
+- **No feature measures how well a product matches the query.** Only `base_score_proxy` and the category match give an approximate signal. A query-product similarity feature will probably improve the ranking more than a different model type. [docs/EVALUATION.md](../docs/EVALUATION.md) shows the effect of this limit on the offline evaluation.

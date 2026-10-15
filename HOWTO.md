@@ -1,84 +1,60 @@
-# How to run this locally
+# How to run this project on your computer
 
-Step-by-step instructions to get the full stack — Pinecone Local, both gRPC
-services, the GraphQL gateway, and the React UI — running on your machine,
-plus how to confirm each piece actually came up before moving to the next
-step. No cloud account or API key needed anywhere in this flow.
+This document tells you how to run the full system on your computer:
+
+- Pinecone Local
+- the two gRPC services
+- the GraphQL gateway
+- the React UI
+
+Each step has a check, so that you can make sure that the step worked before you continue. You do not need a cloud account or an API key.
 
 ## Prerequisites
 
-- JDK 26, Maven, Docker + Docker Compose plugin, Node.js (for `web/`).
-- **Apple Silicon Macs**: `protoc-gen-grpc-java`'s macOS binaries are
-  x86_64 even for the "aarch_64" classifier (confirmed across many
-  versions — this is upstream packaging, not a bug in this repo), so Maven
-  builds that trigger gRPC codegen need Rosetta 2:
+- JDK 26, Maven, Docker with the Docker Compose plugin, Node.js, and Python 3.
+- **Apple Silicon (M-series) Macs:** The Maven build generates gRPC code with `protoc-gen-grpc-java`. Its macOS binaries are x86_64, also for the "aarch_64" classifier. This is an upstream packaging problem, not a problem in this repository. Install Rosetta 2 before you build:
+
   ```bash
   softwareupdate --install-rosetta --agree-to-license
   ```
-  Docker itself handles the `pinecone-local` image's x86_64-only
-  architecture via its own emulation (`platform: linux/amd64` is already
-  set in `docker-compose.yml`) — that part needs no host-level Rosetta.
 
-## Step-by-step
+  You do not need Rosetta 2 for the `pinecone-local` image. That image is also x86_64 only, but Docker runs it in emulation. `docker-compose.yml` already sets `platform: linux/amd64`.
 
-### 1. Fetch the WANDS catalog + clickstream dataset
+## Steps
+
+### 1. Download the data
 
 ```bash
 ./scripts/download-data.sh
 ```
 
-Downloads `product.csv`, `query.csv`, `label.csv` (from upstream
-`wayfair/WANDS`) and `clickstream.csv` (from `avantiwhenever/WANDS`, this
-project's synthetic addition) into `data/`.
+This script puts four files into `data/`:
 
-**Verify:** `wc -l data/*.csv` — expect ~42,995 products, 480 queries,
-233,448 labels, ~170,991 clickstream events (plus one header row each).
+- `product.csv`, `query.csv`, and `label.csv` from `wayfair/WANDS`
+- `clickstream.csv`, the synthetic clickstream from `avantiwhenever/WANDS`
 
-### 2. Fetch the embedding model
+**Check:** Run `wc -l data/*.csv`. Each file has one header line. The expected line counts are:
+
+| File | Lines |
+|---|---|
+| `product.csv` | 42,995 |
+| `query.csv` | 481 |
+| `label.csv` | 233,449 |
+| `clickstream.csv` | 170,991 |
+
+### 2. Download the embedding model
 
 ```bash
 ./scripts/download-models.sh
 ```
 
-Downloads ONNX weights + tokenizer for `bge-small-en-v1.5` into
-`models/bge-small-en-v1.5/`.
+This script puts the ONNX weights and the tokenizer of `bge-small-en-v1.5` into `models/bge-small-en-v1.5/`.
 
-**Verify:** that directory should contain `model.onnx` (~128MB),
-`tokenizer.json`, and `config.json`.
+**Check:** The directory contains `model.onnx` (approximately 128 MB), `tokenizer.json`, and `config.json`.
 
-### 3. Start Pinecone Local + all four services
+### 3. Train the ranking model
 
-```bash
-./scripts/start-services.sh
-```
-
-(Set `GATEWAY_HOST_PORT`/`WEB_HOST_PORT` env vars first if 8080/5173 are
-already taken by another project on your machine.) Builds and starts all
-five containers, then polls until graphql-gateway responds.
-
-**Verify:** `docker compose ps` — all five containers (`pinecone-local`,
-`search-service`, `recommender-service`, `graphql-gateway`, `web`) should
-show as running (not restarting/exited).
-
-### 4. Ingest the WANDS catalog into Pinecone
-
-```bash
-./scripts/ingest-catalog.sh
-```
-
-Rebuilds `search-service` (to pick up any local changes) and runs the
-ingestion CLI **inside** the compose network — it can't run on the host,
-since Pinecone Local's data-plane host discovery returns the
-container-internal hostname regardless of caller; see
-[docs/PROJECT_STATE.md](docs/PROJECT_STATE.md) for why. This embeds all
-~43K products via `bge-small-en-v1.5` and upserts them into the
-`wands-products` Pinecone Local index — expect this to take a while
-(CPU-bound batch embedding); the CLI prints progress periodically.
-
-**Verify:** `curl -s http://localhost:5080/indexes/wands-products` should
-report a non-zero vector count once ingestion completes.
-
-### 5. Train the neural ranking model
+`recommender-service` loads this model when it starts. Thus, train the model before you start the services.
 
 ```bash
 cd training
@@ -87,19 +63,55 @@ python train_neural_ranker.py
 cd ..
 ```
 
-This step trains a pairwise XGBoost ranking model on the clickstream in
-`data/clickstream.csv`. It exports the model to
-`models/neural-ranker/model.onnx`. For the method and the results, see
-`training/TRAINING.md`.
+This step trains a pairwise XGBoost ranking model on the clickstream in `data/clickstream.csv`. It exports the model to `models/neural-ranker/model.onnx`. For the method and the results, see [training/TRAINING.md](training/TRAINING.md).
 
-**Verify:** `models/neural-ranker/model.onnx` should exist.
-`recommender-service` needs a restart (`docker compose restart
-recommender-service`) to pick up a freshly trained model if it was already
-running.
+**Check:** The file `models/neural-ranker/model.onnx` exists.
 
-### 6. Query the GraphQL gateway directly
+If you train the model again while the services operate, restart `recommender-service`:
 
-Open `http://localhost:8080/graphiql` and run:
+```bash
+docker compose restart recommender-service
+```
+
+### 4. Start Pinecone Local and all services
+
+```bash
+./scripts/start-services.sh
+```
+
+This script builds and starts five containers. Then it waits until `graphql-gateway` responds.
+
+If another application already uses port 8080 or 5173, set different ports before you start:
+
+```bash
+export GATEWAY_HOST_PORT=18080 WEB_HOST_PORT=15173
+```
+
+**Check:** Run `docker compose ps`. These five containers must show the status "running", not "restarting" or "exited":
+
+- `pinecone-local`
+- `search-service`
+- `recommender-service`
+- `graphql-gateway`
+- `web`
+
+### 5. Load the catalog into Pinecone
+
+```bash
+./scripts/ingest-catalog.sh
+```
+
+This script rebuilds `search-service`, so that it uses your latest local changes. Then it runs the ingestion tool in the Docker Compose network.
+
+- The tool must run in the network, not on the host. Pinecone Local always returns its internal container hostname as the data-plane host. See [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md).
+- The tool calculates an embedding for each of the approximately 43,000 products and writes them to the `wands-products` index.
+- This step uses much CPU time and takes a long time. The tool shows its progress at intervals.
+
+**Check:** Run `curl -s http://localhost:5080/indexes/wands-products`. When the ingestion is complete, the vector count is more than zero.
+
+### 6. Send a query to the GraphQL gateway
+
+Open `http://localhost:8080/graphiql` and run this query:
 
 ```graphql
 query {
@@ -109,18 +121,20 @@ query {
 }
 ```
 
-**Verify:** you get back real WANDS products (not an error), and switching
-`strategy` between `NONE`, `POPULARITY`, `COLLABORATIVE`, `BANDIT`, and
-`NEURAL` changes the result ordering and/or the `source` field per result.
+**Check:**
+
+- The response contains real WANDS products, not an error.
+- Change `strategy` to each of `NONE`, `POPULARITY`, `COLLABORATIVE`, `BANDIT`, `NEURAL`, and `DIVERSE_POPULARITY`. The order of the results or the `source` field changes.
 
 ### 7. Use the web UI
 
-```
-http://localhost:5173
-```
+Open `http://localhost:5173`.
 
-**Verify:** the search box returns results, the strategy dropdown changes
-them, and each result shows a "why was this shown" source badge.
+**Check:**
+
+- The search box returns results.
+- A different strategy in the list changes the results.
+- Each result shows a badge that tells why the system shows it.
 
 ### 8. Run the offline evaluation
 
@@ -128,54 +142,55 @@ them, and each result shows a "why was this shown" source badge.
 ./scripts/run-recommender-eval.sh
 ```
 
-Scores all 6 strategies against held-out clickstream sessions and writes
-`RESULTS.md` at the repo root — see `EvalCli`'s class Javadoc for the full
-methodology and honest caveats.
+This script scores all six strategies against the held-out clickstream sessions. It writes `RESULTS.md` in the repository root. For the method, see [docs/EVALUATION.md](docs/EVALUATION.md).
 
-**Verify:** `RESULTS.md` has a fresh timestamp and a 5-row table.
+**Check:** `RESULTS.md` has three tables. Each table has one row for each of the six strategies. If the code and the data did not change, only the latency column is different from the previous file.
 
-### 9. Regenerate the GitHub Pages demo snapshots
+### 9. Update the snapshots for the GitHub Pages demo
 
 ```bash
-python3 scripts/capture_demo_snapshots.py
+python3 scripts/capture_demo_snapshots.py http://localhost:8080/graphql
 ```
 
-Captures live results for a curated set of queries × all 6 strategies into
-`docs/data/*.json` — this is what `docs/index.html`'s static demo fetches.
+This script runs a set of queries with all six strategies. It writes the results into `docs/data/*.json`. The static demo page `docs/index.html` reads these files.
 
-**Verify:** `docs/data/manifest.json` lists the captured files; open
-`docs/index.html` locally (e.g. `python3 -m http.server` from `docs/`) to
-confirm the page renders with the new data.
+The first argument is the gateway URL. If you do not give it, the script uses `http://localhost:18080/graphql`.
 
-### Stopping everything
+**Check:**
+
+- `docs/data/manifest.json` lists the captured files.
+- Start a local web server in `docs/`, for example `python3 -m http.server`. Open the page and make sure that it shows the new data.
+
+### Stop the system
 
 ```bash
 ./scripts/stop-services.sh
 ```
 
-## Convenience scripts
+## Scripts
 
 | Script | What it does |
 |---|---|
-| `scripts/download-data.sh` | Fetches WANDS + clickstream CSVs into `data/` |
-| `scripts/download-models.sh` | Fetches the embedding model into `models/` |
-| `scripts/start-services.sh` | `docker compose up --build` + waits for the gateway |
-| `scripts/wait-for-gateway.sh` | Polls a host until it responds (used by the above) |
-| `scripts/stop-services.sh` | `docker compose down` |
-| `scripts/ingest-catalog.sh` | Runs the ingestion CLI inside the compose network |
-| `scripts/run-recommender-eval.sh` | Runs the offline evaluation, writes `RESULTS.md` |
-| `scripts/capture_demo_snapshots.py` | Captures live queries into `docs/data/` for the GitHub Pages demo |
-| `scripts/scan-cves.sh` | Reproduces CI's `cve-scan` job locally via Trivy |
+| `scripts/download-data.sh` | Downloads the WANDS and clickstream files into `data/` |
+| `scripts/download-models.sh` | Downloads the embedding model into `models/` |
+| `scripts/start-services.sh` | Runs `docker compose up --build`, then waits for the gateway |
+| `scripts/wait-for-gateway.sh` | Waits until a host responds. `start-services.sh` uses it. |
+| `scripts/stop-services.sh` | Runs `docker compose down` |
+| `scripts/ingest-catalog.sh` | Runs the ingestion tool in the Docker Compose network |
+| `scripts/run-recommender-eval.sh` | Runs the offline evaluation and writes `RESULTS.md` |
+| `scripts/capture_demo_snapshots.py` | Captures live query results into `docs/data/` for the GitHub Pages demo |
+| `scripts/scan-cves.sh` | Runs the CI `cve-scan` job on your computer with Trivy |
 
-## Running things individually outside Docker (for development)
+## Run one part at a time, without Docker
 
-Each Java module can run standalone via `mvn -pl <module> spring-boot:run`
-once `rec-support` is installed (`mvn -pl rec-support install`) — point
-`PINECONE_HOST`/`GRPC_PORT`/etc. env vars at `localhost` equivalents instead
-of the docker-compose service names. `web/` runs via `npm run dev` inside
-`web/`, pointed at `VITE_GRAPHQL_URL=http://localhost:8080/graphql`.
+Use this method when you develop one part of the system.
 
-Run a module's tests in isolation with `mvn -pl <module> test` (omit
-`-am` — dependencies resolve from the already-installed local repo, and
-`-am` would rebuild/race on shared modules if you're doing this across
-multiple terminals at once).
+- **Java services.** First, install `rec-support`:
+
+  ```bash
+  mvn -pl rec-support install
+  ```
+
+  Then start a service with `mvn -pl <module> spring-boot:run`. Set the environment variables, for example `PINECONE_HOST` and `GRPC_PORT`, to `localhost` addresses instead of the Docker Compose service names.
+- **Web UI.** In `web/`, run `npm run dev`. Set `VITE_GRAPHQL_URL=http://localhost:8080/graphql`.
+- **Tests for one module.** Run `mvn -pl <module> test`. Do not use `-am`. The dependencies come from your local Maven repository. If you run builds in more than one terminal, `-am` can make two builds write to the same shared module at the same time.
