@@ -54,7 +54,7 @@ public final class PopularityBoostStrategy implements RecommendationStrategy {
                     + POPULARITY_WEIGHT * normalizedPopularity.get(product);
             reranked.add(product.withScore(blended));
         }
-        reranked.sort((a, b) -> Double.compare(b.score(), a.score()));
+        reranked.sort(ScoredProduct.BY_SCORE_DESCENDING);
 
         Set<String> present = new LinkedHashSet<>();
         for (ScoredProduct p : reranked) {

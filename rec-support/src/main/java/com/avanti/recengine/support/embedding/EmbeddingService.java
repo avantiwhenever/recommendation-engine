@@ -4,6 +4,7 @@ import ai.djl.huggingface.tokenizers.Encoding;
 import ai.djl.huggingface.tokenizers.HuggingFaceTokenizer;
 import ai.onnxruntime.OnnxTensor;
 import ai.onnxruntime.OrtEnvironment;
+import ai.onnxruntime.OrtException;
 import ai.onnxruntime.OrtSession;
 
 import java.io.IOException;
@@ -44,7 +45,7 @@ public final class EmbeddingService implements AutoCloseable {
         this.environment = OrtEnvironment.getEnvironment();
         try {
             this.session = environment.createSession(modelDir.resolve("model.onnx").toString(), new OrtSession.SessionOptions());
-        } catch (ai.onnxruntime.OrtException e) {
+        } catch (OrtException e) {
             throw new IOException("Failed to load ONNX model from " + modelDir, e);
         }
         this.tokenizer = HuggingFaceTokenizer.builder()
@@ -105,7 +106,7 @@ public final class EmbeddingService implements AutoCloseable {
                 embeddings.add(normalize(tokenVectors[0]));
             }
             return embeddings;
-        } catch (ai.onnxruntime.OrtException e) {
+        } catch (OrtException e) {
             throw new UncheckedIOException(new IOException("ONNX inference failed", e));
         }
     }
@@ -131,7 +132,7 @@ public final class EmbeddingService implements AutoCloseable {
         tokenizer.close();
         try {
             session.close();
-        } catch (ai.onnxruntime.OrtException e) {
+        } catch (OrtException e) {
             throw new UncheckedIOException(new IOException("Failed to close ONNX session", e));
         }
     }

@@ -42,10 +42,7 @@ public final class PineconeVectorStore implements AutoCloseable {
     private final Index index;
 
     public PineconeVectorStore(String controlPlaneHost, String apiKey, boolean tlsEnabled, String indexName) {
-        this.pinecone = new Pinecone.Builder(apiKey)
-                .withHost(controlPlaneHost)
-                .withTlsEnabled(tlsEnabled)
-                .build();
+        this.pinecone = newClient(controlPlaneHost, apiKey, tlsEnabled);
         this.index = pinecone.getIndexConnection(indexName);
     }
 
@@ -57,10 +54,7 @@ public final class PineconeVectorStore implements AutoCloseable {
      */
     public static void ensureServerlessIndex(String controlPlaneHost, String apiKey, boolean tlsEnabled,
                                               String indexName, int dimensions) {
-        Pinecone controlPlane = new Pinecone.Builder(apiKey)
-                .withHost(controlPlaneHost)
-                .withTlsEnabled(tlsEnabled)
-                .build();
+        Pinecone controlPlane = newClient(controlPlaneHost, apiKey, tlsEnabled);
         try {
             controlPlane.describeIndex(indexName);
         } catch (PineconeException notFound) {
@@ -81,11 +75,7 @@ public final class PineconeVectorStore implements AutoCloseable {
     public List<ScoredMatch> query(float[] queryVector, int topK) {
         QueryResponseWithUnsignedIndices response =
                 index.queryByVector(topK, toFloatList(queryVector), DEFAULT_NAMESPACE, false, true);
-        List<ScoredMatch> matches = new ArrayList<>();
-        for (ScoredVectorWithUnsignedIndices match : response.getMatchesList()) {
-            matches.add(new ScoredMatch(match.getId(), match.getScore(), fromStruct(match.getMetadata())));
-        }
-        return matches;
+        return toScoredMatches(response);
     }
 
     /**
@@ -100,6 +90,17 @@ public final class PineconeVectorStore implements AutoCloseable {
     public List<ScoredMatch> queryById(String id, int topK) {
         QueryResponseWithUnsignedIndices response =
                 index.queryByVectorId(topK, id, DEFAULT_NAMESPACE, false, true);
+        return toScoredMatches(response);
+    }
+
+    private static Pinecone newClient(String controlPlaneHost, String apiKey, boolean tlsEnabled) {
+        return new Pinecone.Builder(apiKey)
+                .withHost(controlPlaneHost)
+                .withTlsEnabled(tlsEnabled)
+                .build();
+    }
+
+    private static List<ScoredMatch> toScoredMatches(QueryResponseWithUnsignedIndices response) {
         List<ScoredMatch> matches = new ArrayList<>();
         for (ScoredVectorWithUnsignedIndices match : response.getMatchesList()) {
             matches.add(new ScoredMatch(match.getId(), match.getScore(), fromStruct(match.getMetadata())));

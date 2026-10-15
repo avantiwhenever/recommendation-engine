@@ -19,21 +19,25 @@ export default function App() {
     fetchPolicy: "network-only",
   });
 
+  function search(searchQuery: string, searchStrategy: RecommenderStrategy) {
+    runSearch({ variables: { query: searchQuery, topK: TOP_K, strategy: searchStrategy } });
+  }
+
   function handleSearch(nextQuery: string) {
     setQuery(nextQuery);
-    runSearch({ variables: { query: nextQuery, topK: TOP_K, strategy } });
+    search(nextQuery, strategy);
   }
 
   function handleStrategyChange(nextStrategy: RecommenderStrategy) {
     setStrategy(nextStrategy);
     if (query) {
-      runSearch({ variables: { query, topK: TOP_K, strategy: nextStrategy } });
+      search(query, nextStrategy);
     }
   }
 
   function retry() {
     if (query) {
-      runSearch({ variables: { query, topK: TOP_K, strategy } });
+      search(query, strategy);
     }
   }
 

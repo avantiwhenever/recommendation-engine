@@ -8,7 +8,6 @@ import com.avanti.recengine.grpc.recommender.RecommendRequest;
 import com.avanti.recengine.grpc.recommender.RecommendResponse;
 import com.avanti.recengine.grpc.recommender.RecommenderServiceGrpc;
 import com.avanti.recengine.grpc.recommender.Strategy;
-import com.avanti.recengine.grpc.search.ScoredProduct;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.stereotype.Component;
 
@@ -34,14 +33,15 @@ public class GrpcRecommenderServiceClientAdapter implements RecommenderPort {
         if (userId != null) {
             builder.setUserId(userId);
         }
-        candidates.forEach(c -> builder.addCandidates(toProtoScoredProduct(c)));
+        candidates.forEach(c -> builder.addCandidates(ScoredProductMapper.toProto(c)));
         if (recentProductIds != null) {
             builder.addAllRecentProductIds(recentProductIds);
         }
 
         RecommendResponse response = recommenderStub.recommend(builder.build());
         List<Product> results = response.getResultsList().stream()
-                .map(GrpcRecommenderServiceClientAdapter::toDomain)
+                // source is set uniformly from RecommendResponse.source by the caller
+                .map(p -> ScoredProductMapper.toDomain(p, null))
                 .toList();
         return new RecommendResult(results, response.getSource());
     }
@@ -55,42 +55,5 @@ public class GrpcRecommenderServiceClientAdapter implements RecommenderPort {
      */
     private static Strategy toProtoStrategy(RecommenderStrategy strategy) {
         return Strategy.valueOf(strategy.name());
-    }
-
-    private static ScoredProduct toProtoScoredProduct(Product p) {
-        ScoredProduct.Builder builder = ScoredProduct.newBuilder()
-                .setProductId(p.productId())
-                .setScore(p.score())
-                .setProductName(nullToBlank(p.name()))
-                .setAverageRating(p.averageRating())
-                .setRatingCount(p.ratingCount());
-        if (p.productClass() != null) {
-            builder.setProductClass(p.productClass());
-        }
-        if (p.categoryHierarchy() != null) {
-            builder.setCategoryHierarchy(p.categoryHierarchy());
-        }
-        return builder.build();
-    }
-
-    private static Product toDomain(ScoredProduct p) {
-        return new Product(
-                p.getProductId(),
-                p.getProductName(),
-                blankToNull(p.getProductClass()),
-                blankToNull(p.getCategoryHierarchy()),
-                p.getAverageRating(),
-                p.getRatingCount(),
-                p.getScore(),
-                null // source is set uniformly from RecommendResponse.source by the caller
-        );
-    }
-
-    private static String blankToNull(String value) {
-        return (value == null || value.isEmpty()) ? null : value;
-    }
-
-    private static String nullToBlank(String value) {
-        return value == null ? "" : value;
     }
 }

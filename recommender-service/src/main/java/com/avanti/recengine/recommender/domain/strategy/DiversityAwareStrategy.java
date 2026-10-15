@@ -1,5 +1,6 @@
 package com.avanti.recengine.recommender.domain.strategy;
 
+import com.avanti.recengine.recommender.domain.CategoryHierarchy;
 import com.avanti.recengine.recommender.domain.RecommendationContext;
 import com.avanti.recengine.recommender.domain.RecommendationStrategy;
 import com.avanti.recengine.recommender.domain.ScoredProduct;
@@ -250,8 +251,10 @@ public final class DiversityAwareStrategy implements RecommendationStrategy {
     }
 
     private static double similarity(ScoredProduct a, ScoredProduct b, Map<String, List<String>> neighborRanksByProductId) {
+        String categoryA = CategoryHierarchy.topLevelSegment(a.categoryHierarchy());
+        String categoryB = CategoryHierarchy.topLevelSegment(b.categoryHierarchy());
         double categorySimilarity = 0.0;
-        if (topLevelSegment(a.categoryHierarchy()).equalsIgnoreCase(topLevelSegment(b.categoryHierarchy()))) {
+        if (categoryA.equalsIgnoreCase(categoryB)) {
             categorySimilarity += CATEGORY_MATCH_SIMILARITY;
             if (sameProductClass(a.productClass(), b.productClass())) {
                 categorySimilarity += PRODUCT_CLASS_MATCH_SIMILARITY;
@@ -286,14 +289,6 @@ public final class DiversityAwareStrategy implements RecommendationStrategy {
             return false;
         }
         return a.equalsIgnoreCase(b);
-    }
-
-    /** Same convention as {@link BanditExploreStrategy}'s category parsing, null/blank-safe. */
-    private static String topLevelSegment(String categoryHierarchy) {
-        if (categoryHierarchy == null || categoryHierarchy.isBlank()) {
-            return "Uncategorized";
-        }
-        return categoryHierarchy.split("/")[0].trim();
     }
 
     @Override

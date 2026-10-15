@@ -1,5 +1,7 @@
 package com.avanti.recengine.recommender.domain.strategy;
 
+import com.avanti.recengine.recommender.domain.CatalogEntry;
+import com.avanti.recengine.recommender.domain.CategoryHierarchy;
 import com.avanti.recengine.recommender.domain.RecommendationContext;
 import com.avanti.recengine.recommender.domain.RecommendationStrategy;
 import com.avanti.recengine.recommender.domain.ScoredProduct;
@@ -97,7 +99,7 @@ public final class NeuralRankingStrategy implements RecommendationStrategy {
             double modelScore = model.score(features);
             reranked.add(product.withScore(modelScore));
         }
-        reranked.sort((a, b) -> Double.compare(b.score(), a.score()));
+        reranked.sort(ScoredProduct.BY_SCORE_DESCENDING);
         return reranked;
     }
 
@@ -106,9 +108,9 @@ public final class NeuralRankingStrategy implements RecommendationStrategy {
         List<String> segments = new ArrayList<>(recentProductIds.size());
         for (String recentId : recentProductIds) {
             clickstream.catalogEntry(recentId)
-                    .map(entry -> entry.categoryHierarchy())
+                    .map(CatalogEntry::categoryHierarchy)
                     .filter(hierarchy -> hierarchy != null && !hierarchy.isBlank())
-                    .ifPresent(hierarchy -> segments.add(topLevelSegment(hierarchy)));
+                    .ifPresent(hierarchy -> segments.add(CategoryHierarchy.topLevelSegment(hierarchy)));
         }
         return segments;
     }
@@ -134,7 +136,7 @@ public final class NeuralRankingStrategy implements RecommendationStrategy {
         if (categoryHierarchy == null || categoryHierarchy.isBlank() || recentCategorySegments.isEmpty()) {
             return 0.0f;
         }
-        String candidateSegment = topLevelSegment(categoryHierarchy);
+        String candidateSegment = CategoryHierarchy.topLevelSegment(categoryHierarchy);
         long matches = recentCategorySegments.stream().filter(segment -> segment.equalsIgnoreCase(candidateSegment)).count();
         return (float) matches / recentCategorySegments.size();
     }
@@ -143,12 +145,7 @@ public final class NeuralRankingStrategy implements RecommendationStrategy {
         if (categoryHierarchy == null || userTopCategory == null) {
             return false;
         }
-        return topLevelSegment(categoryHierarchy).equalsIgnoreCase(topLevelSegment(userTopCategory));
-    }
-
-    private static String topLevelSegment(String categoryHierarchy) {
-        String[] parts = categoryHierarchy.split("/");
-        return parts[0].trim();
+        return CategoryHierarchy.topLevelSegment(categoryHierarchy).equalsIgnoreCase(CategoryHierarchy.topLevelSegment(userTopCategory));
     }
 
     private static double sigmoid(double x) {

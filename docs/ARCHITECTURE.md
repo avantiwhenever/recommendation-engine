@@ -27,11 +27,11 @@ what's verified-working vs. in-flight, see [PROJECT_STATE.md](PROJECT_STATE.md).
    gRPC *clients* instead of a server).
 4. **`recommender-service/`** — the strategy layer. Start at
    `domain/RecommendationStrategy.java` (the interface every strategy
-   implements) and `config/RecommenderConfig.java` (how a strategy is
+   implements) and `domain/strategy/Strategies.java` (how a strategy is
    selected at request time — a manually-built enum-keyed `Map`, not
-   Spring's auto-populated bean map, so the same strategy code stays
-   portable outside a Spring context if this project ever grows an offline
-   eval CLI the way the sibling `search` project has one).
+   Spring's auto-populated bean map, so the exact same wiring is shared by
+   `config/RecommenderConfig.java` and the Spring-free offline eval CLI,
+   `eval/EvalCli.java`).
 5. **`training/`** — the Python side, independent of the JVM: builds
    implicit-feedback labels from the clickstream CSV, trains a small model,
    exports ONNX. Read `training/TRAINING.md` for the actual methodology
