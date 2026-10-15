@@ -23,13 +23,13 @@
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-web</artifactId>
+      <artifactId>spring-boot-starter-webmvc</artifactId>
     </dependency>
 
     <!-- gRPC outbound adapters to search-service / recommender-service -->
     <dependency>
-      <groupId>net.devh</groupId>
-      <artifactId>grpc-client-spring-boot-starter</artifactId>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-grpc-client</artifactId>
     </dependency>
     <dependency>
       <groupId>io.grpc</groupId>
@@ -55,8 +55,15 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.springframework.graphql</groupId>
-      <artifactId>spring-graphql-test</artifactId>
+      <!-- In-process gRPC transport for adapter tests (previously pulled in
+           transitively by the net.devh starter). -->
+      <groupId>io.grpc</groupId>
+      <artifactId>grpc-inprocess</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-graphql-test</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

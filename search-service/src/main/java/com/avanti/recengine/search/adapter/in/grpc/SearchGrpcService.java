@@ -8,7 +8,7 @@ import com.avanti.recengine.search.domain.Product;
 import com.avanti.recengine.search.domain.ScoredResult;
 import com.avanti.recengine.search.port.in.SearchProductsUseCase;
 import io.grpc.stub.StreamObserver;
-import net.devh.boot.grpc.server.service.GrpcService;
+import org.springframework.grpc.server.service.GrpcService;
 
 @GrpcService
 public class SearchGrpcService extends SearchServiceGrpc.SearchServiceImplBase {

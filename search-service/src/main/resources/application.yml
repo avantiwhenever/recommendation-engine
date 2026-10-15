@@ -1,9 +1,10 @@
 # search-service is a gRPC server only — no REST/HTTP inbound adapter, so
 # there's no `server.port` to configure (spring-boot-starter-web isn't even
 # a dependency).
-grpc:
-  server:
-    port: ${GRPC_PORT:9090}
+spring:
+  grpc:
+    server:
+      port: ${GRPC_PORT:9090}
 
 search-service:
   pinecone:
