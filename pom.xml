@@ -31,12 +31,12 @@
          project started on) — CI's cve-scan and docker-image-scan jobs
          caught a real HIGH-severity CVE-2025-55163 (Netty HTTP/2 DDoS) in
          1.73.0's transitive netty-codec-http2, fixed upstream by 1.75.0+. -->
-    <grpc.version>1.84.0</grpc.version>
+    <grpc.version>1.84.3</grpc.version>
     <protobuf.version>3.25.9</protobuf.version>
     <protobuf-plugin.version>0.6.1</protobuf-plugin.version>
     <os-maven-plugin.version>1.7.1</os-maven-plugin.version>
 
-    <onnxruntime.version>1.30.0</onnxruntime.version>
+    <onnxruntime.version>1.31.0</onnxruntime.version>
     <djl-tokenizers.version>0.38.0</djl-tokenizers.version>
     <!-- Pinecone Local (docs.pinecone.io) is a fixed emulator on API version
          2025-01 whose index-describe responses lack the `vector_type` field
@@ -57,8 +57,8 @@
     <!-- Two Jackson lines coexist: Jackson 2 (com.fasterxml), still used
          transitively by pinecone-client, and Jackson 3 (tools.jackson), used
          by Spring Boot 4 itself. Both share jackson-annotations 2.21. -->
-    <jackson2.version>2.21.7</jackson2.version>
-    <jackson3.version>3.1.7</jackson3.version>
+    <jackson2.version>2.22.3</jackson2.version>
+    <jackson3.version>3.2.3</jackson3.version>
     <picocli.version>4.7.7</picocli.version>
     <slf4j.version>2.0.20</slf4j.version>
   </properties>
@@ -93,7 +93,7 @@
       <dependency>
         <groupId>io.netty</groupId>
         <artifactId>netty-bom</artifactId>
-        <version>4.1.139.Final</version>
+        <version>4.2.19.Final</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
